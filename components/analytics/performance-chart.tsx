@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -29,6 +30,23 @@ interface PerformanceChartProps {
 }
 
 export function PerformanceChart({ timeRange }: PerformanceChartProps) {
+  const [windowWidth, setWindowWidth] = useState<number>(0);
+
+  // Update window width on component mount (client-side)
+  useEffect(() => {
+    setWindowWidth(window.innerWidth);
+
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    window.addEventListener("resize", handleResize);
+    
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
   const data = {
     labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
     datasets: [
@@ -57,14 +75,14 @@ export function PerformanceChart({ timeRange }: PerformanceChartProps) {
         max: 100,
         ticks: {
           font: {
-            size: window.innerWidth < 768 ? 10 : 12,
+            size: windowWidth < 768 ? 10 : 12, // Use state value for window width
           },
         },
       },
       x: {
         ticks: {
           font: {
-            size: window.innerWidth < 768 ? 10 : 12,
+            size: windowWidth < 768 ? 10 : 12, // Use state value for window width
           },
         },
       },

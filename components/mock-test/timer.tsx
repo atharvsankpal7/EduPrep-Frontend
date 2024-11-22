@@ -5,7 +5,7 @@ import { Clock } from "lucide-react";
 
 interface TimerProps {
   timeLeft: number;
-  setTimeLeft: (time: number) => void;
+  setTimeLeft: (time: number | ((prev: number) => number)) => void; // Explicitly allow a function type
   onTimeUp: () => void;
 }
 
