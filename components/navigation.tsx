@@ -6,11 +6,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Menu } from "lucide-react";
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -32,8 +28,9 @@ export function Navigation() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between px-4">
+      <div className=" flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-2">
+          {/* Mobile Menu Button */}
           <Sheet>
             <SheetTrigger asChild className="md:hidden">
               <Button variant="ghost" size="icon" className="mr-2">
@@ -41,6 +38,8 @@ export function Navigation() {
                 <span className="sr-only">Toggle menu</span>
               </Button>
             </SheetTrigger>
+
+            {/* Sheet content for mobile */}
             <SheetContent side="left" className="w-[240px] sm:w-[300px]">
               <nav className="flex flex-col gap-4 mt-6">
                 {routes.map((route) => (
@@ -60,13 +59,16 @@ export function Navigation() {
               </nav>
             </SheetContent>
           </Sheet>
+
+          {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
             <span className="text-xl font-bold">MockMaster</span>
           </Link>
         </div>
 
-        <NavigationMenu className="hidden md:flex">
-          <NavigationMenuList>
+        {/* Desktop Menu */}
+        <NavigationMenu className="hidden md:flex flex-grow justify-center">
+          <NavigationMenuList className="flex gap-6">
             {routes.map((route) => (
               <NavigationMenuItem key={route.href}>
                 <Link href={route.href} legacyBehavior passHref>
@@ -84,8 +86,11 @@ export function Navigation() {
           </NavigationMenuList>
         </NavigationMenu>
 
-        <div className="flex items-center gap-2">
+        {/* Theme Toggle and Account Buttons */}
+        <div className="flex items-center gap-4">
           <ThemeToggle />
+
+          {/* Desktop Account Buttons */}
           <div className="hidden sm:flex items-center gap-2">
             <Button variant="outline" asChild>
               <Link href="/sign-in">Sign In</Link>
@@ -94,12 +99,15 @@ export function Navigation() {
               <Link href="/sign-up">Sign Up</Link>
             </Button>
           </div>
+
+          {/* Mobile Account Menu */}
           <Sheet>
             <SheetTrigger asChild className="sm:hidden">
               <Button variant="outline" size="sm">
                 Account
               </Button>
             </SheetTrigger>
+
             <SheetContent side="right" className="w-[240px] sm:w-[300px]">
               <div className="flex flex-col gap-4 mt-6">
                 <Button asChild variant="outline">
