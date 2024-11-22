@@ -62,7 +62,7 @@ export function Navigation() {
 
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
-            <span className="text-xl font-bold">MockMaster</span>
+            <span className="text-xl font-bold">EduPrep</span>
           </Link>
         </div>
 

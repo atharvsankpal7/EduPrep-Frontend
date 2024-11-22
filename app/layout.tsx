@@ -9,10 +9,12 @@ import './globals.css';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'MockMaster - Online Test Platform',
+  title: 'EduPrep - Online Test Platform',
   description: 'Enhance your test preparation with our advanced mock test platform',
+  icons: {
+    icon: '/favicon.ico'
+  }
 };
-
 export default function RootLayout({
   children,
 }: {
@@ -32,7 +34,7 @@ export default function RootLayout({
             <main className="min-h-screen bg-background">
               {children}
             </main>
-            {/* <Toaster /> */}
+            <Toaster />
           </QueryProvider>
         </ThemeProvider>
       </body>
