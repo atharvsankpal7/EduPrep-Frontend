@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
 
 const formSchema = z.object({
+  urn:z.number().min(8,"Please enter valid URN"),
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
@@ -65,6 +66,19 @@ export default function SignUpPage() {
         </div>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="urn"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>URN</FormLabel>
+                  <FormControl>
+                    <Input placeholder="21031038" {...field} type="number" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="name"

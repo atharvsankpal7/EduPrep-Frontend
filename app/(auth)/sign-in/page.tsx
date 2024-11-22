@@ -18,8 +18,8 @@ import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
 
 const formSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(1, "Password is required"),
+  email: z.string().min(4,"Invalid email address or urn"),
+  password: z.string().min(8, "Password is required"),
 });
 
 export default function SignInPage() {
@@ -68,9 +68,9 @@ export default function SignInPage() {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>Email/URN</FormLabel>
                   <FormControl>
-                    <Input placeholder="john@example.com" type="email" {...field} />
+                    <Input placeholder="Enter URN or Email" type="text" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

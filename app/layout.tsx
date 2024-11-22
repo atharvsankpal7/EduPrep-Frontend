@@ -32,7 +32,7 @@ export default function RootLayout({
             <main className="min-h-screen bg-background">
               {children}
             </main>
-            <Toaster />
+            {/* <Toaster /> */}
           </QueryProvider>
         </ThemeProvider>
       </body>

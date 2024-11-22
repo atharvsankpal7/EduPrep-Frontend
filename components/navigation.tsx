@@ -22,7 +22,7 @@ import {
 const routes = [
   { href: "/", label: "Home" },
   { href: "/mock-test", label: "Mock Test" },
-  { href: "/analytics", label: "Analytics" },
+  // { href: "/analytics", label: "Analytics" },
   { href: "/study-groups", label: "Study Groups" },
   { href: "/recommendations", label: "Recommendations" },
 ];
