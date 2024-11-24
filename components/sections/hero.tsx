@@ -7,7 +7,7 @@ import Link from "next/link";
 
 export function HeroSection() {
   return (
-    <section className="relative py-20 overflow-hidden bg-background">
+    <section className="relative py-20 overflow-hidden bg-background section-pattern">
       <div className="container px-4 mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -16,13 +16,14 @@ export function HeroSection() {
           className="relative z-10 max-w-4xl mx-auto text-center"
         >
           <div className="flex items-center justify-center mb-8">
-            <span className="p-2 rounded-full bg-primary/10">
-              <GraduationCap className="w-8 h-8 text-primary" />
+            <span className="p-3 rounded-full bg-gradient-blue animate-float glass-effect">
+              <GraduationCap className="w-8 h-8 text-white" />
             </span>
           </div>
           <h1 className="mb-8 text-5xl font-bold tracking-tight md:text-6xl">
             Master Your Exams with
-            <span className="text-primary"> Intelligent</span> Mock Tests
+            <span className="text-gradient-blue"> Intelligent</span>{" "}
+            <span className="text-gradient-ginger">Mock Tests</span>
           </h1>
           <p className="max-w-2xl mx-auto mb-10 text-xl text-muted-foreground">
             Enhance your test preparation with our advanced platform featuring
@@ -30,18 +31,27 @@ export function HeroSection() {
             study groups.
           </p>
           <div className="flex flex-col items-center space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4 sm:justify-center">
-            <Button size="lg" asChild>
+            <Button 
+              size="lg" 
+              className="bg-gradient-blue hover-glow hover-glow-cool w-full sm:w-auto" 
+              asChild
+            >
               <Link href="/mock-test">
                 Start Practice Test <ArrowRight className="w-4 h-4 ml-2" />
               </Link>
             </Button>
-            <Button size="lg" variant="outline" asChild>
+            <Button 
+              size="lg" 
+              variant="outline" 
+              className="hover-glow hover-glow-warm w-full sm:w-auto glass-effect" 
+              asChild
+            >
               <Link href="/study-groups">Join Study Group</Link>
             </Button>
           </div>
         </motion.div>
       </div>
-      <div className="absolute inset-0 bg-grid-white/10 bg-grid-16 [mask-image:radial-gradient(white,transparent_85%)]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background opacity-80" />
     </section>
   );
 }

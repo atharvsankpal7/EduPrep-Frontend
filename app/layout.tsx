@@ -3,7 +3,7 @@ import { Inter } from 'next/font/google';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { Toaster } from '@/components/ui/toaster';
 import { QueryProvider } from '@/components/providers/query-provider';
-import { Navigation } from '@/components/navigation';
+import { NavBar } from '@/components/navbar';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -15,6 +15,7 @@ export const metadata: Metadata = {
     icon: '/favicon.ico'
   }
 };
+
 export default function RootLayout({
   children,
 }: {
@@ -30,7 +31,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <QueryProvider>
-            <Navigation />
+            <NavBar />
             <main className="min-h-screen bg-background">
               {children}
             </main>

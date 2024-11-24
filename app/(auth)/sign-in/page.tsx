@@ -19,7 +19,7 @@ import { toast } from "@/components/ui/use-toast";
 
 const formSchema = z.object({
   email: z.string().min(4,"Invalid email address or urn"),
-  password: z.string().min(8, "Password is required"),
+  password: z.string().min(8, "Password length should be atleast 8 characters").max(64, "Password length should be less than 64"),
 });
 
 export default function SignInPage() {
