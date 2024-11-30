@@ -2,148 +2,187 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { BarChart2, LineChart, PieChart, Calendar } from "lucide-react";
+import { ChevronRight, Database, Calculator, Cpu, BarChart, BookOpen } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PerformanceChart } from "@/components/analytics/performance-chart";
-import { SubjectDistribution } from "@/components/analytics/subject-distribution";
-import { TimeSpentAnalysis } from "@/components/analytics/time-spent";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { useRouter } from "next/navigation";
 
-export default function AnalyticsPage() {
-  const [timeRange, setTimeRange] = useState("week");
+const subjects = {
+  database: {
+    icon: Database,
+    chapters: [
+      "SQL Fundamentals",
+      "Database Design",
+      "Normalization",
+      "Transactions & Concurrency",
+      "Indexing & Optimization",
+      "NoSQL Concepts",
+    ],
+  },
+  quantitative: {
+    icon: Calculator,
+    chapters: [
+      "Profit and Loss",
+      "Percentage",
+      "Time and Work",
+      "Simple Interest",
+      "Compound Interest",
+      "Ratio and Proportion",
+      "Average",
+      "Partnership",
+    ],
+  },
+  operatingSystem: {
+    icon: Cpu,
+    chapters: [
+      "Process Management",
+      "Memory Management",
+      "File Systems",
+      "CPU Scheduling",
+      "Deadlocks",
+      "Virtual Memory",
+    ],
+  },
+  dataInterpretation: {
+    icon: BarChart,
+    chapters: [
+      "Tables",
+      "Graphs",
+      "Pie Charts",
+      "Line Charts",
+      "Bar Graphs",
+      "Caselets",
+    ],
+  },
+  reasoning: {
+    icon: BookOpen,
+    chapters: [
+      "Verbal Ability",
+      "Reading Comprehension",
+      "Grammar",
+      "Parts of Speech",
+      "Vocabulary",
+      "Sentence Correction",
+    ],
+  },
+};
+
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 },
+};
+
+export default function CustomPracticePage() {
+  const router = useRouter();
+  const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
+  const [selectedChapters, setSelectedChapters] = useState<string[]>([]);
+
+  const handleChapterToggle = (chapter: string) => {
+    setSelectedChapters((prev) =>
+      prev.includes(chapter)
+        ? prev.filter((c) => c !== chapter)
+        : [...prev, chapter]
+    );
+  };
+
+  const startCustomTest = () => {
+    if (selectedChapters.length > 0) {
+      // In a real application, you would pass these parameters to generate a custom test
+      router.push(`/mock-test?type=custom&chapters=${selectedChapters.join(",")}`);
+    }
+  };
 
   return (
-    <div className="container px-4 py-6 md:py-8">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold mb-2">Analytics Dashboard</h1>
-            <p className="text-muted-foreground">
-              Track your performance and progress over time
-            </p>
-          </div>
-          <Select value={timeRange} onValueChange={setTimeRange}>
-            <SelectTrigger className="w-full sm:w-[180px]">
-              <SelectValue placeholder="Select time range" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="week">Last 7 days</SelectItem>
-              <SelectItem value="month">Last 30 days</SelectItem>
-              <SelectItem value="year">Last 12 months</SelectItem>
-            </SelectContent>
-          </Select>
+    <div className="container py-8">
+      <div className="max-w-4xl mx-auto">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-2">Custom Practice Test</h1>
+          <p className="text-muted-foreground">
+            Select subjects and topics to create your personalized practice test
+          </p>
         </div>
 
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          variants={container}
+          initial="hidden"
+          animate="show"
+          className="grid gap-6 md:grid-cols-2"
         >
-          <div className="grid gap-4 sm:gap-6 mb-8 grid-cols-2 md:grid-cols-4">
-            <StatsCard
-              title="Average Score"
-              value="78%"
-              description="Last 30 days"
-              icon={BarChart2}
-              trend="up"
-              trendValue="12%"
-            />
-            <StatsCard
-              title="Tests Completed"
-              value="24"
-              description="Last 30 days"
-              icon={LineChart}
-              trend="up"
-              trendValue="8"
-            />
-            <StatsCard
-              title="Study Time"
-              value="45h"
-              description="Last 30 days"
-              icon={Calendar}
-              trend="down"
-              trendValue="5h"
-            />
-            <StatsCard
-              title="Accuracy Rate"
-              value="82%"
-              description="Last 30 days"
-              icon={PieChart}
-              trend="up"
-              trendValue="4%"
-            />
-          </div>
-
-          <Tabs defaultValue="performance" className="space-y-6">
-            <TabsList className="w-full justify-start overflow-x-auto">
-              <TabsTrigger value="performance">Performance</TabsTrigger>
-              <TabsTrigger value="subjects">Subjects</TabsTrigger>
-              <TabsTrigger value="time">Time Analysis</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="performance" className="space-y-6">
-              <Card>
+          {Object.entries(subjects).map(([key, { icon: Icon, chapters }]) => (
+            <motion.div key={key} variants={item}>
+              <Card className="h-full">
                 <CardHeader>
-                  <CardTitle>Performance Over Time</CardTitle>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2">
+                      <Icon className="h-5 w-5" />
+                      <span className="capitalize">
+                        {key.replace(/([A-Z])/g, " $1").trim()}
+                      </span>
+                    </CardTitle>
+                    <Badge variant="secondary">
+                      {chapters.length} chapters
+                    </Badge>
+                  </div>
                 </CardHeader>
-                <CardContent className="pt-0">
-                  <PerformanceChart timeRange={timeRange} />
+                <CardContent>
+                  <Accordion type="multiple" className="w-full">
+                    <AccordionItem value={key}>
+                      <AccordionTrigger>View Chapters</AccordionTrigger>
+                      <AccordionContent>
+                        <div className="space-y-2">
+                          {chapters.map((chapter) => (
+                            <div
+                              key={chapter}
+                              className="flex items-center gap-2"
+                            >
+                              <input
+                                type="checkbox"
+                                id={chapter}
+                                checked={selectedChapters.includes(chapter)}
+                                onChange={() => handleChapterToggle(chapter)}
+                                className="h-4 w-4 rounded border-gray-300"
+                              />
+                              <label
+                                htmlFor={chapter}
+                                className="text-sm cursor-pointer"
+                              >
+                                {chapter}
+                              </label>
+                            </div>
+                          ))}
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
                 </CardContent>
               </Card>
-            </TabsContent>
-
-            <TabsContent value="subjects" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Subject Distribution</CardTitle>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <SubjectDistribution />
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="time" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Time Spent Analysis</CardTitle>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <TimeSpentAnalysis timeRange={timeRange} />
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+            </motion.div>
+          ))}
         </motion.div>
+
+        <div className="mt-8 flex justify-end">
+          <Button
+            size="lg"
+            onClick={startCustomTest}
+            disabled={selectedChapters.length === 0}
+          >
+            Start Custom Test
+            <ChevronRight className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
       </div>
     </div>
-  );
-}
-
-interface StatsCardProps {
-  title: string;
-  value: string;
-  description: string;
-  icon: React.ElementType;
-  trend: "up" | "down";
-  trendValue: string;
-}
-
-function StatsCard({ title, value, description, icon: Icon, trend, trendValue }: StatsCardProps) {
-  return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-xs sm:text-sm font-medium">{title}</CardTitle>
-        <Icon className="h-4 w-4 text-muted-foreground" />
-      </CardHeader>
-      <CardContent>
-        <div className="text-lg sm:text-2xl font-bold">{value}</div>
-        <p className="text-xs text-muted-foreground">{description}</p>
-        <div className={`text-xs ${trend === "up" ? "text-green-500" : "text-red-500"} mt-1`}>
-          {trend === "up" ? "↑" : "↓"} {trendValue}
-        </div>
-      </CardContent>
-    </Card>
   );
 }

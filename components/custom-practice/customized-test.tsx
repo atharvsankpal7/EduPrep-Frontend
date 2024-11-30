@@ -1,92 +1,60 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ChevronLeft, Dices } from "lucide-react";
+import { undergraduateSubjects } from "@/lib/data/undergraduate-subjects";
+import { createTest } from "@/lib/backendCalls/createTest";
+import { EducationLevel, TopicList } from "@/lib/type";
 
-const subjects = {
-  core: {
-    title: "Core Subjects",
-    categories: {
-      database: {
-        name: "Database Management",
-        topics: ["SQL Fundamentals", "Normalization", "Transactions", "Indexing", "Query Optimization", "ACID Properties"],
-      },
-      os: {
-        name: "Operating Systems",
-        topics: ["Process Management", "Memory Management", "File Systems", "CPU Scheduling", "Deadlocks", "Virtual Memory"],
-      },
-      networks: {
-        name: "Computer Networks",
-        topics: ["OSI Model", "TCP/IP", "Routing", "Network Security", "Protocols", "Socket Programming"],
-      },
-      dataStructures: {
-        name: "Data Structures",
-        topics: ["Arrays", "Linked Lists", "Trees", "Graphs", "Sorting", "Searching", "Dynamic Programming"],
-      },
-    },
-  },
-  aptitude: {
-    title: "Aptitude",
-    categories: {
-      arithmetic: {
-        name: "Arithmetic Aptitude",
-        topics: ["Problems on Trains", "Time and Distance", "Simple Interest", "Compound Interest", "Profit and Loss", "Percentage"],
-      },
-      dataInterpretation: {
-        name: "Data Interpretation",
-        topics: ["Table Charts", "Bar Charts", "Pie Charts", "Line Charts"],
-      },
-    },
-  },
-  verbal: {
-    title: "Verbal and Reasoning",
-    categories: {
-      verbalAbility: {
-        name: "Verbal Ability",
-        topics: ["Spotting Errors", "Synonyms", "Antonyms", "Sentence Formation", "Comprehension"],
-      },
-      logicalReasoning: {
-        name: "Logical Reasoning",
-        topics: ["Number Series", "Analogies", "Logical Problems", "Statement and Assumption"],
-      },
-      visualReasoning: {
-        name: "Visual Reasoning",
-        topics: ["Pattern Recognition", "Mirror Images", "Paper Folding", "Figure Matrix"],
-      },
-    },
-  },
-};
+export function CustomizedTest({ onBack }: { onBack: () => void }) {
+  const [selectedTopics, setSelectedTopics] = useState<Record<string, string[]>>({});
+  const router = useRouter();
 
-interface CustomizedTestProps {
-  onBack: () => void;
-}
-
-export function CustomizedTest({ onBack }: CustomizedTestProps) {
-  const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
-
-  const handleTopicToggle = (topic: string) => {
-    setSelectedTopics(prev =>
-      prev.includes(topic)
-        ? prev.filter(t => t !== topic)
-        : [...prev, topic]
-    );
+  // Toggle a topic under a specific subject
+  const handleTopicToggle = (subject: string, topic: string) => {
+    setSelectedTopics((prev) => {
+      const currentTopics = prev[subject] || [];
+      const updatedTopics = currentTopics.includes(topic)
+        ? currentTopics.filter((t) => t !== topic)
+        : [...currentTopics, topic];
+      return { ...prev, [subject]: updatedTopics };
+    });
   };
 
+  // Select all topics across all subjects
   const handleSelectAll = () => {
-    const allTopics = Object.values(subjects).flatMap(section =>
-      Object.values(section.categories).flatMap(category => category.topics)
-    );
+    const allTopics: Record<string, string[]> = {};
+    Object.entries(undergraduateSubjects).forEach(([subjectKey, section]) => {
+      allTopics[subjectKey] = Object.values(section.categories).flatMap((category) => category.topics);
+    });
     setSelectedTopics(allTopics);
   };
 
-  const startRandomTest = () => {
-    // Implement random test generation logic
-    console.log("Starting random test with selected topics:", selectedTopics);
+  // Start random test with selected topics
+  const startRandomTest = async () => {
+    const topicList: TopicList = {
+      subjects: Object.entries(selectedTopics).map(([subjectName, topics]) => ({
+        subjectName,
+        topics,
+      })),
+    };
+
+    try {
+      const response = await createTest({
+        educationLevel: EducationLevel.Undergraduate,
+        topicList,
+      });
+      router.push(`/test/${response.testId}`);
+    } catch (error) {
+      console.error("Failed to create test:", error);
+      alert("Error creating test. Please try again.");
+    }
   };
 
   return (
@@ -99,15 +67,21 @@ export function CustomizedTest({ onBack }: CustomizedTestProps) {
           <Button variant="outline" onClick={handleSelectAll}>
             Select All
           </Button>
-          <Button onClick={startRandomTest} className="gap-2">
+          <Button
+            onClick={startRandomTest}
+            className="gap-2"
+            disabled={
+              Object.values(selectedTopics).flatMap((topics) => topics).length === 0
+            }
+          >
             <Dices className="w-4 h-4" /> Start Random Test
           </Button>
         </div>
       </div>
 
       <div className="grid gap-6">
-        {Object.entries(subjects).map(([sectionKey, section]) => (
-          <Card key={sectionKey}>
+        {Object.entries(undergraduateSubjects).map(([subjectKey, section]) => (
+          <Card key={subjectKey}>
             <CardHeader>
               <CardTitle>{section.title}</CardTitle>
             </CardHeader>
@@ -122,8 +96,8 @@ export function CustomizedTest({ onBack }: CustomizedTestProps) {
                           <div key={topic} className="flex items-center gap-2">
                             <Checkbox
                               id={topic}
-                              checked={selectedTopics.includes(topic)}
-                              onCheckedChange={() => handleTopicToggle(topic)}
+                              checked={selectedTopics[subjectKey]?.includes(topic) || false}
+                              onCheckedChange={() => handleTopicToggle(subjectKey, topic)}
                             />
                             <label
                               htmlFor={topic}

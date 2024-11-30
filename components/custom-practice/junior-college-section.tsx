@@ -1,129 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ChevronLeft, Dices } from "lucide-react";
-
-const subjects = {
-  physics: {
-    name: "Physics",
-    years: {
-      "11th": [
-        "Physical World and Measurement",
-        "Kinematics",
-        "Laws of Motion",
-        "Work, Energy and Power",
-        "Motion of System of Particles and Rigid Body",
-        "Gravitation",
-        "Properties of Bulk Matter",
-        "Thermodynamics",
-        "Behaviour of Perfect Gas and Kinetic Theory",
-        "Oscillations and Waves"
-      ],
-      "12th": [
-        "Electrostatics",
-        "Current Electricity",
-        "Magnetic Effects of Current and Magnetism",
-        "Electromagnetic Induction and Alternating Currents",
-        "Electromagnetic Waves",
-        "Optics",
-        "Dual Nature of Matter and Radiation",
-        "Atoms and Nuclei",
-        "Electronic Devices"
-      ]
-    }
-  },
-  chemistry: {
-    name: "Chemistry",
-    years: {
-      "11th": [
-        "Some Basic Concepts of Chemistry",
-        "Structure of Atom",
-        "Classification of Elements and Periodicity",
-        "Chemical Bonding and Molecular Structure",
-        "States of Matter",
-        "Thermodynamics",
-        "Equilibrium",
-        "Redox Reactions",
-        "Hydrogen",
-        "s-Block Elements",
-        "p-Block Elements",
-        "Organic Chemistry: Basic Principles"
-      ],
-      "12th": [
-        "Solid State",
-        "Solutions",
-        "Electrochemistry",
-        "Chemical Kinetics",
-        "Surface Chemistry",
-        "General Principles of Isolation of Elements",
-        "p-Block Elements",
-        "d and f Block Elements",
-        "Coordination Compounds",
-        "Organic Compounds"
-      ]
-    }
-  },
-  mathematics: {
-    name: "Mathematics",
-    years: {
-      "11th": [
-        "Sets and Functions",
-        "Trigonometric Functions",
-        "Principle of Mathematical Induction",
-        "Complex Numbers and Quadratic Equations",
-        "Linear Inequalities",
-        "Permutations and Combinations",
-        "Binomial Theorem",
-        "Sequences and Series",
-        "Straight Lines",
-        "Conic Sections",
-        "Introduction to Three Dimensional Geometry",
-        "Limits and Derivatives",
-        "Mathematical Reasoning",
-        "Statistics",
-        "Probability"
-      ],
-      "12th": [
-        "Relations and Functions",
-        "Inverse Trigonometric Functions",
-        "Matrices",
-        "Determinants",
-        "Continuity and Differentiability",
-        "Applications of Derivatives",
-        "Integrals",
-        "Applications of Integrals",
-        "Differential Equations",
-        "Vector Algebra",
-        "Three Dimensional Geometry",
-        "Linear Programming"
-      ]
-    }
-  },
-  biology: {
-    name: "Biology",
-    years: {
-      "11th": [
-        "Diversity in Living World",
-        "Structural Organisation in Animals and Plants",
-        "Cell Structure and Function",
-        "Plant Physiology",
-        "Human Physiology"
-      ],
-      "12th": [
-        "Reproduction",
-        "Genetics and Evolution",
-        "Biology and Human Welfare",
-        "Biotechnology and Its Applications",
-        "Ecology and Environment"
-      ]
-    }
-  }
-};
+import { Dices } from "lucide-react";
+import { juniorCollegeSubjects } from "@/lib/data/junior-college-subjects";
 
 const container = {
   hidden: { opacity: 0 },
@@ -142,24 +27,29 @@ const item = {
 
 export function JuniorCollegeSection() {
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
+  const router = useRouter();
 
-  const handleTopicToggle = (topic: string) => {
+  const handleTopicToggle = (topicId: string) => {
     setSelectedTopics(prev =>
-      prev.includes(topic)
-        ? prev.filter(t => t !== topic)
-        : [...prev, topic]
+      prev.includes(topicId)
+        ? prev.filter(t => t !== topicId)
+        : [...prev, topicId]
     );
   };
 
   const handleSelectAll = () => {
-    const allTopics = Object.values(subjects).flatMap(subject =>
-      Object.values(subject.years).flatMap(topics => topics)
+    const allTopicIds = Object.values(juniorCollegeSubjects).flatMap(subject =>
+      Object.values(subject.years).flatMap(topics => 
+        topics.map(topic => topic.id)
+      )
     );
-    setSelectedTopics(allTopics);
+    setSelectedTopics(allTopicIds);
   };
 
   const startRandomTest = () => {
-    console.log("Starting random test with selected topics:", selectedTopics);
+    if (selectedTopics.length > 0) {
+      router.push(`/test/junior-college/random?subjects=${selectedTopics.join(',')}`);
+    }
   };
 
   return (
@@ -168,7 +58,11 @@ export function JuniorCollegeSection() {
         <Button variant="outline" onClick={handleSelectAll}>
           Select All
         </Button>
-        <Button onClick={startRandomTest} className="gap-2">
+        <Button 
+          onClick={startRandomTest} 
+          className="gap-2"
+          disabled={selectedTopics.length === 0}
+        >
           <Dices className="w-4 h-4" /> Start Random Test
         </Button>
       </div>
@@ -179,7 +73,7 @@ export function JuniorCollegeSection() {
         animate="show"
         className="grid gap-6 md:grid-cols-2"
       >
-        {Object.entries(subjects).map(([subjectKey, subject]) => (
+        {Object.entries(juniorCollegeSubjects).map(([subjectKey, subject]) => (
           <motion.div key={subjectKey} variants={item}>
             <Card className="h-full">
               <CardHeader>
@@ -193,17 +87,17 @@ export function JuniorCollegeSection() {
                       <AccordionContent>
                         <div className="grid gap-2">
                           {topics.map((topic) => (
-                            <div key={topic} className="flex items-center gap-2">
+                            <div key={topic.id} className="flex items-center gap-2">
                               <Checkbox
-                                id={topic}
-                                checked={selectedTopics.includes(topic)}
-                                onCheckedChange={() => handleTopicToggle(topic)}
+                                id={topic.id}
+                                checked={selectedTopics.includes(topic.id)}
+                                onCheckedChange={() => handleTopicToggle(topic.id)}
                               />
                               <label
-                                htmlFor={topic}
+                                htmlFor={topic.id}
                                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                               >
-                                {topic}
+                                {topic.name}
                               </label>
                             </div>
                           ))}

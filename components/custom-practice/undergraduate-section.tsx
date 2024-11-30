@@ -67,7 +67,7 @@ export function UndergraduateSection() {
       {examTypes.map((exam) => (
         <motion.div key={exam.id} variants={item}>
           <Card 
-            className="cursor-pointer hover:glass-effect transition-all duration-300 card-highlight "
+            className="cursor-pointer hover:shadow-lg transition-all duration-300 card-highlight glass-effect"
             onClick={() => setSelectedExam(exam.id)}
           >
             <CardHeader>
