@@ -21,7 +21,7 @@ const features = [
     title: "Mock Tests",
     description:
       "Practice with our extensive collection of subject-specific mock tests",
-    href: "/mock-test",
+    href: "/test",
     gradient: "bg-gradient-blue",
     hoverEffect: "hover-glow-cool",
   },

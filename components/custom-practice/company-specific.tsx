@@ -82,7 +82,7 @@ export function CompanySpecific({ onBack }: CompanySpecificProps) {
               <AlertDialogHeader>
                 <AlertDialogTitle>Start Company Specific Test?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This test is designed to match {companies.find(c => c.id === selectedCompany)?.name}'s assessment pattern.
+                  This test is designed to match {companies.find(c => c.id === selectedCompany)?.name}&apos;s assessment pattern.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

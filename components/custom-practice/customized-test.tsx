@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ChevronLeft, Dices } from "lucide-react";
-import { undergraduateSubjects } from "@/lib/data/undergraduate-subjects";
+import { juniorCollegeSubjects } from "@/lib/data/junior-college-subjects";
 import { createTest } from "@/lib/backendCalls/createTest";
 import { EducationLevel, TopicList } from "@/lib/type";
 
@@ -30,7 +30,7 @@ export function CustomizedTest({ onBack }: { onBack: () => void }) {
   // Select all topics across all subjects
   const handleSelectAll = () => {
     const allTopics: Record<string, string[]> = {};
-    Object.entries(undergraduateSubjects).forEach(([subjectKey, section]) => {
+    Object.entries(juniorCollegeSubjects).forEach(([subjectKey, section]) => {
       allTopics[subjectKey] = Object.values(section.categories).flatMap((category) => category.topics);
     });
     setSelectedTopics(allTopics);
@@ -80,7 +80,7 @@ export function CustomizedTest({ onBack }: { onBack: () => void }) {
       </div>
 
       <div className="grid gap-6">
-        {Object.entries(undergraduateSubjects).map(([subjectKey, section]) => (
+        {Object.entries(juniorCollegeSubjects).map(([subjectKey, section]) => (
           <Card key={subjectKey}>
             <CardHeader>
               <CardTitle>{section.title}</CardTitle>

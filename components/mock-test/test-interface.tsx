@@ -127,7 +127,7 @@ export function TestInterface({ testId, onTestEnd }: TestInterfaceProps) {
                 <AlertDialogHeader>
                   <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This action cannot be undone. Once submitted, you won't be able to modify your answers.
+                    This action cannot be undone. Once submitted, you won&apos;t be able to modify your answers.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>

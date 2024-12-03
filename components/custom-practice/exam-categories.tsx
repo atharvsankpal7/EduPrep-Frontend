@@ -39,7 +39,7 @@ export function ExamCategories({ onBack }: ExamCategoriesProps) {
               <AlertDialogHeader>
                 <AlertDialogTitle>Start GATE Mock Test?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This test will take 3 hours to complete. Make sure you have a stable internet connection and won't be disturbed.
+                  This test will take 3 hours to complete. Make sure you have a stable internet connection and won&apos;t be disturbed.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

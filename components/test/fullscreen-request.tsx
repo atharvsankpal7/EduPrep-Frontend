@@ -35,7 +35,7 @@ export function FullscreenRequest({ onAccept, onDecline }: FullscreenRequestProp
           <DialogTitle>Enter Fullscreen Mode</DialogTitle>
           <DialogDescription>
             This test requires fullscreen mode to maintain academic integrity. 
-            Please click "Enter Fullscreen" to continue.
+            Please click &quot;Enter Fullscreen&quot; to continue.
           </DialogDescription>
         </DialogHeader>
         <div className="flex items-center justify-center p-6">

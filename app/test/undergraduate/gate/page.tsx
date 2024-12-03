@@ -194,7 +194,7 @@ export default function GateTestPage() {
                     <AlertDialogTitle>Ready to begin?</AlertDialogTitle>
                     <AlertDialogDescription>
                       The test will start immediately in full-screen mode. Make
-                      sure you're ready to spend the next 3 hours uninterrupted.
+                      sure you&apos;re ready to spend the next 3 hours uninterrupted.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>

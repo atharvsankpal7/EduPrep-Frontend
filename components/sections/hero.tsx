@@ -36,7 +36,7 @@ export function HeroSection() {
               className="bg-gradient-blue hover-glow hover-glow-cool w-full sm:w-auto" 
               asChild
             >
-              <Link href="/mock-test">
+              <Link href="/test">
                 Start Practice Test <ArrowRight className="w-4 h-4 ml-2" />
               </Link>
             </Button>
