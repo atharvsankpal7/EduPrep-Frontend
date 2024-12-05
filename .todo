@@ -1,0 +1,5 @@
+make the input for time and number of questions, more manual like number input and also the max limit for the questions should be 120 and minimum should be 10 and time should be inputted in the more descriptive format like hours, minutes and seconds.
+
+also for compnay-specific tests we should have information about the test like we do in gate and custom test
+take the information about the compnay-specific test from the backend
+also add a button under each of the company to see syllabus for that company 
