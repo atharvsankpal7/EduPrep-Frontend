@@ -1,5 +1,6 @@
+"use client";
+
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -10,17 +11,16 @@ import {
 } from "@/components/ui/accordion";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ChevronLeft, Dices } from "lucide-react";
-import { createTest } from "@/lib/backendCalls/createTest";
-import { EducationLevel, TCustomizedTestProps, TopicList } from "@/lib/type";
-import { ErrorMessageDialog } from "../test/error-message";
+import { TCustomizedTestProps, TopicList } from "@/lib/type";
 
-
-export function CustomizedTest({ onBack, subjects }: TCustomizedTestProps) {
-  const [selectedTopics, setSelectedTopics] = useState<
-    Record<string, string[]>
-  >({});
-  const [showError, setShowError] = useState(false);
-  const router = useRouter();
+export function CustomizedTest({
+  onBack,
+  subjects,
+  onStartTest,
+}: TCustomizedTestProps & { onStartTest: (topics: TopicList) => void }) {
+  const [selectedTopics, setSelectedTopics] = useState<Record<string, string[]>>(
+    {}
+  );
 
   const handleTopicToggle = (subject: string, topic: string) => {
     setSelectedTopics((prev) => {
@@ -42,31 +42,18 @@ export function CustomizedTest({ onBack, subjects }: TCustomizedTestProps) {
     setSelectedTopics(allTopics);
   };
 
-  const startRandomTest = async () => {
+  const handleStartTest = () => {
     const topicList: TopicList = {
       subjects: Object.entries(selectedTopics).map(([subjectName, topics]) => ({
         subjectName,
         topics,
       })),
     };
-
-    try {
-      const response = await createTest({
-        educationLevel: EducationLevel.Undergraduate,
-        topicList,
-      });
-      if (!response.testId) {
-        throw new Error("Failed to create test");
-      }
-      router.push(`/test/${response.testId}`);
-    } catch (error) {
-      setShowError(true);
-    }
+    onStartTest(topicList);
   };
 
   return (
     <div className="space-y-6">
-      <ErrorMessageDialog open={showError} onClose={() => setShowError(false)} />
       <div className="flex items-center justify-between">
         <Button variant="ghost" onClick={onBack} className="gap-2">
           <ChevronLeft className="w-4 h-4" /> Back
@@ -76,14 +63,14 @@ export function CustomizedTest({ onBack, subjects }: TCustomizedTestProps) {
             Select All
           </Button>
           <Button
-            onClick={startRandomTest}
+            onClick={handleStartTest}
             className="gap-2"
             disabled={
-              Object.values(selectedTopics).flatMap((topics) => topics)
-                .length === 0
+              Object.values(selectedTopics).flatMap((topics) => topics).length ===
+              0
             }
           >
-            <Dices className="w-4 h-4" /> Start Random Test
+            <Dices className="w-4 h-4" /> Create Test
           </Button>
         </div>
       </div>
