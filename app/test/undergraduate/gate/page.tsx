@@ -23,6 +23,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Question, TestInterface } from "@/components/test/test-interface";
 import { Clock, BookOpen, AlertTriangle } from "lucide-react";
+import { ErrorMessageDialog } from "@/components/test/error-message";
+import { createTest } from "@/lib/backendCalls/createTest";
+import { EducationLevel } from "@/lib/type";
+import { useRouter } from "next/navigation";
 const demoQuestions: Question[] = [
   {
     question: "What is the capital of France?",
@@ -110,27 +114,31 @@ const demoQuestions: Question[] = [
     correctAnswer: 1,
   },
 ];
-export default function GateTestPage() {
-  const [testStarted, setTestStarted] = useState(false);
 
-  if (testStarted) {
-    return (
-      <TestInterface
-        testId="gate-123"
-        testName="GATE Computer Science Mock Test"
-        duration={180}
-        totalQuestions={65}
-        onComplete={(answers) => {
-          console.log("Test completed:", answers);
-          // Handle test completion
-        }}
-        questions={demoQuestions}
-      />
-    );
-  }
+export default function GateTestPage() {
+  const [showError, setShowError] = useState(false);
+  const router = useRouter();
+
+  const startNewTest = async () => {
+    try {
+      const response = await createTest({
+        educationLevel: EducationLevel.Undergraduate,
+      });
+      if (!response.testId) {
+        throw new Error("Failed to create test");
+      }
+      router.push(`/test/${response.testId}`);
+    } catch (error) {
+      setShowError(true);
+    }
+  };
 
   return (
     <div className="container py-8">
+      <ErrorMessageDialog
+        open={showError}
+        onClose={() => setShowError(false)}
+      />
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">GATE Mock Test</h1>
@@ -194,12 +202,13 @@ export default function GateTestPage() {
                     <AlertDialogTitle>Ready to begin?</AlertDialogTitle>
                     <AlertDialogDescription>
                       The test will start immediately in full-screen mode. Make
-                      sure you&apos;re ready to spend the next 3 hours uninterrupted.
+                      sure you&apos;re ready to spend the next 3 hours
+                      uninterrupted.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={() => setTestStarted(true)}>
+                    <AlertDialogAction onClick={() => startNewTest()}>
                       Start Now
                     </AlertDialogAction>
                   </AlertDialogFooter>

@@ -14,49 +14,31 @@ interface CreateTestResponse {
     correctAnswer: string;
   }>;
 }
+
 const BACKEND_URL = `${process.env.BACKEND_URL}/api/test/get`;
-const getGateTest = async (): Promise<CreateTestResponse> => {
+
+const makeRequest = async <T>(url: string, data?: any): Promise<T> => {
   try {
-    const response = await axios.post<CreateTestResponse>(
-      `${BACKEND_URL}/undergraduate/gate`
-    );
+    const response = await axios.post<T>(url, data);
     return response.data;
   } catch (error) {
-    throw new Error("Failed to create gate test");
+    if (error instanceof Error) {
+      throw new Error(`Failed to create test: ${error.message}`);
+    } else {
+      throw new Error('Failed to create test: An unknown error occurred');
+    }
   }
 };
+const getGateTest = (): Promise<CreateTestResponse> =>
+  makeRequest(`${BACKEND_URL}/undergraduate/gate`);
 
-const getCompanySpecificTest = async (
-  company: string
-): Promise<CreateTestResponse> => {
-  try {
-    const response = await axios.post<CreateTestResponse>(
-      `${BACKEND_URL}/undergraduate/companySpecific`,
-      {
-        company,
-      }
-    );
+const getCompanySpecificTest = (company: string): Promise<CreateTestResponse> =>
+  makeRequest(`${BACKEND_URL}/undergraduate/companySpecific`, { company });
 
-    return response.data;
-  } catch (error) {
-    throw new Error(
-      "Failed to create company specific test for company: " + company
-    );
-  }
-};
+const getCetTest = (): Promise<CreateTestResponse> =>
+  makeRequest(`${BACKEND_URL}/juniorcollege/cet`);
 
-const getCetTest = async (): Promise<CreateTestResponse> => {
-  try {
-    const response = await axios.post<CreateTestResponse>(
-      `${BACKEND_URL}/juniorcollege/cet`
-    );
-    return response.data;
-  } catch (error) {
-    throw new Error("Failed to create cet test");
-  }
-};
-
-const getCustomTest = async ({
+const getCustomTest = ({
   time,
   numberOfQuestions,
   topicList,
@@ -66,21 +48,11 @@ const getCustomTest = async ({
   numberOfQuestions: number;
   topicList: TopicList;
   educationLevel: EducationLevel;
-}): Promise<CreateTestResponse> => {
-  try {
-    const response = await axios.post<CreateTestResponse>(
-      `${BACKEND_URL}/${educationLevel.toLocaleLowerCase()}/custom`,
-      {
-        time,
-        numberOfQuestions,
-        topicList,
-      }
-    );
-    return response.data;
-  } catch (error) {
-    throw new Error("Failed to create custom test");
-  }
-};
+}): Promise<CreateTestResponse> =>
+  makeRequest(
+    `${BACKEND_URL}/${educationLevel.toLowerCase()}/custom`,
+    { time, numberOfQuestions, topicList }
+  );
 
 const createUndergraduateTest = async ({
   numberOfQuestions = 30,
@@ -97,28 +69,18 @@ const createUndergraduateTest = async ({
   educationLevel: EducationLevel;
   time?: number;
 }): Promise<CreateTestResponse> => {
-  if (category === TUnderGraduateTestCategories.GATE) {
-    return getGateTest();
-  } else if (category === TUnderGraduateTestCategories.COMPANY_SPECIFIC) {
-    if (!company) {
-      throw new Error("Company is required for company specific test");
-    }
-    return getCompanySpecificTest(company);
-  } else if (category === TUnderGraduateTestCategories.CUSTOM) {
-    if (!topicList) {
-      throw new Error("Topic list is required for custom test");
-    }
-    if (time === undefined) {
-      throw new Error("Time is required for custom test");
-    }
-    return getCustomTest({
-      time,
-      numberOfQuestions,
-      topicList,
-      educationLevel,
-    });
-  } else {
-    throw new Error("Invalid test category");
+  switch (category) {
+    case TUnderGraduateTestCategories.GATE:
+      return getGateTest();
+    case TUnderGraduateTestCategories.COMPANY_SPECIFIC:
+      if (!company) throw new Error("Company is required for company specific test");
+      return getCompanySpecificTest(company);
+    case TUnderGraduateTestCategories.CUSTOM:
+      if (!topicList) throw new Error("Topic list is required for custom test");
+      if (time === undefined) throw new Error("Time is required for custom test");
+      return getCustomTest({ time, numberOfQuestions, topicList, educationLevel });
+    default:
+      throw new Error("Invalid test category");
   }
 };
 
@@ -127,7 +89,7 @@ export const createTest = async ({
   numberOfQuestions = 30,
   company,
   topicList,
-  time = 60 * 60 * 60, // 1 hour
+  time = 60 * 60 * 60,
   isCet = false,
 }: {
   educationLevel: EducationLevel;
@@ -138,28 +100,24 @@ export const createTest = async ({
   isCet?: boolean;
 }): Promise<CreateTestResponse> => {
   if (educationLevel === EducationLevel.Undergraduate) {
+    const category = company
+      ? TUnderGraduateTestCategories.COMPANY_SPECIFIC
+      : topicList
+      ? TUnderGraduateTestCategories.CUSTOM
+      : TUnderGraduateTestCategories.GATE;
+
     return createUndergraduateTest({
       numberOfQuestions,
       company,
       topicList,
-      category: company
-        ? TUnderGraduateTestCategories.COMPANY_SPECIFIC
-        : TUnderGraduateTestCategories.CUSTOM,
-      educationLevel,
-      time,
-    });
-  } else {
-    if (isCet) {
-      return getCetTest();
-    }
-    if (!topicList) {
-      throw new Error("Topic list is required for custom test");
-    }
-    return getCustomTest({
-      numberOfQuestions,
-      topicList,
+      category,
       educationLevel,
       time,
     });
   }
+
+  if (isCet) return getCetTest();
+  
+  if (!topicList) throw new Error("Topic list is required for custom test");
+  return getCustomTest({ numberOfQuestions, topicList, educationLevel, time });
 };

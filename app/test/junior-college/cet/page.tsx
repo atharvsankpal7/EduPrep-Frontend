@@ -120,10 +120,6 @@ export default function GateTestPage() {
         testName="GATE Computer Science Mock Test"
         duration={180}
         totalQuestions={65}
-        onComplete={(answers) => {
-          console.log("Test completed:", answers);
-          // Handle test completion
-        }}
         questions={demoQuestions}
       />
     );

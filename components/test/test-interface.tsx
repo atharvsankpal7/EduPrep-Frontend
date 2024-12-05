@@ -13,6 +13,7 @@ import { FullscreenRequest } from "@/components/test/fullscreen-request";
 import { useFullscreen } from "@/components/test/hooks/use-fullscreen";
 import { useTabWarning } from "@/components/test/hooks/use-tab-warning";
 import { useToast } from "@/components/ui/use-toast";
+import { useRouter } from "next/navigation";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -39,7 +40,10 @@ interface TestInterfaceProps {
   duration: number;
   totalQuestions: number;
   questions: Question[];
-  onComplete: (answers: Record<number, number>) => void;
+}
+
+function onComplete(answers: Record<number, number>) {
+  // Handle submission logic here
 }
 
 export function TestInterface({
@@ -48,7 +52,6 @@ export function TestInterface({
   duration,
   totalQuestions,
   questions,
-  onComplete,
 }: TestInterfaceProps) {
   const [currentQuestion, setCurrentQuestion] = useState(1);
   const [answers, setAnswers] = useState<Record<number, number>>({});
@@ -56,8 +59,10 @@ export function TestInterface({
   const [warnings, setWarnings] = useState<string[]>([]);
   const [testStarted, setTestStarted] = useState(false);
   const { toast } = useToast();
+  const router = useRouter();
 
-  const { isFullscreen, isFullscreenAvailable, enterFullscreen } = useFullscreen();
+  const { isFullscreen, isFullscreenAvailable, enterFullscreen } =
+    useFullscreen();
   const { warningVisible } = useTabWarning();
 
   const handleAnswer = (questionId: number, answerId: number) => {
@@ -67,23 +72,21 @@ export function TestInterface({
     }));
   };
 
- 
   const handleSubmit = () => {
-    if (Object.keys(answers).length > 0) {
-      onComplete(answers);
-    } else {
-      toast({
-        title: "Submission Error",
-        description: "You must answer at least one question before submitting.",
-        variant: "destructive",
-      });
-    }
+    onComplete(answers);
+    router.push(`/test/result/${testId}`);
+  };
+
+  const handleTimeUp = () => {
+    onComplete(answers);
+    router.push(`/test/result/${testId}`);
   };
 
   const handleFullscreenDecline = () => {
     toast({
       title: "Test Requirements",
-      description: "Fullscreen mode is required to take this test. Please try again.",
+      description:
+        "Fullscreen mode is required to take this test. Please try again.",
       variant: "destructive",
     });
   };
@@ -120,7 +123,9 @@ export function TestInterface({
             <div className="flex items-center gap-2 p-4 rounded-lg bg-destructive/10 text-destructive">
               <AlertTriangle className="h-5 w-5" />
               <div className="flex-1">
-                <p className="font-medium">Test Violations ({warnings.length}/3)</p>
+                <p className="font-medium">
+                  Test Violations ({warnings.length}/3)
+                </p>
                 <ul className="mt-2 text-sm space-y-1">
                   {warnings.map((warning, index) => (
                     <li key={index}>{warning}</li>
@@ -145,13 +150,14 @@ export function TestInterface({
               <div className="bg-card rounded-lg shadow-lg p-6">
                 {currentQuestionData ? (
                   <QuestionPanel
-                  questionNumber={currentQuestion}
-                  questionText={currentQuestionData.question} // Dynamically passed
-                  options={currentQuestionData.options} // Dynamically passed
-                  onAnswer={(answerId) => handleAnswer(currentQuestion, answerId)}
-                  selectedAnswer={answers[currentQuestion]}
-                />
-                
+                    questionNumber={currentQuestion}
+                    questionText={currentQuestionData.question}
+                    options={currentQuestionData.options}
+                    onAnswer={(answerId) =>
+                      handleAnswer(currentQuestion, answerId)
+                    }
+                    selectedAnswer={answers[currentQuestion]}
+                  />
                 ) : (
                   <p>Question data is unavailable.</p>
                 )}
@@ -166,7 +172,7 @@ export function TestInterface({
                 <Timer
                   timeLeft={timeLeft}
                   setTimeLeft={setTimeLeft}
-                  onTimeUp={handleSubmit}
+                  onTimeUp={handleTimeUp}
                 />
               </div>
             )}
@@ -203,7 +209,9 @@ export function TestInterface({
         <div className="fixed bottom-0 left-0 right-0 bg-background border-t py-4">
           <div className="container flex justify-between items-center">
             <button
-              onClick={() => setCurrentQuestion((prev) => Math.max(1, prev - 1))}
+              onClick={() =>
+                setCurrentQuestion((prev) => Math.max(1, prev - 1))
+              }
               disabled={currentQuestion === 1}
               className="px-4 py-2 rounded-md bg-primary/10 hover:bg-primary/20 transition-colors"
             >
@@ -221,8 +229,9 @@ export function TestInterface({
                   <AlertDialogHeader>
                     <AlertDialogTitle>Submit Test?</AlertDialogTitle>
                     <AlertDialogDescription>
-                      You have answered {Object.keys(answers).length} out of {totalQuestions}{" "}
-                      questions. Are you sure you want to submit?
+                      You have answered {Object.keys(answers).length} out of{" "}
+                      {totalQuestions} questions. Are you sure you want to
+                      submit?
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
@@ -235,7 +244,11 @@ export function TestInterface({
               </AlertDialog>
             ) : (
               <button
-                onClick={() => setCurrentQuestion((prev) => Math.min(totalQuestions, prev + 1))}
+                onClick={() =>
+                  setCurrentQuestion((prev) =>
+                    Math.min(totalQuestions, prev + 1)
+                  )
+                }
                 className="px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
               >
                 Next

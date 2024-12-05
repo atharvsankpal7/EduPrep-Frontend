@@ -1,22 +1,27 @@
-"use client";
-
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ChevronLeft, Dices } from "lucide-react";
 import { createTest } from "@/lib/backendCalls/createTest";
 import { EducationLevel, TCustomizedTestProps, TopicList } from "@/lib/type";
-
+import { ErrorMessageDialog } from "../test/error-message";
 
 
 export function CustomizedTest({ onBack, subjects }: TCustomizedTestProps) {
-  const [selectedTopics, setSelectedTopics] = useState<Record<string, string[]>>({});
+  const [selectedTopics, setSelectedTopics] = useState<
+    Record<string, string[]>
+  >({});
+  const [showError, setShowError] = useState(false);
   const router = useRouter();
 
-  // Toggle a topic under a specific subject
   const handleTopicToggle = (subject: string, topic: string) => {
     setSelectedTopics((prev) => {
       const currentTopics = prev[subject] || [];
@@ -27,7 +32,6 @@ export function CustomizedTest({ onBack, subjects }: TCustomizedTestProps) {
     });
   };
 
-  // Select all topics across all subjects
   const handleSelectAll = () => {
     const allTopics: Record<string, string[]> = {};
     subjects.forEach((domain) => {
@@ -38,7 +42,6 @@ export function CustomizedTest({ onBack, subjects }: TCustomizedTestProps) {
     setSelectedTopics(allTopics);
   };
 
-  // Start random test with selected topics
   const startRandomTest = async () => {
     const topicList: TopicList = {
       subjects: Object.entries(selectedTopics).map(([subjectName, topics]) => ({
@@ -52,15 +55,18 @@ export function CustomizedTest({ onBack, subjects }: TCustomizedTestProps) {
         educationLevel: EducationLevel.Undergraduate,
         topicList,
       });
+      if (!response.testId) {
+        throw new Error("Failed to create test");
+      }
       router.push(`/test/${response.testId}`);
     } catch (error) {
-      console.error("Failed to create test:", error);
-      alert("Error creating test. Please try again.");
+      setShowError(true);
     }
   };
 
   return (
     <div className="space-y-6">
+      <ErrorMessageDialog open={showError} onClose={() => setShowError(false)} />
       <div className="flex items-center justify-between">
         <Button variant="ghost" onClick={onBack} className="gap-2">
           <ChevronLeft className="w-4 h-4" /> Back
@@ -73,7 +79,8 @@ export function CustomizedTest({ onBack, subjects }: TCustomizedTestProps) {
             onClick={startRandomTest}
             className="gap-2"
             disabled={
-              Object.values(selectedTopics).flatMap((topics) => topics).length === 0
+              Object.values(selectedTopics).flatMap((topics) => topics)
+                .length === 0
             }
           >
             <Dices className="w-4 h-4" /> Start Random Test
@@ -89,7 +96,11 @@ export function CustomizedTest({ onBack, subjects }: TCustomizedTestProps) {
             </CardHeader>
             <CardContent>
               {domains.subjects.map((subject) => (
-                <Accordion key={subject.subjectName} type="multiple" className="w-full">
+                <Accordion
+                  key={subject.subjectName}
+                  type="multiple"
+                  className="w-full"
+                >
                   <AccordionItem value={subject.subjectName}>
                     <AccordionTrigger>{subject.subjectName}</AccordionTrigger>
                     <AccordionContent>
@@ -98,8 +109,14 @@ export function CustomizedTest({ onBack, subjects }: TCustomizedTestProps) {
                           <div key={topic} className="flex items-center gap-2">
                             <Checkbox
                               id={topic}
-                              checked={selectedTopics[subject.subjectName]?.includes(topic) || false}
-                              onCheckedChange={() => handleTopicToggle(subject.subjectName, topic)}
+                              checked={
+                                selectedTopics[subject.subjectName]?.includes(
+                                  topic
+                                ) || false
+                              }
+                              onCheckedChange={() =>
+                                handleTopicToggle(subject.subjectName, topic)
+                              }
                             />
                             <label
                               htmlFor={topic}

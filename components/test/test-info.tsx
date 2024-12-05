@@ -120,10 +120,6 @@ export default function GateTestPage() {
         testName="GATE Computer Science Mock Test"
         duration={180}
         totalQuestions={65}
-        onComplete={(answers) => {
-          console.log("Test completed:", answers);
-          // Handle test completion
-        }}
         questions={demoQuestions}
       />
     );
@@ -194,7 +190,8 @@ export default function GateTestPage() {
                     <AlertDialogTitle>Ready to begin?</AlertDialogTitle>
                     <AlertDialogDescription>
                       The test will start immediately in full-screen mode. Make
-                      sure you&apos;re ready to spend the next 3 hours uninterrupted.
+                      sure you&apos;re ready to spend the next 3 hours
+                      uninterrupted.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
