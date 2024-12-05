@@ -11,6 +11,8 @@ import { Building2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { createTest } from "@/lib/backendCalls/createTest";
 import { EducationLevel } from "@/lib/type";
+import { useState } from "react";
+import { ErrorMessageDialog } from "@/components/test/error-message";
 
 const companies = [
   {
@@ -52,6 +54,7 @@ const item = {
 
 export default function CompanyTestPage() {
   const router = useRouter();
+  const [showError, setShowError] = useState(false);
 
   const handleStartTest = async (company: string) => {
     try {
@@ -59,16 +62,22 @@ export default function CompanyTestPage() {
         educationLevel: EducationLevel.Undergraduate,
         company,
       });
-
+      if (!response.testId) {
+        throw new Error("Failed to create test");
+      }
       router.push(`/test/${response.testId}`);
     } catch (error) {
-      console.error("Failed to create test:", error);
-      alert("Error creating test. Please try again.");
+      setShowError(true);
     }
   };
 
   return (
     <div className="container py-8">
+      <ErrorMessageDialog
+        open={showError}
+        onClose={() => setShowError(false)}
+      />
+
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Company-Specific Tests</h1>
