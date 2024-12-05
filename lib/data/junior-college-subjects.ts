@@ -1,9 +1,63 @@
-export const juniorCollegeSubjects = {
-  science: {
-    title: "Science Subjects",
-    categories: {
-      physics: {
-        name: "Physics",
+import {  TSubjectList } from "../type";
+
+export const juniorCollegeSubjects: TSubjectList[] = [
+  {
+    domain: "11th Standard",
+    subjects: [
+      {
+        subjectName: "Physics",
+        topics: [
+          "Current Electricity",
+          "Magnetic Effects of Current and Magnetism",
+          "Electromagnetic Induction and Alternating Currents",
+          "Electromagnetic Waves",
+          "Optics",
+          "Dual Nature of Matter and Radiation",
+          "Atoms and Nuclei",
+          "Electronic Devices",
+        ],
+      },
+      {
+        subjectName: "Chemistry",
+        topics: [
+          "Solutions",
+          "Electrochemistry",
+          "Chemical Kinetics",
+          "Surface Chemistry",
+          "General Principles of Isolation of Elements",
+          "p-Block Elements",
+          "d and f Block Elements",
+          "Coordination Compounds",
+          "Organic Compounds",
+        ],
+      },
+      {
+        subjectName: "Mathematics",
+        topics: [
+          "Continuity and Differentiability",
+          "Applications of Derivatives",
+          "Integrals",
+          "Applications of Integrals",
+          "Differential Equations",
+          "Vector Algebra",
+          "Three Dimensional Geometry",
+          "Linear Programming",
+        ],
+      },
+      {
+        subjectName: "Biology",
+        topics: [
+          "Biotechnology and Its Applications",
+          "Ecology and Environment",
+        ],
+      },
+    ],
+  },
+  {
+    domain: "12th Standard",
+    subjects: [
+      {
+        subjectName: "Physics",
         topics: [
           "Physical World and Measurement",
           "Kinematics",
@@ -12,22 +66,10 @@ export const juniorCollegeSubjects = {
           "Motion of System of Particles and Rigid Body",
           "Gravitation",
           "Properties of Bulk Matter",
-          "Thermodynamics",
-          "Behaviour of Perfect Gas and Kinetic Theory",
-          "Oscillations and Waves",
-          "Electrostatics",
-          "Current Electricity",
-          "Magnetic Effects of Current and Magnetism",
-          "Electromagnetic Induction and Alternating Currents",
-          "Electromagnetic Waves",
-          "Optics",
-          "Dual Nature of Matter and Radiation",
-          "Atoms and Nuclei",
-          "Electronic Devices"
-        ]
+        ],
       },
-      chemistry: {
-        name: "Chemistry",
+      {
+        subjectName: "Chemistry",
         topics: [
           "Some Basic Concepts of Chemistry",
           "Structure of Atom",
@@ -38,23 +80,10 @@ export const juniorCollegeSubjects = {
           "Equilibrium",
           "Redox Reactions",
           "Hydrogen",
-          "s-Block Elements",
-          "p-Block Elements",
-          "Organic Chemistry: Basic Principles",
-          "Solid State",
-          "Solutions",
-          "Electrochemistry",
-          "Chemical Kinetics",
-          "Surface Chemistry",
-          "General Principles of Isolation of Elements",
-          "p-Block Elements",
-          "d and f Block Elements",
-          "Coordination Compounds",
-          "Organic Compounds"
-        ]
+        ],
       },
-      mathematics: {
-        name: "Mathematics",
+      {
+        subjectName: "Mathematics",
         topics: [
           "Sets and Functions",
           "Trigonometric Functions",
@@ -66,40 +95,17 @@ export const juniorCollegeSubjects = {
           "Sequences and Series",
           "Straight Lines",
           "Conic Sections",
-          "Introduction to Three Dimensional Geometry",
-          "Limits and Derivatives",
-          "Mathematical Reasoning",
-          "Statistics",
-          "Probability",
-          "Relations and Functions",
-          "Inverse Trigonometric Functions",
-          "Matrices",
-          "Determinants",
-          "Continuity and Differentiability",
-          "Applications of Derivatives",
-          "Integrals",
-          "Applications of Integrals",
-          "Differential Equations",
-          "Vector Algebra",
-          "Three Dimensional Geometry",
-          "Linear Programming"
-        ]
+        ],
       },
-      biology: {
-        name: "Biology",
+      {
+        subjectName: "Biology",
         topics: [
           "Diversity in Living World",
           "Structural Organisation in Animals and Plants",
           "Cell Structure and Function",
           "Plant Physiology",
-          "Human Physiology",
-          "Reproduction",
-          "Genetics and Evolution",
-          "Biology and Human Welfare",
-          "Biotechnology and Its Applications",
-          "Ecology and Environment"
-        ]
-      }
-    }
-  }
-};
+        ],
+      },
+    ],
+  },
+];

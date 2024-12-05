@@ -12,8 +12,21 @@ export const EducationLevel = {
   JuniorCollege: "juniorCollege",
 } as const;
 
-// export const UndergraduateTypes - {
+export type EducationLevel =
+  (typeof EducationLevel)[keyof typeof EducationLevel];
 
-// }
+export interface TSubjectList {
+  domain: string;
+  subjects: Subject[];
+}
 
-export type EducationLevel = typeof EducationLevel[keyof typeof EducationLevel];
+export interface TCustomizedTestProps {
+  onBack: () => void;
+  subjects: TSubjectList[];
+}
+
+export enum TUnderGraduateTestCategories {
+  GATE = "Gate",
+  COMPANY_SPECIFIC = "Company Specific",
+  CUSTOM = "Custom",
+}

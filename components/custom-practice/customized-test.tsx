@@ -2,17 +2,17 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ChevronLeft, Dices } from "lucide-react";
-import { juniorCollegeSubjects } from "@/lib/data/junior-college-subjects";
 import { createTest } from "@/lib/backendCalls/createTest";
-import { EducationLevel, TopicList } from "@/lib/type";
+import { EducationLevel, TCustomizedTestProps, TopicList } from "@/lib/type";
 
-export function CustomizedTest({ onBack }: { onBack: () => void }) {
+
+
+export function CustomizedTest({ onBack, subjects }: TCustomizedTestProps) {
   const [selectedTopics, setSelectedTopics] = useState<Record<string, string[]>>({});
   const router = useRouter();
 
@@ -30,8 +30,10 @@ export function CustomizedTest({ onBack }: { onBack: () => void }) {
   // Select all topics across all subjects
   const handleSelectAll = () => {
     const allTopics: Record<string, string[]> = {};
-    Object.entries(juniorCollegeSubjects).forEach(([subjectKey, section]) => {
-      allTopics[subjectKey] = Object.values(section.categories).flatMap((category) => category.topics);
+    subjects.forEach((domain) => {
+      domain.subjects.forEach((subject) => {
+        allTopics[subject.subjectName] = subject.topics;
+      });
     });
     setSelectedTopics(allTopics);
   };
@@ -80,24 +82,24 @@ export function CustomizedTest({ onBack }: { onBack: () => void }) {
       </div>
 
       <div className="grid gap-6">
-        {Object.entries(juniorCollegeSubjects).map(([subjectKey, section]) => (
-          <Card key={subjectKey}>
+        {subjects.map((domains) => (
+          <Card key={domains.domain}>
             <CardHeader>
-              <CardTitle>{section.title}</CardTitle>
+              <CardTitle>{`${domains.domain}`}</CardTitle>
             </CardHeader>
             <CardContent>
-              <Accordion type="multiple" className="w-full">
-                {Object.entries(section.categories).map(([categoryKey, category]) => (
-                  <AccordionItem value={categoryKey} key={categoryKey}>
-                    <AccordionTrigger>{category.name}</AccordionTrigger>
+              {domains.subjects.map((subject) => (
+                <Accordion key={subject.subjectName} type="multiple" className="w-full">
+                  <AccordionItem value={subject.subjectName}>
+                    <AccordionTrigger>{subject.subjectName}</AccordionTrigger>
                     <AccordionContent>
                       <div className="grid gap-2">
-                        {category.topics.map((topic) => (
+                        {subject.topics.map((topic) => (
                           <div key={topic} className="flex items-center gap-2">
                             <Checkbox
                               id={topic}
-                              checked={selectedTopics[subjectKey]?.includes(topic) || false}
-                              onCheckedChange={() => handleTopicToggle(subjectKey, topic)}
+                              checked={selectedTopics[subject.subjectName]?.includes(topic) || false}
+                              onCheckedChange={() => handleTopicToggle(subject.subjectName, topic)}
                             />
                             <label
                               htmlFor={topic}
@@ -110,8 +112,8 @@ export function CustomizedTest({ onBack }: { onBack: () => void }) {
                       </div>
                     </AccordionContent>
                   </AccordionItem>
-                ))}
-              </Accordion>
+                </Accordion>
+              ))}
             </CardContent>
           </Card>
         ))}

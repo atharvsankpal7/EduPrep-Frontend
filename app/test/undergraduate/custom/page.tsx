@@ -1,7 +1,7 @@
 "use client";
 
 import { CustomizedTest } from "@/components/custom-practice/customized-test";
-// import { undergraduateSubjects } from "@/lib/data/subjects-topic";
+import { undergraduateSubjects } from "@/lib/data/undergraduate-subjects";
 export default function CustomTestPage() {
   return (
     <div className="container py-8">
@@ -15,7 +15,7 @@ export default function CustomTestPage() {
 
         <CustomizedTest
           onBack={() => window.history.back()}
-          // subjects={undergraduateSubjects}
+          subjects={undergraduateSubjects}
         />
       </div>
     </div>
