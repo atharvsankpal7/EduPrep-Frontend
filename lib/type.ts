@@ -30,3 +30,28 @@ export enum TUnderGraduateTestCategories {
   COMPANY_SPECIFIC = "Company Specific",
   CUSTOM = "Custom",
 }
+export type TCreateTestResponse = {
+  testId: string;
+  questions: Array<{
+    id: string;
+    question: string;
+    options: string[];
+    correctAnswer: string;
+  }>;
+};
+
+export type TCreateUndergraduateTestRequest = {
+  numberOfQuestions?: number;
+  category: TUnderGraduateTestCategories;
+  topicList?: TopicList;
+  company?: string;
+  educationLevel: EducationLevel;
+  time?: number;
+};
+
+export type TCreateCustomTestRequest = {
+  time: number;
+  numberOfQuestions: number;
+  topicList: TopicList;
+  educationLevel: EducationLevel;
+};

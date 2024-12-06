@@ -1,21 +1,14 @@
 import axios from "axios";
 import {
+  TCreateTestResponse,
   EducationLevel,
   TopicList,
   TUnderGraduateTestCategories,
+  TCreateUndergraduateTestRequest,
+  TCreateCustomTestRequest,
 } from "../type";
 
-interface CreateTestResponse {
-  testId: string;
-  questions: Array<{
-    id: string;
-    question: string;
-    options: string[];
-    correctAnswer: string;
-  }>;
-}
-
-const BACKEND_URL = `${process.env.BACKEND_URL}/api/test/get`;
+const BACKEND_URL = `${process.env.BACKEND_URL}/api/test/create`;
 
 const makeRequest = async <T>(url: string, data?: any): Promise<T> => {
   try {
@@ -25,17 +18,19 @@ const makeRequest = async <T>(url: string, data?: any): Promise<T> => {
     if (error instanceof Error) {
       throw new Error(`Failed to create test: ${error.message}`);
     } else {
-      throw new Error('Failed to create test: An unknown error occurred');
+      throw new Error("Failed to create test: An unknown error occurred");
     }
   }
 };
-const getGateTest = (): Promise<CreateTestResponse> =>
+const getGateTest = (): Promise<TCreateTestResponse> =>
   makeRequest(`${BACKEND_URL}/undergraduate/gate`);
 
-const getCompanySpecificTest = (company: string): Promise<CreateTestResponse> =>
+const getCompanySpecificTest = (
+  company: string
+): Promise<TCreateTestResponse> =>
   makeRequest(`${BACKEND_URL}/undergraduate/companySpecific`, { company });
 
-const getCetTest = (): Promise<CreateTestResponse> =>
+const getCetTest = (): Promise<TCreateTestResponse> =>
   makeRequest(`${BACKEND_URL}/juniorcollege/cet`);
 
 const getCustomTest = ({
@@ -43,16 +38,12 @@ const getCustomTest = ({
   numberOfQuestions,
   topicList,
   educationLevel,
-}: {
-  time: number;
-  numberOfQuestions: number;
-  topicList: TopicList;
-  educationLevel: EducationLevel;
-}): Promise<CreateTestResponse> =>
-  makeRequest(
-    `${BACKEND_URL}/${educationLevel.toLowerCase()}/custom`,
-    { time, numberOfQuestions, topicList }
-  );
+}: TCreateCustomTestRequest): Promise<TCreateTestResponse> =>
+  makeRequest(`${BACKEND_URL}/${educationLevel.toLowerCase()}/custom`, {
+    time,
+    numberOfQuestions,
+    topicList,
+  });
 
 const createUndergraduateTest = async ({
   numberOfQuestions = 30,
@@ -61,24 +52,24 @@ const createUndergraduateTest = async ({
   company,
   educationLevel,
   time,
-}: {
-  numberOfQuestions?: number;
-  category: TUnderGraduateTestCategories;
-  topicList?: TopicList;
-  company?: string;
-  educationLevel: EducationLevel;
-  time?: number;
-}): Promise<CreateTestResponse> => {
+}: TCreateUndergraduateTestRequest): Promise<TCreateTestResponse> => {
   switch (category) {
     case TUnderGraduateTestCategories.GATE:
       return getGateTest();
     case TUnderGraduateTestCategories.COMPANY_SPECIFIC:
-      if (!company) throw new Error("Company is required for company specific test");
+      if (!company)
+        throw new Error("Company is required for company specific test");
       return getCompanySpecificTest(company);
     case TUnderGraduateTestCategories.CUSTOM:
       if (!topicList) throw new Error("Topic list is required for custom test");
-      if (time === undefined) throw new Error("Time is required for custom test");
-      return getCustomTest({ time, numberOfQuestions, topicList, educationLevel });
+      if (time === undefined)
+        throw new Error("Time is required for custom test");
+      return getCustomTest({
+        time,
+        numberOfQuestions,
+        topicList,
+        educationLevel,
+      });
     default:
       throw new Error("Invalid test category");
   }
@@ -98,7 +89,7 @@ export const createTest = async ({
   topicList?: TopicList;
   time?: number;
   isCet?: boolean;
-}): Promise<CreateTestResponse> => {
+}): Promise<TCreateTestResponse> => {
   if (educationLevel === EducationLevel.Undergraduate) {
     const category = company
       ? TUnderGraduateTestCategories.COMPANY_SPECIFIC
@@ -117,7 +108,7 @@ export const createTest = async ({
   }
 
   if (isCet) return getCetTest();
-  
+
   if (!topicList) throw new Error("Topic list is required for custom test");
   return getCustomTest({ numberOfQuestions, topicList, educationLevel, time });
 };
