@@ -3,3 +3,5 @@ make the input for time and number of questions, more manual like number input a
 also for compnay-specific tests we should have information about the test like we do in gate and custom test
 take the information about the compnay-specific test from the backend
 also add a button under each of the company to see syllabus for that company 
+
+add persistent storage for the user to store authentication
