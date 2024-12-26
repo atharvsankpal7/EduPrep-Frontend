@@ -121,6 +121,9 @@ export default function GateTestPage() {
         duration={180}
         totalQuestions={65}
         questions={demoQuestions}
+        onComplete={  (answers) => {
+          console.log("Test completed with answers:", answers);
+        }}
       />
     );
   }

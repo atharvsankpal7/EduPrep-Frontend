@@ -48,6 +48,7 @@ export default function TestPage({ params }: TestPageProps) {
       duration={testConfig.duration}
       totalQuestions={testConfig.totalQuestions}
       questions={testConfig.questions}
+      onComplete={handleTestComplete}
     />
   );
 }
