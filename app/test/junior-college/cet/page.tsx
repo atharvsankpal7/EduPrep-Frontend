@@ -26,7 +26,7 @@ export default function CetTestPage() {
       const response = await createTest({
         educationLevel: EducationLevel.JuniorCollege,
         isCet: true,
-      });
+      }) as any;
      
       if (!response.data.testDetails.testId) {
         throw new Error("Failed to create test");

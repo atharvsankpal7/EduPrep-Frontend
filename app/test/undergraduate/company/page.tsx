@@ -61,7 +61,7 @@ export default function CompanyTestPage() {
       const response = await createTest({
         educationLevel: EducationLevel.Undergraduate,
         company,
-      });
+      }) as any;
       if (!response.testId) {
         throw new Error("Failed to create test");
       }

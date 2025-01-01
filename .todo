@@ -4,4 +4,10 @@ also for compnay-specific tests we should have information about the test like w
 take the information about the compnay-specific test from the backend
 also add a button under each of the company to see syllabus for that company 
 
-add persistent storage for the user to store authentication
+
+✅ JWT Auth<!-- add persistent storage for the user to store authentication 
+-->
+
+for createTest in backendCalls introduce a type instead of as any 
+
+

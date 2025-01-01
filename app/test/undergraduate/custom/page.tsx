@@ -42,7 +42,7 @@ export default function CustomTestPage() {
         topicList: selectedTopics,
         numberOfQuestions: testConfig.questionCount,
         time: testConfig.duration * 60,
-      });
+      }) as any;
 
       if (!response.testId) {
         throw new Error("Failed to create test");
