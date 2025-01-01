@@ -1,7 +1,9 @@
 // pages/test/[id]/page.tsx
-"use client"
+"use client";
 import { useEffect, useState } from "react";
 import { TestInterface } from "@/components/test/test-interface";
+import { IQuestion, ITest } from "@/lib/type";
+import axios from "axios";
 
 interface TestPageProps {
   params: { id: string };
@@ -9,45 +11,67 @@ interface TestPageProps {
 }
 
 interface TestConfig {
-  testName: string;
-  duration: number;
-  totalQuestions: number;
-  questions: Array<{ question: string; options: string[]; correctAnswer?: number }>;
+  test: ITest;
+  questions: IQuestion[];
 }
 
 export default function TestPage({ params }: TestPageProps) {
   const testId = params.id;
   const [testConfig, setTestConfig] = useState<TestConfig | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000/api/v1/test';
+
     const fetchTestConfig = async () => {
-      const response = await fetch(`${process.env.BACKEND_API}/test/getTest/${testId}`);
-      if (response.ok) {
-        const data = await response.json();
-        setTestConfig(data);
-      } else {
-        console.error("Failed to fetch test data");
+      try {
+        const url = `${BACKEND_URL}/getTest/${testId}`;
+        const response = await axios.get(url);
+        const { test, questions } = response.data.data;
+        if (!test || !questions) {
+          throw new Error('Invalid test data received');
+        }
+        
+        setTestConfig({ test, questions });
+        setError(null);
+      } catch (error) {
+        console.error("Failed to fetch test data:", error);
+        setError("Failed to load test. Please try again later.");
       }
     };
 
     fetchTestConfig();
   }, [testId]);
 
-  const handleTestComplete = (answers: Record<number, number>) => {
-    console.log("Test completed with answers:", answers);
+  const handleTestComplete = async (answers: Record<number, number>) => {
+    try {
+      const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000/api/v1/test';
+      await axios.post(`${BACKEND_URL}/submitTest/${testId}`, { answers });
+      console.log("Test submitted successfully");
+    } catch (error) {
+      console.error("Failed to submit test:", error);
+    }
   };
 
+  if (error) {
+    return <div className="error-message">{error}</div>;
+  }
+
   if (!testConfig) {
-    return <div>Loading...</div>;
+    return <div className="loading">Loading...</div>;
   }
 
   return (
     <TestInterface
       testId={testId}
-      testName={testConfig.testName}
-      duration={testConfig.duration}
-      totalQuestions={testConfig.totalQuestions}
-      questions={testConfig.questions}
+      testName={testConfig.test.testName}
+      duration={testConfig.test.testDuration}
+      totalQuestions={testConfig.test.totalQuestions}
+      questions={testConfig.questions.map((question) => ({
+        question: question.questionText,
+        options: question.options,
+        correctAnswer: question.answer,
+      }))}
       onComplete={handleTestComplete}
     />
   );

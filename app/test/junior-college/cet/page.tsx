@@ -27,10 +27,11 @@ export default function CetTestPage() {
         educationLevel: EducationLevel.JuniorCollege,
         isCet: true,
       });
-      if (!response.testId) {
+     
+      if (!response.data.testDetails.testId) {
         throw new Error("Failed to create test");
       }
-      router.push(`/test/${response.testId}`);
+      router.push(`/test/${response.data.testDetails.testId}`);
     } catch (error) {
       setShowError(true);
     }

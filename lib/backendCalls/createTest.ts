@@ -8,11 +8,13 @@ import {
   TCreateCustomTestRequest,
 } from "../type";
 
-const BACKEND_URL = `${process.env.BACKEND_URL}/api/test/create`;
+const BACKEND_URL = `http://localhost:5000/api/v1/test`;
 
 const makeRequest = async <T>(url: string, data?: any): Promise<T> => {
   try {
+    console.log("Making request to:", url);
     const response = await axios.post<T>(url, data);
+    console.log("Response received:", response.data);
     return response.data;
   } catch (error) {
     if (error instanceof Error) {
@@ -38,7 +40,7 @@ const getCustomTest = ({
   numberOfQuestions,
   topicList,
   educationLevel,
-}: TCreateCustomTestRequest): Promise<TCreateTestResponse> =>
+}: TCreateCustomTestRequest) =>
   makeRequest(`${BACKEND_URL}/${educationLevel.toLowerCase()}/custom`, {
     time,
     numberOfQuestions,
@@ -52,7 +54,7 @@ const createUndergraduateTest = async ({
   company,
   educationLevel,
   time,
-}: TCreateUndergraduateTestRequest): Promise<TCreateTestResponse> => {
+}: TCreateUndergraduateTestRequest) => {
   switch (category) {
     case TUnderGraduateTestCategories.GATE:
       return getGateTest();
@@ -75,6 +77,20 @@ const createUndergraduateTest = async ({
   }
 };
 
+// the backend response is in the format of
+// {
+//     "statusCode": 201,
+//     "data": {
+//     "testDetails": {
+//         "testId": "6773c7ac1d00a61f44a5c805",
+//             "name": "Custom Test 1735641004066",
+//             "duration": 180,
+//             "totalQuestions": 100
+//     }
+// },
+//     "message": "Test created successfully",
+//     "success": true
+// }
 export const createTest = async ({
   educationLevel,
   numberOfQuestions = 30,
@@ -89,7 +105,7 @@ export const createTest = async ({
   topicList?: TopicList;
   time?: number;
   isCet?: boolean;
-}): Promise<TCreateTestResponse> => {
+}) => {
   if (educationLevel === EducationLevel.Undergraduate) {
     const category = company
       ? TUnderGraduateTestCategories.COMPANY_SPECIFIC
