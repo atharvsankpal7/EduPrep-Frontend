@@ -25,7 +25,7 @@ export default function TestPage({ params }: TestPageProps) {
 
     const fetchTestConfig = async () => {
       try {
-        const url = `${BACKEND_URL}/getTest/${testId}`;
+        const url = `${BACKEND_URL}/${testId}`;
         const response = await axios.get(url);
         const { test, questions } = response.data.data;
         if (!test || !questions) {
