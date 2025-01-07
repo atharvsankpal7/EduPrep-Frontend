@@ -21,7 +21,9 @@ export default function TestPage({ params }: TestPageProps) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000/api/v1/test';
+    const BACKEND_URL =
+      process.env.NEXT_PUBLIC_BACKEND_URL ||
+      "http://localhost:5000/api/v1/test";
 
     const fetchTestConfig = async () => {
       try {
@@ -29,9 +31,9 @@ export default function TestPage({ params }: TestPageProps) {
         const response = await axios.get(url);
         const { test, questions } = response.data.data;
         if (!test || !questions) {
-          throw new Error('Invalid test data received');
+          throw new Error("Invalid test data received");
         }
-        
+
         setTestConfig({ test, questions });
         setError(null);
       } catch (error) {
@@ -45,8 +47,10 @@ export default function TestPage({ params }: TestPageProps) {
 
   const handleTestComplete = async (answers: Record<number, number>) => {
     try {
-      const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000/api/v1/test';
-      await axios.post(`${BACKEND_URL}/submitTest/${testId}`, { answers });
+      const BACKEND_URL =
+        process.env.NEXT_PUBLIC_BACKEND_URL ||
+        "http://localhost:5000/api/v1/test";
+      await axios.post(`${BACKEND_URL}/${testId}/submitTest`, { answers });
       console.log("Test submitted successfully");
     } catch (error) {
       console.error("Failed to submit test:", error);

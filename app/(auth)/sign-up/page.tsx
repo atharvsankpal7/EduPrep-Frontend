@@ -16,16 +16,19 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
-  urn:z.number().min(8,"Please enter valid URN"),
-  name: z.string().min(2, "Name must be at least 2 characters"),
+  urn: z.string().transform((val) => parseInt(val)).pipe(z.number().min(8, "Please enter valid URN")),  name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
 export default function SignUpPage() {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const BACKEND_URL = `http://localhost:5000/api/v1`;
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -33,13 +36,22 @@ export default function SignUpPage() {
       name: "",
       email: "",
       password: "",
+      urn: 0,
     },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
+    
     try {
-      // Implement sign-up logic here
+      await axios.post(`${BACKEND_URL}/user/register`, {
+        fullName: values.name,
+        urn: values.urn,
+        password: values.password,
+        email: values.email,
+      });
+
+      router.push("/");
       toast({
         title: "Account created successfully!",
         description: "Please check your email to verify your account.",
@@ -54,7 +66,6 @@ export default function SignUpPage() {
       setIsLoading(false);
     }
   }
-
   return (
     <div className="container flex items-center justify-center min-h-screen py-12">
       <div className="w-full max-w-md space-y-6">
@@ -99,7 +110,11 @@ export default function SignUpPage() {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="john@example.com" type="email" {...field} />
+                    <Input
+                      placeholder="john@example.com"
+                      type="email"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -125,7 +140,10 @@ export default function SignUpPage() {
         </Form>
         <div className="text-center text-sm">
           Already have an account?{" "}
-          <Link href="/sign-in" className="font-medium text-primary hover:underline">
+          <Link
+            href="/sign-in"
+            className="font-medium text-primary hover:underline"
+          >
             Sign in
           </Link>
         </div>

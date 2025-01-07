@@ -8,7 +8,7 @@ import {
   TCreateCustomTestRequest,
 } from "../type";
 
-const BACKEND_URL = `http://localhost:5000/api/v1/test`;
+export const BACKEND_URL = `http://localhost:5000/api/v1/test`;
 
 const makeRequest = async <T>(url: string, data?: any): Promise<T> => {
   try {
