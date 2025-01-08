@@ -16,6 +16,7 @@ import Link from "next/link";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/lib/stores/auth-store";
 
 const BACKEND_URL = `http://localhost:5000/api/v1`;
 
@@ -33,6 +34,8 @@ export default function SignInPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("email");
   const router = useRouter();
+  const login = useAuthStore((state) => state.login);
+
   const emailForm = useForm({
     defaultValues: { email: "", password: "" },
   });
@@ -50,11 +53,15 @@ export default function SignInPage() {
     try {
       const response = await fetch(`${BACKEND_URL}/user/login`, {
         method: "POST",
+        credentials: 'include',
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(values),
       });
 
       if (!response.ok) throw new Error();
+
+      const data = await response.json();
+      login(data.data.user);
 
       toast({
         title: "Welcome back!",

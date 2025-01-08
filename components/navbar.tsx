@@ -8,6 +8,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { TeacherNav } from "@/components/navbar/teacher-nav";
+import { useAuthStore } from "@/lib/stores/auth-store";
 
 const studentRoutes = [
   { href: "/", label: "Home" },
@@ -20,6 +21,26 @@ const studentRoutes = [
 export function NavBar() {
   const pathname = usePathname();
   const isTeacherRoute = pathname.startsWith("/teacher");
+  const { isAuthenticated, user, logout } = useAuthStore();
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/v1/user/logout', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ _id: user?._id }),
+      });
+
+      if (response.ok) {
+        logout();
+      }
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -91,12 +112,25 @@ export function NavBar() {
           <ThemeToggle />
           {!isTeacherRoute && (
             <div className="hidden sm:flex items-center gap-2">
-              <Button variant="outline" className="hover-glow" asChild>
-                <Link href="/sign-in">Sign In</Link>
-              </Button>
-              <Button className="bg-gradient-blue hover-glow" asChild>
-                <Link href="/sign-up">Sign Up</Link>
-              </Button>
+              {isAuthenticated ? (
+                <>
+                  <span className="text-sm text-muted-foreground">
+                    {user?.fullName}
+                  </span>
+                  <Button variant="outline" onClick={handleLogout}>
+                    Log Out
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button variant="outline" className="hover-glow" asChild>
+                    <Link href="/sign-in">Sign In</Link>
+                  </Button>
+                  <Button className="bg-gradient-blue hover-glow" asChild>
+                    <Link href="/sign-up">Sign Up</Link>
+                  </Button>
+                </>
+              )}
             </div>
           )}
         </div>
