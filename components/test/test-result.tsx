@@ -3,13 +3,14 @@
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, XCircle, BarChart2 } from "lucide-react";
+import { CheckCircle2, XCircle, BarChart2, Clock } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 interface TestResultProps {
   totalQuestions: number;
   correctAnswers: number;
   score: number;
+  timeSpent: number;
   tabSwitches: number;
   autoSubmitted: boolean;
 }
@@ -18,6 +19,7 @@ export function TestResult({
   totalQuestions,
   correctAnswers,
   score,
+  timeSpent,
   tabSwitches,
   autoSubmitted,
 }: TestResultProps) {
@@ -57,6 +59,12 @@ export function TestResult({
               <div className="text-2xl font-bold">{totalQuestions - correctAnswers}</div>
               <div className="text-sm text-muted-foreground">Incorrect Answers</div>
             </div>
+          </div>
+
+          <div className="flex flex-col items-center p-4 bg-blue-500/10 rounded-lg">
+            <Clock className="w-8 h-8 mb-2 text-blue-500" />
+            <div className="text-2xl font-bold">{Math.floor(timeSpent / 60)}m {timeSpent % 60}s</div>
+            <div className="text-sm text-muted-foreground">Time Spent</div>
           </div>
 
           {tabSwitches > 0 && (

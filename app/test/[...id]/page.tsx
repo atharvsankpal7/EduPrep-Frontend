@@ -50,7 +50,7 @@ export default function TestPage({ params }: TestPageProps) {
       
       // Format answers for API
       const selectedAnswers = Object.entries(answers).map(([index, option]) => ({
-        questionId: testConfig?.questions[parseInt(index)]._id,
+        questionId: testConfig?.questions[parseInt(index)].id,
         selectedOption: option
       }));
 

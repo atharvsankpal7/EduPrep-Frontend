@@ -31,7 +31,7 @@ export function NavBar() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ _id: user?._id }),
+        body: JSON.stringify({ id: user?.id }),
       });
 
       if (response.ok) {
