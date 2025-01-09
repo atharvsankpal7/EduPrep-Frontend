@@ -1,9 +1,9 @@
-// pages/test/[id]/page.tsx
 "use client";
 import { useEffect, useState } from "react";
 import { TestInterface } from "@/components/test/test-interface";
 import { IQuestion, ITest } from "@/lib/type";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 
 interface TestPageProps {
   params: { id: string };
@@ -19,11 +19,10 @@ export default function TestPage({ params }: TestPageProps) {
   const testId = params.id;
   const [testConfig, setTestConfig] = useState<TestConfig | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
-    const BACKEND_URL =
-      process.env.NEXT_PUBLIC_BACKEND_URL ||
-      "http://localhost:5000/api/v1/test";
+    const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000/api/v1/test";
 
     const fetchTestConfig = async () => {
       try {
@@ -45,15 +44,31 @@ export default function TestPage({ params }: TestPageProps) {
     fetchTestConfig();
   }, [testId]);
 
-  const handleTestComplete = async (answers: Record<number, number>) => {
+  const handleTestComplete = async (answers: Record<number, number>, timeSpent: number) => {
     try {
-      const BACKEND_URL =
-        process.env.NEXT_PUBLIC_BACKEND_URL ||
-        "http://localhost:5000/api/v1/test";
-      await axios.post(`${BACKEND_URL}/${testId}/submitTest`, { answers });
-      console.log("Test submitted successfully");
+      const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000/api/v1/test";
+      
+      // Format answers for API
+      const selectedAnswers = Object.entries(answers).map(([index, option]) => ({
+        questionId: testConfig?.questions[parseInt(index)]._id,
+        selectedOption: option
+      }));
+
+      // Submit test
+      await axios.patch(`${BACKEND_URL}/${testId}/submit`, {
+        selectedAnswers,
+        timeTaken: Math.floor(timeSpent / 60), // Convert to minutes
+        autoSubmission: {
+          isAutoSubmitted: false,
+          tabSwitches: 0
+        }
+      });
+
+      // Redirect to results page
+      router.push(`/result/${testId}`);
     } catch (error) {
       console.error("Failed to submit test:", error);
+      setError("Failed to submit test. Please try again.");
     }
   };
 
