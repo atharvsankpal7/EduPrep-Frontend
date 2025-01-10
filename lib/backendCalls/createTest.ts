@@ -13,7 +13,13 @@ export const BACKEND_URL = `http://localhost:5000/api/v1/test`;
 const makeRequest = async <T>(url: string, data?: any): Promise<T> => {
   try {
     console.log("Making request to:", url);
-    const response = await axios.post<T>(url, data);
+    // console.log("Current cookies:", document.cookie);
+    const response = await axios.post<T>(url, data, {
+      withCredentials: true, // This enables sending cookies
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
     console.log("Response received:", response.data);
     return response.data;
   } catch (error) {
@@ -24,6 +30,7 @@ const makeRequest = async <T>(url: string, data?: any): Promise<T> => {
     }
   }
 };
+
 const getGateTest = (): Promise<TCreateTestResponse> =>
   makeRequest(`${BACKEND_URL}/undergraduate/gate`);
 
@@ -77,20 +84,6 @@ const createUndergraduateTest = async ({
   }
 };
 
-// the backend response is in the format of
-// {
-//     "statusCode": 201,
-//     "data": {
-//     "testDetails": {
-//         "testId": "6773c7ac1d00a61f44a5c805",
-//             "name": "Custom Test 1735641004066",
-//             "duration": 180,
-//             "totalQuestions": 100
-//     }
-// },
-//     "message": "Test created successfully",
-//     "success": true
-// }
 export const createTest = async ({
   educationLevel,
   numberOfQuestions = 30,
