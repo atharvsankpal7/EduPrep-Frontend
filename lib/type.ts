@@ -91,6 +91,7 @@ export interface ITopic {
 }
 
 export interface IQuestion {
+  id:string;
   topicIds: string[];
   questionText: string;
   options: string[];

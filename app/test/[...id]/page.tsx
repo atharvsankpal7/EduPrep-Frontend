@@ -1,9 +1,10 @@
 "use client";
+
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { TestInterface } from "@/components/test/test-interface";
 import { IQuestion, ITest } from "@/lib/type";
 import axios from "axios";
-import { useRouter } from "next/navigation";
 
 interface TestPageProps {
   params: { id: string };
@@ -48,11 +49,12 @@ export default function TestPage({ params }: TestPageProps) {
     try {
       const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000/api/v1/test";
       
-      // Format answers for API
-      const selectedAnswers = Object.entries(answers).map(([index, option]) => ({
-        questionId: testConfig?.questions[parseInt(index)].id,
-        selectedOption: option
-      }));
+      // Format answers to match questions array order
+      const selectedAnswers = testConfig?.questions.map((question, index) => ({
+        questionId: question.id,
+        selectedOption: answers[index] || 0 // Default to 0 if no answer selected
+      })) || [];
+  
 
       // Submit test
       await axios.patch(`${BACKEND_URL}/${testId}/submit`, {
@@ -61,6 +63,11 @@ export default function TestPage({ params }: TestPageProps) {
         autoSubmission: {
           isAutoSubmitted: false,
           tabSwitches: 0
+        }
+      }, {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json'
         }
       });
 
