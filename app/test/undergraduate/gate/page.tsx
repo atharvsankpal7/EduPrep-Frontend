@@ -12,7 +12,10 @@ export default function GateTestPage() {
   const [userAnswers, setUserAnswers] = useState<Record<number, number>>({});
   const [timeSpent, setTimeSpent] = useState(0);
 
-  const handleTestComplete = (answers: Record<number, number>, time: number) => {
+  const handleTestComplete = (
+    answers: Record<number, number>,
+    time: number
+  ) => {
     setUserAnswers(answers);
     setTimeSpent(time);
     setTestCompleted(true);
@@ -38,14 +41,17 @@ export default function GateTestPage() {
 
   if (testStarted) {
     return (
-      <TestInterface
-        testId="gate-demo"
-        testName="GATE Mock Test"
-        duration={180 * 60} // 3 hours in seconds
-        totalQuestions={65}
-        questions={gateQuestions}
-        onComplete={handleTestComplete}
-      />
+      // <TestInterface
+      //   testId="gate-demo"
+      //   testName="GATE Mock Test"
+      //   duration={180 * 60} // 3 hours in seconds
+      //   totalQuestions={65}
+      //   questions={gateQuestions}
+      //   onComplete={handleTestComplete}
+      // />
+      <div>
+        <h1>Test Interface</h1>
+      </div>
     );
   }
 

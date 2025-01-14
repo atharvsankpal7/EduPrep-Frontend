@@ -54,7 +54,6 @@ export default function TestPage({ params }: TestPageProps) {
         questionId: question.id,
         selectedOption: answers[index] || 0 // Default to 0 if no answer selected
       })) || [];
-  
 
       // Submit test
       await axios.patch(`${BACKEND_URL}/${testId}/submit`, {
@@ -87,17 +86,22 @@ export default function TestPage({ params }: TestPageProps) {
     return <div className="loading">Loading...</div>;
   }
 
+  // Transform questions into sections
+  const sections = [{
+    name: "Main Section",
+    duration: testConfig.test.testDuration,
+    questions: testConfig.questions.map(q => ({
+      question: q.questionText,
+      options: q.options,
+      correctAnswer: q.answer,
+    }))
+  }];
+
   return (
     <TestInterface
       testId={testId}
       testName={testConfig.test.testName}
-      duration={testConfig.test.testDuration}
-      totalQuestions={testConfig.test.totalQuestions}
-      questions={testConfig.questions.map((question) => ({
-        question: question.questionText,
-        options: question.options,
-        correctAnswer: question.answer,
-      }))}
+      sections={sections}
       onComplete={handleTestComplete}
     />
   );
