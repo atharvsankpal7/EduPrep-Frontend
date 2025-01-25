@@ -101,7 +101,12 @@ export interface IQuestion {
   standard:number;
 
 }
-
+export interface ITestSection {
+  sectionName: string;
+  sectionDuration: number; // in minutes
+  questions: IQuestion[]; // questionIds for this section
+  totalQuestions: number;
+}
 export enum DifficultyLevel {
   EASY = 1,
   MEDIUM = 2,

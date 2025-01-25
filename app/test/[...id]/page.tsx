@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { TestInterface } from "@/components/test/test-interface";
-import { IQuestion, ITest } from "@/lib/type";
+import { IQuestion, ITest, ITestSection } from "@/lib/type";
 import axios from "axios";
 
 interface TestPageProps {
@@ -12,8 +12,14 @@ interface TestPageProps {
 }
 
 interface TestConfig {
-  test: ITest;
-  questions: IQuestion[];
+  test: {
+    id: string;
+    testName: string;
+    testDuration: number;
+    totalQuestions: number;
+    sections: ITestSection[];
+    areSectionsSkippable?: boolean;
+  };
 }
 
 export default function TestPage({ params }: TestPageProps) {
@@ -23,18 +29,42 @@ export default function TestPage({ params }: TestPageProps) {
   const router = useRouter();
 
   useEffect(() => {
-    const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000/api/v1/test";
+    const BACKEND_URL =
+      process.env.NEXT_PUBLIC_BACKEND_URL ||
+      "http://localhost:5000/api/v1/test";
 
     const fetchTestConfig = async () => {
       try {
         const url = `${BACKEND_URL}/${testId}`;
         const response = await axios.get(url);
-        const { test, questions } = response.data.data;
-        if (!test || !questions) {
+        const data = response.data.data;
+
+        if (!data.test || !data.test.sections) {
           throw new Error("Invalid test data received");
         }
 
-        setTestConfig({ test, questions });
+        // Transform the data to match the TestInterface requirements
+        const transformedConfig: TestConfig = {
+          test: {
+            id: data.test.id,
+            testName: data.test.testName,
+            testDuration: data.test.testDuration,
+            totalQuestions: data.test.totalQuestions,
+            sections: data.test.sections.map((section: ITestSection) => ({
+              name: section.sectionName,
+              duration: section.sectionDuration,
+              questionCount: section.totalQuestions,
+              questions: section.questions.map((q: IQuestion) => ({
+                question: q.questionText,
+                options: q.options,
+                correctAnswer: q.answer,
+              })),
+            })),
+            areSectionsSkippable: data.test.areSectionsSkippable ?? true,
+          },
+        };
+
+        setTestConfig(transformedConfig);
         setError(null);
       } catch (error) {
         console.error("Failed to fetch test data:", error);
@@ -45,31 +75,43 @@ export default function TestPage({ params }: TestPageProps) {
     fetchTestConfig();
   }, [testId]);
 
-  const handleTestComplete = async (answers: Record<number, number>, timeSpent: number) => {
+  const handleTestComplete = async (
+    answers: Record<number, number>,
+    timeSpent: number
+  ) => {
     try {
-      const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000/api/v1/test";
-      
-      // Format answers to match questions array order
-      const selectedAnswers = testConfig?.questions.map((question, index) => ({
-        questionId: question.id,
-        selectedOption: answers[index] || 0 // Default to 0 if no answer selected
-      })) || [];
-  
+      const BACKEND_URL =
+        process.env.NEXT_PUBLIC_BACKEND_URL ||
+        "http://localhost:5000/api/v1/test";
+
+      // Format answers to match backend expectations
+      const selectedAnswers = Object.entries(answers).map(
+        ([index, answer]) => ({
+          questionId: testConfig?.test.sections.flatMap((s) => s.questions)[
+            parseInt(index)
+          ].id,
+          selectedOption: answer,
+        })
+      );
 
       // Submit test
-      await axios.patch(`${BACKEND_URL}/${testId}/submit`, {
-        selectedAnswers,
-        timeTaken: Math.floor(timeSpent / 60), // Convert to minutes
-        autoSubmission: {
-          isAutoSubmitted: false,
-          tabSwitches: 0
+      await axios.patch(
+        `${BACKEND_URL}/${testId}/submit`,
+        {
+          selectedAnswers,
+          timeTaken: Math.floor(timeSpent / 60), // Convert to minutes
+          autoSubmission: {
+            isAutoSubmitted: false,
+            tabSwitches: 0,
+          },
+        },
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "application/json",
+          },
         }
-      }, {
-        withCredentials: true,
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
+      );
 
       // Redirect to results page
       router.push(`/result/${testId}`);
@@ -80,24 +122,38 @@ export default function TestPage({ params }: TestPageProps) {
   };
 
   if (error) {
-    return <div className="error-message">{error}</div>;
+    return (
+      <div className="container py-8">
+        <div className="max-w-md mx-auto text-center">
+          <div className="rounded-lg bg-destructive/10 p-4 text-destructive">
+            <p>{error}</p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (!testConfig) {
-    return <div className="loading">Loading...</div>;
+    return (
+      <div className="container py-8">
+        <div className="max-w-md mx-auto text-center">
+          <div className="animate-pulse space-y-4">
+            <div className="h-4 bg-muted rounded w-3/4 mx-auto"></div>
+            <div className="h-4 bg-muted rounded w-1/2 mx-auto"></div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
     <TestInterface
-      testId={testId}
+      testId={testConfig.test.id}
       testName={testConfig.test.testName}
       duration={testConfig.test.testDuration}
       totalQuestions={testConfig.test.totalQuestions}
-      questions={testConfig.questions.map((question) => ({
-        question: question.questionText,
-        options: question.options,
-        correctAnswer: question.answer,
-      }))}
+      sections={testConfig.test.sections}
+      areSectionsSkippable={testConfig.test.areSectionsSkippable}
       onComplete={handleTestComplete}
     />
   );
