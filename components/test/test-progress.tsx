@@ -7,20 +7,18 @@ interface TestProgressProps {
   currentQuestion: number;
   totalQuestions: number;
   answeredQuestions: number;
-  sectionName?: string;
 }
 
 export function TestProgress({
   currentQuestion,
   totalQuestions,
   answeredQuestions,
-  sectionName,
 }: TestProgressProps) {
   const progress = (answeredQuestions / totalQuestions) * 100;
 
   return (
     <div className="space-y-4">
-      <h3 className="font-medium">Progress {sectionName && `- ${sectionName}`}</h3>
+      <h3 className="font-medium">Progress</h3>
       
       <div className="space-y-2">
         <Progress value={progress} className="h-2" />
