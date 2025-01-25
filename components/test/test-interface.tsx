@@ -26,18 +26,19 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, Loader2 } from "lucide-react";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { IQuestion, ITestSection } from "@/lib/type";
 
-
+export interface Question {
+  question: string;
+  options: string[];
+  correctAnswer?: number;
+}
 
 interface TestInterfaceProps {
   testId: string;
   testName: string;
   duration: number;
   totalQuestions: number;
-  sections: ITestSection[];
-  areSectionsSkippable?: boolean;
+  questions: Question[];
   onComplete: (answers: Record<number, number>, timeSpent: number) => void;
 }
 
@@ -46,11 +47,9 @@ export function TestInterface({
   testName,
   duration,
   totalQuestions,
-  sections,
-  areSectionsSkippable = true,
+  questions,
   onComplete,
 }: TestInterfaceProps) {
-  const [currentSection, setCurrentSection] = useState(0);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [timeLeft, setTimeLeft] = useState(duration);
@@ -61,13 +60,8 @@ export function TestInterface({
   const { isFullscreen, isFullscreenAvailable, enterFullscreen } = useFullscreen();
   const { warningVisible } = useTabWarning();
 
-  // Handle single section case
-  const isSingleSection = sections.length === 1;
-  const currentSectionData = sections[currentSection];
-  const currentQuestionData = currentSectionData.questions[currentQuestion];
-
   // Check if questions are available
-  if (!sections || sections.length === 0) {
+  if (!questions || questions.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center space-y-4">
@@ -79,19 +73,10 @@ export function TestInterface({
   }
 
   const handleAnswer = (answerId: number) => {
-    const questionIndex = getGlobalQuestionIndex();
     setAnswers((prev) => ({
       ...prev,
-      [questionIndex]: answerId,
+      [currentQuestion]: answerId,
     }));
-  };
-
-  const getGlobalQuestionIndex = () => {
-    let index = currentQuestion;
-    for (let i = 0; i < currentSection; i++) {
-      index += sections[i].totalQuestions;
-    }
-    return index;
   };
 
   const handleSubmit = () => {
@@ -111,19 +96,6 @@ export function TestInterface({
     });
   };
 
-  const handleSectionChange = (sectionIndex: number) => {
-    if (!areSectionsSkippable && sectionIndex > currentSection + 1) {
-      toast({
-        title: "Section Navigation Restricted",
-        description: "You must complete the current section before moving to the next one.",
-        variant: "destructive",
-      });
-      return;
-    }
-    setCurrentSection(sectionIndex);
-    setCurrentQuestion(0);
-  };
-
   if (!testStarted && isFullscreenAvailable) {
     return (
       <FullscreenRequest
@@ -133,6 +105,19 @@ export function TestInterface({
         }}
         onDecline={handleFullscreenDecline}
       />
+    );
+  }
+
+  // Get current question safely
+  const currentQuestionData = questions[currentQuestion];
+  if (!currentQuestionData) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <AlertTriangle className="w-8 h-8 mx-auto text-destructive" />
+          <p className="text-lg text-destructive">Error loading question</p>
+        </div>
+      </div>
     );
   }
 
@@ -150,24 +135,6 @@ export function TestInterface({
       />
 
       <div className="container py-6">
-        {!isSingleSection && (
-          <div className="mb-6">
-            <Tabs value={currentSection.toString()} onValueChange={(value) => handleSectionChange(parseInt(value))}>
-              <TabsList>
-                {sections.map((section, index) => (
-                  <TabsTrigger
-                    key={index}
-                    value={index.toString()}
-                    disabled={!areSectionsSkippable && index > currentSection + 1}
-                  >
-                    {section.sectionName}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </Tabs>
-          </div>
-        )}
-
         {warnings.length > 0 && (
           <div className="mb-6">
             <div className="flex items-center gap-2 p-4 rounded-lg bg-destructive/10 text-destructive">
@@ -188,6 +155,7 @@ export function TestInterface({
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Main Content */}
           <div className="lg:col-span-9">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -197,15 +165,16 @@ export function TestInterface({
               <div className="bg-card rounded-lg shadow-lg p-6">
                 <QuestionPanel
                   questionNumber={currentQuestion + 1}
-                  questionText={currentQuestionData.questionText}
+                  questionText={currentQuestionData.question}
                   options={currentQuestionData.options}
                   onAnswer={handleAnswer}
-                  selectedAnswer={answers[getGlobalQuestionIndex()]}
+                  selectedAnswer={answers[currentQuestion]}
                 />
               </div>
             </motion.div>
           </div>
 
+          {/* Sidebar */}
           <div className="lg:col-span-3 space-y-6">
             <div className="bg-card rounded-lg shadow-lg p-4">
               <Timer
@@ -218,15 +187,14 @@ export function TestInterface({
             <div className="bg-card rounded-lg shadow-lg p-4">
               <TestProgress
                 currentQuestion={currentQuestion + 1}
-                totalQuestions={currentSectionData.totalQuestions}
+                totalQuestions={totalQuestions}
                 answeredQuestions={Object.keys(answers).length}
-                sectionName={currentSectionData.sectionName}
               />
             </div>
 
             <div className="bg-card rounded-lg shadow-lg p-4">
               <QuestionNavigation
-                totalQuestions={currentSectionData.totalQuestions}
+                totalQuestions={totalQuestions}
                 currentQuestion={currentQuestion + 1}
                 answeredQuestions={answers}
                 onQuestionSelect={(num) => setCurrentQuestion(num - 1)}
@@ -244,6 +212,7 @@ export function TestInterface({
           </div>
         </div>
 
+        {/* Bottom Navigation */}
         <div className="fixed bottom-0 left-0 right-0 bg-background border-t py-4">
           <div className="container flex justify-between items-center">
             <button
@@ -254,37 +223,25 @@ export function TestInterface({
               Previous
             </button>
 
-            {currentQuestion === currentSectionData.questions.length - 1 ? (
+            {currentQuestion === questions.length - 1 ? (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <button className="px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
-                    {currentSection === sections.length - 1 ? "Submit Test" : "Next Section"}
+                    Submit Test
                   </button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>
-                      {currentSection === sections.length - 1 ? "Submit Test?" : "Move to Next Section?"}
-                    </AlertDialogTitle>
+                    <AlertDialogTitle>Submit Test?</AlertDialogTitle>
                     <AlertDialogDescription>
-                      {currentSection === sections.length - 1 
-                        ? `You have answered ${Object.keys(answers).length} out of ${totalQuestions} questions. Are you sure you want to submit?`
-                        : "You won't be able to return to this section if section navigation is restricted. Are you sure you want to continue?"
-                      }
+                      You have answered {Object.keys(answers).length} out of{" "}
+                      {totalQuestions} questions. Are you sure you want to submit?
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction 
-                      onClick={() => {
-                        if (currentSection === sections.length - 1) {
-                          handleSubmit();
-                        } else {
-                          handleSectionChange(currentSection + 1);
-                        }
-                      }}
-                    >
-                      {currentSection === sections.length - 1 ? "Submit" : "Continue"}
+                    <AlertDialogAction onClick={handleSubmit}>
+                      Submit
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
@@ -293,7 +250,7 @@ export function TestInterface({
               <button
                 onClick={() =>
                   setCurrentQuestion((prev) =>
-                    Math.min(currentSectionData.questions.length - 1, prev + 1)
+                    Math.min(questions.length - 1, prev + 1)
                   )
                 }
                 className="px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
