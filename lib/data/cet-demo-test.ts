@@ -1,61 +1,7 @@
 import { Question } from "@/components/test/test-interface";
 
-export const cetQuestions: Question[] = [
-  {
-    question: "What is the SI unit of force?",
-    options: ["Newton", "Joule", "Watt", "Pascal"],
-    correctAnswer: 0
-  },
-  {
-    question: "Which of the following is a vector quantity?",
-    options: ["Mass", "Temperature", "Velocity", "Time"],
-    correctAnswer: 2
-  },
-  {
-    question: "What is the chemical formula for water?",
-    options: ["H2O", "CO2", "NaCl", "O2"],
-    correctAnswer: 0
-  },
-  {
-    question: "Find the value of sin²θ + cos²θ",
-    options: ["0", "1", "2", "Depends on θ"],
-    correctAnswer: 1
-  },
-  {
-    question: "What is the atomic number of Carbon?",
-    options: ["5", "6", "7", "8"],
-    correctAnswer: 1
-  },
-  {
-    question: "Which gas is most abundant in Earth's atmosphere?",
-    options: ["Oxygen", "Carbon Dioxide", "Nitrogen", "Hydrogen"],
-    correctAnswer: 2
-  },
-  {
-    question: "What is the derivative of sin(x)?",
-    options: ["cos(x)", "-cos(x)", "sin(x)", "-sin(x)"],
-    correctAnswer: 0
-  },
-  {
-    question: "What is the pH of a neutral solution?",
-    options: ["0", "7", "14", "1"],
-    correctAnswer: 1
-  },
-  {
-    question: "Which law states that energy cannot be created or destroyed?",
-    options: ["Newton's First Law", "Law of Conservation of Mass", "Law of Conservation of Energy", "Boyle's Law"],
-    correctAnswer: 2
-  },
-  {
-    question: "What is the unit of electric current?",
-    options: ["Volt", "Ampere", "Ohm", "Watt"],
-    correctAnswer: 1
-  },
-  {
-    question: "What is the value of π (pi) to two decimal places?",
-    options: ["3.14", "3.12", "3.16", "3.18"],
-    correctAnswer: 0
-  },
+export const cetQuestions= [
+  
   {
     question: "Which of these is not a noble gas?",
     options: ["Helium", "Neon", "Nitrogen", "Argon"],
@@ -558,3 +504,5 @@ export const cetQuestions: Question[] = [
     correctAnswer: 1
   }
 ];
+
+console.log(cetQuestions.length);
