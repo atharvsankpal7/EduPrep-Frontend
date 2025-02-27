@@ -7,10 +7,12 @@ interface TestState {
   answers: Record<number, number>;
   isSubmitted: boolean;
   score: number | null;
+  sectionScores: Record<string, number>;
   incrementTabSwitches: () => void;
   submitTest: () => void;
   setAnswers: (answers: Record<number, number>) => void;
   calculateScore: (correctAnswers: Record<number, number>) => void;
+  calculateSectionScore: (sectionName: string, sectionAnswers: Record<number, number>, correctAnswers: Record<number, number>) => void;
 }
 
 export const useTestStore = create<TestState>((set, get) => ({
@@ -18,6 +20,7 @@ export const useTestStore = create<TestState>((set, get) => ({
   answers: {},
   isSubmitted: false,
   score: null,
+  sectionScores: {},
 
   incrementTabSwitches: () => {
     set((state) => ({ 
@@ -48,4 +51,24 @@ export const useTestStore = create<TestState>((set, get) => ({
     const percentage = (correct / totalQuestions) * 100;
     set({ score: percentage });
   },
+
+  calculateSectionScore: (sectionName, sectionAnswers, correctAnswers) => {
+    const totalQuestions = Object.keys(sectionAnswers).length;
+    let correct = 0;
+
+    Object.entries(sectionAnswers).forEach(([questionId, answer]) => {
+      if (correctAnswers[parseInt(questionId)] === answer) {
+        correct++;
+      }
+    });
+
+    const percentage = totalQuestions > 0 ? (correct / totalQuestions) * 100 : 0;
+    
+    set((state) => ({
+      sectionScores: {
+        ...state.sectionScores,
+        [sectionName]: percentage
+      }
+    }));
+  }
 }));

@@ -112,6 +112,11 @@
   body {
     @apply bg-background text-foreground;
   }
+  
+  /* Hide navbar when in test mode */
+  body.test-mode header {
+    display: none;
+  }
 }
 
 /* Enhanced Gradient Backgrounds */

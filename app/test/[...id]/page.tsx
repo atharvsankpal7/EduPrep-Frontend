@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { TestInterface } from "@/components/test/test-interface";
 import { IQuestion, ITest } from "@/lib/type";
 import axios from "axios";
+import LoadingComponent from "@/components/loading";
 
 interface TestPageProps {
   params: { id: string };
@@ -16,10 +17,21 @@ interface TestConfig {
   questions: IQuestion[];
 }
 
+interface TestSection {
+  name: string;
+  duration: number;
+  questions: {
+    question: string;
+    options: string[];
+    correctAnswer: number;
+  }[];
+}
+
 export default function TestPage({ params }: TestPageProps) {
   const testId = params.id;
   const [testConfig, setTestConfig] = useState<TestConfig | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
@@ -27,9 +39,11 @@ export default function TestPage({ params }: TestPageProps) {
 
     const fetchTestConfig = async () => {
       try {
+        setLoading(true);
         const url = `${BACKEND_URL}/${testId}`;
         const response = await axios.get(url);
         const { test, questions } = response.data.data;
+        
         if (!test || !questions) {
           throw new Error("Invalid test data received");
         }
@@ -39,6 +53,8 @@ export default function TestPage({ params }: TestPageProps) {
       } catch (error) {
         console.error("Failed to fetch test data:", error);
         setError("Failed to load test. Please try again later.");
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -49,11 +65,31 @@ export default function TestPage({ params }: TestPageProps) {
     try {
       const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000/api/v1/test";
       
-      // Format answers to match questions array order
-      const selectedAnswers = testConfig?.questions.map((question, index) => ({
-        questionId: question.id,
-        selectedOption: answers[index] || 0 // Default to 0 if no answer selected
-      })) || [];
+      if (!testConfig) return;
+      
+      // Organize answers by section
+      const sectionAnswers: Record<string, { questionId: string, selectedOption: number, sectionName: string }[]> = {};
+      
+      let globalQuestionIndex = 0;
+      testConfig.test.sections.forEach(section => {
+        sectionAnswers[section.sectionName] = [];
+        
+        for (let i = 0; i < section.questions.length; i++) {
+          const questionId = section.questions[i];
+          const answer = answers[globalQuestionIndex] || 0;
+          
+          sectionAnswers[section.sectionName].push({
+            questionId,
+            selectedOption: answer,
+            sectionName: section.sectionName
+          });
+          
+          globalQuestionIndex++;
+        }
+      });
+      
+      // Flatten the section answers for submission
+      const selectedAnswers = Object.values(sectionAnswers).flat();
 
       // Submit test
       await axios.patch(`${BACKEND_URL}/${testId}/submit`, {
@@ -78,24 +114,44 @@ export default function TestPage({ params }: TestPageProps) {
     }
   };
 
+  if (loading) {
+    return <LoadingComponent />;
+  }
+
   if (error) {
-    return <div className="error-message">{error}</div>;
+    return <div className="container py-8 text-center text-destructive">{error}</div>;
   }
 
   if (!testConfig) {
-    return <div className="loading">Loading...</div>;
+    return <div className="container py-8 text-center">No test data available</div>;
   }
 
-  // Transform questions into sections
-  const sections = [{
-    name: "Main Section",
-    duration: testConfig.test.testDuration,
-    questions: testConfig.questions.map(q => ({
-      question: q.questionText,
-      options: q.options,
-      correctAnswer: q.answer,
-    }))
-  }];
+  // Transform the test data into sections format for the TestInterface component
+  const sections: TestSection[] = testConfig.test.sections.map(section => {
+    // Find questions for this section
+    const sectionQuestions = section.questions.map(questionId => {
+      const question = testConfig.questions.find(q => q.id === questionId);
+      if (!question) {
+        return {
+          question: "Question not found",
+          options: ["Option not available"],
+          correctAnswer: 0
+        };
+      }
+      
+      return {
+        question: question.questionText,
+        options: question.options,
+        correctAnswer: question.answer,
+      };
+    });
+    
+    return {
+      name: section.sectionName,
+      duration: section.sectionDuration,
+      questions: sectionQuestions
+    };
+  });
 
   return (
     <TestInterface

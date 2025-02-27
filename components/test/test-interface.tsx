@@ -1,17 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Timer } from "@/components/test/timer";
 import { QuestionPanel } from "@/components/test/question-panel";
 import { TestHeader } from "@/components/test/test-header";
-import { ProctorControls } from "@/components/test/proctor-controls";
 import { TestProgress } from "@/components/test/test-progress";
 import { QuestionNavigation } from "@/components/test/question-navigation";
 import { TestWarning } from "@/components/test/student/test-warning";
-import { FullscreenRequest } from "@/components/test/fullscreen-request";
-import { useFullscreen } from "@/components/test/hooks/use-fullscreen";
-import { useTabWarning } from "@/components/test/hooks/use-tab-warning";
 import { useToast } from "@/components/ui/use-toast";
 import {
   AlertDialog,
@@ -28,6 +24,8 @@ import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useTestStore } from "@/lib/stores/test-store";
+import { WarningModal } from "@/components/test/warning-modal";
 
 export interface Question {
   question: string;
@@ -63,10 +61,112 @@ export function TestInterface({
   const [sectionCompleted, setSectionCompleted] = useState<boolean[]>(
     new Array(sections.length).fill(false)
   );
+  const [totalTimeSpent, setTotalTimeSpent] = useState(0);
+  const [warningVisible, setWarningVisible] = useState(false);
+  const [warningMessage, setWarningMessage] = useState("");
+  const [showWarningModal, setShowWarningModal] = useState(true);
   const { toast } = useToast();
+  const { tabSwitchCount, incrementTabSwitches } = useTestStore();
 
-  const { isFullscreen, isFullscreenAvailable, enterFullscreen } = useFullscreen();
-  const { warningVisible } = useTabWarning();
+  // Refs for document events
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Enter fullscreen on component mount
+  useEffect(() => {
+    const enterFullscreen = async () => {
+      try {
+        const elem = document.documentElement;
+        if (elem.requestFullscreen) {
+          await elem.requestFullscreen();
+        } else if ((elem as any).webkitRequestFullscreen) {
+          await (elem as any).webkitRequestFullscreen();
+        } else if ((elem as any).msRequestFullscreen) {
+          await (elem as any).msRequestFullscreen();
+        }
+      } catch (error) {
+        console.error("Failed to enter fullscreen:", error);
+      }
+    };
+
+    if (testStarted) {
+      enterFullscreen();
+      
+      // Hide navbar by adding a class to the body
+      document.body.classList.add('test-mode');
+    }
+    
+    // Cleanup function to exit fullscreen when component unmounts
+    return () => {
+      if (document.exitFullscreen && document.fullscreenElement) {
+        document.exitFullscreen();
+      }
+      // Remove the test-mode class
+      document.body.classList.remove('test-mode');
+    };
+  }, [testStarted]);
+
+  // Track tab switches
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden && testStarted) {
+        incrementTabSwitches();
+        
+        if (tabSwitchCount < 2) {
+          setWarningMessage(`Warning: Tab switch detected (${tabSwitchCount + 1}/3). Your test will be auto-submitted after 3 attempts.`);
+          setWarningVisible(true);
+          setTimeout(() => setWarningVisible(false), 5000);
+        } else if (tabSwitchCount === 2) {
+          setWarningMessage("Final Warning: This is your last warning. Next tab switch will submit your test.");
+          setWarningVisible(true);
+          setTimeout(() => setWarningVisible(false), 5000);
+        } else {
+          setWarningMessage("Test Submitted: Your test has been automatically submitted due to multiple tab switches.");
+          setWarningVisible(true);
+          handleSubmit();
+        }
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, [tabSwitchCount, incrementTabSwitches, testStarted]);
+
+  // Prevent copy-paste
+  useEffect(() => {
+    const preventCopyPaste = (e: ClipboardEvent) => {
+      e.preventDefault();
+      toast({
+        title: "Action not allowed",
+        description: "Copy and paste are disabled during the test",
+        variant: "destructive",
+      });
+    };
+
+    if (testStarted) {
+      document.addEventListener("copy", preventCopyPaste);
+      document.addEventListener("paste", preventCopyPaste);
+      document.addEventListener("cut", preventCopyPaste);
+    }
+
+    return () => {
+      document.removeEventListener("copy", preventCopyPaste);
+      document.removeEventListener("paste", preventCopyPaste);
+      document.removeEventListener("cut", preventCopyPaste);
+    };
+  }, [toast, testStarted]);
+
+  // Prevent context menu
+  useEffect(() => {
+    const preventContextMenu = (e: MouseEvent) => {
+      e.preventDefault();
+    };
+
+    if (testStarted) {
+      document.addEventListener("contextmenu", preventContextMenu);
+    }
+
+    return () => document.removeEventListener("contextmenu", preventContextMenu);
+  }, [testStarted]);
 
   const handleAnswer = (answerId: number) => {
     const questionIndex = getGlobalQuestionIndex();
@@ -100,6 +200,9 @@ export function TestInterface({
 
   const confirmNextSection = () => {
     if (currentSection < sections.length - 1) {
+      // Add current section's time spent to total
+      setTotalTimeSpent(prev => prev + (sections[currentSection].duration * 60 - timeLeft));
+      
       setCurrentSection(currentSection + 1);
       setCurrentQuestion(0);
       setTimeLeft(sections[currentSection + 1].duration * 60);
@@ -119,23 +222,27 @@ export function TestInterface({
   };
 
   const handleSubmit = () => {
-    const totalTimeSpent = sections.reduce((total, section, index) => {
-      return total + (section.duration * 60 - (index === currentSection ? timeLeft : 0));
-    }, 0);
-    onComplete(answers, totalTimeSpent);
+    // Calculate total time spent including current section
+    const finalTimeSpent = totalTimeSpent + (sections[currentSection].duration * 60 - timeLeft);
+    onComplete(answers, finalTimeSpent);
+  };
+
+  const startTest = () => {
+    setShowWarningModal(false);
+    setTestStarted(true);
   };
 
   // Current section's questions
   const currentSectionQuestions = sections[currentSection].questions;
   const currentQuestionData = currentSectionQuestions[currentQuestion];
 
+  if (!testStarted) {
+    return <WarningModal onStart={startTest} />;
+  }
+
   return (
-    <div className="min-h-screen bg-background">
-      <TestHeader
-        testName={`${testName} - ${sections[currentSection].name}`}
-        isFullscreen={isFullscreen}
-        onToggleFullscreen={enterFullscreen}
-      />
+    <div className="min-h-screen bg-background" ref={containerRef}>
+      <TestHeader testName={`${testName} - ${sections[currentSection].name}`} />
 
       <div className="container py-6">
         <div className="mb-4">
@@ -306,6 +413,9 @@ export function TestInterface({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Tab Switch Warning */}
+      <TestWarning visible={warningVisible} message={warningMessage} />
     </div>
   );
 }
