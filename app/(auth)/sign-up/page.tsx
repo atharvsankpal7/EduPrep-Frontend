@@ -19,12 +19,11 @@ import { toast } from "@/components/ui/use-toast";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/stores/auth-store";
-
 const formSchema = z.object({
   urn: z
     .string()
     .transform((val) => parseInt(val))
-    .pipe(z.number().min(10000000, "URN must be at least 8 digits")),
+    .pipe(z.number().min(8, "Please enter valid URN")),
   fullName: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
@@ -57,40 +56,26 @@ export default function SignUpPage() {
         body: JSON.stringify(values),
       });
 
+      if (!response.ok) throw new Error();
+
       const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Registration failed");
-      }
-
       register(data.data.user);
+
       router.push("/");
       toast({
         title: "Account created successfully!",
         description: "Please check your email to verify your account.",
       });
-    } catch (error: any) {
-      const errorMessage = error.message || "Something went wrong. Please try again.";
-      
-      if (error instanceof z.ZodError) {
-        const fieldErrors = error.errors.map(err => `${err.path.join('.')}: ${err.message}`).join(', ');
-        toast({
-          title: "Validation Error",
-          description: fieldErrors,
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: errorMessage,
-          variant: "destructive",
-        });
-      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
   }
-
   return (
     <div className="container flex items-center justify-center min-h-screen py-12">
       <div className="w-full max-w-md space-y-6">

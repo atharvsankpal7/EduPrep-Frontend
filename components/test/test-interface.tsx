@@ -7,7 +7,7 @@ import { QuestionPanel } from "@/components/test/question-panel";
 import { TestHeader } from "@/components/test/test-header";
 import { TestProgress } from "@/components/test/test-progress";
 import { QuestionNavigation } from "@/components/test/question-navigation";
-import { TestWarning } from "@/components/test/student/test-warning";
+import { TabSwitchWarningModal } from "@/components/test/tab-switch-warning-modal";
 import { useToast } from "@/components/ui/use-toast";
 import {
   AlertDialog,
@@ -62,9 +62,11 @@ export function TestInterface({
     new Array(sections.length).fill(false)
   );
   const [totalTimeSpent, setTotalTimeSpent] = useState(0);
-  const [warningVisible, setWarningVisible] = useState(false);
+  const [warningModalOpen, setWarningModalOpen] = useState(false);
   const [warningMessage, setWarningMessage] = useState("");
   const [showWarningModal, setShowWarningModal] = useState(true);
+  const [isLastWarning, setIsLastWarning] = useState(false);
+  const [isAutoSubmitted, setIsAutoSubmitted] = useState(false);
   const { toast } = useToast();
   const { tabSwitchCount, incrementTabSwitches } = useTestStore();
 
@@ -112,16 +114,16 @@ export function TestInterface({
         incrementTabSwitches();
         
         if (tabSwitchCount < 2) {
-          setWarningMessage(`Warning: Tab switch detected (${tabSwitchCount + 1}/3). Your test will be auto-submitted after 3 attempts.`);
-          setWarningVisible(true);
-          setTimeout(() => setWarningVisible(false), 5000);
+          setWarningModalOpen(true);
+          setIsLastWarning(false);
+          setIsAutoSubmitted(false);
         } else if (tabSwitchCount === 2) {
-          setWarningMessage("Final Warning: This is your last warning. Next tab switch will submit your test.");
-          setWarningVisible(true);
-          setTimeout(() => setWarningVisible(false), 5000);
+          setWarningModalOpen(true);
+          setIsLastWarning(true);
+          setIsAutoSubmitted(false);
         } else {
-          setWarningMessage("Test Submitted: Your test has been automatically submitted due to multiple tab switches.");
-          setWarningVisible(true);
+          setWarningModalOpen(true);
+          setIsAutoSubmitted(true);
           handleSubmit();
         }
       }
@@ -414,8 +416,14 @@ export function TestInterface({
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Tab Switch Warning */}
-      <TestWarning visible={warningVisible} message={warningMessage} />
+      {/* Tab Switch Warning Modal */}
+      <TabSwitchWarningModal
+        open={warningModalOpen}
+        onClose={() => setWarningModalOpen(false)}
+        tabSwitchCount={tabSwitchCount + 1}
+        isLastWarning={isLastWarning}
+        isAutoSubmitted={isAutoSubmitted}
+      />
     </div>
   );
 }
