@@ -11,19 +11,12 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { toast } from "@/components/ui/use-toast";
 import Link from "next/link";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/stores/auth-store";
-import { zodResolver } from "@hookform/resolvers/zod";
 
 const BACKEND_URL = `http://localhost:5000/api/v1`;
 
@@ -40,19 +33,15 @@ const urnFormSchema = z.object({
 export default function SignInPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("email");
-  const [showDialog, setShowDialog] = useState(false);
-  const [dialogContent, setDialogContent] = useState({ title: "", description: "" });
   const router = useRouter();
   const login = useAuthStore((state) => state.login);
 
   const emailForm = useForm({
     defaultValues: { email: "", password: "" },
-    resolver: zodResolver(emailFormSchema),
   });
 
   const urnForm = useForm({
     defaultValues: { urn: "", password: "" },
-    resolver: zodResolver(urnFormSchema),
   });
 
   async function onSubmit(
@@ -61,7 +50,6 @@ export default function SignInPage() {
       | { urn: string; password: string }
   ) {
     setIsLoading(true);
-    
     try {
       const response = await fetch(`${BACKEND_URL}/user/login`, {
         method: "POST",
@@ -70,38 +58,22 @@ export default function SignInPage() {
         body: JSON.stringify(values),
       });
 
-      if (response.status === 404) {
-        console.log("Invalid email/URN or password");
-
-        setDialogContent({
-          title: "Authentication Failed",
-          description: "Invalid email/URN or password. Please try again.",
-
-        });
-        setShowDialog(true);
-        return;
-      }
-
       if (!response.ok) throw new Error();
 
       const data = await response.json();
       login(data.data.user);
 
-
-      setDialogContent({
+      toast({
         title: "Welcome back!",
         description: "You have successfully signed in.",
       });
-      setShowDialog(true);
       router.push("/");
     } catch (error) {
-
-      setDialogContent({
+      toast({
         title: "Error",
-        description: "Something went wrong. Please try again later.",
-
+        description: "Invalid credentials.",
+        variant: "destructive",
       });
-      setShowDialog(true);
     } finally {
       setIsLoading(false);
     }
@@ -109,15 +81,6 @@ export default function SignInPage() {
 
   return (
     <div className="container flex items-center justify-center min-h-screen py-12">
-      <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{dialogContent.title}</DialogTitle>
-            <p>{dialogContent.description}</p>
-          </DialogHeader>
-        </DialogContent>
-      </Dialog>
-
       <div className="w-full max-w-md space-y-6">
         <div className="space-y-2 text-center">
           <h1 className="text-3xl font-bold">Welcome Back</h1>
@@ -127,9 +90,9 @@ export default function SignInPage() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-2 rounded border border-slate-400 active:border-2">
-            <TabsTrigger value="email" >Email</TabsTrigger>
-            <TabsTrigger value="urn" >URN</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="email">Email</TabsTrigger>
+            <TabsTrigger value="urn">URN</TabsTrigger>
           </TabsList>
 
           <TabsContent value="email">
@@ -224,7 +187,7 @@ export default function SignInPage() {
         </Tabs>
 
         <div className="text-center text-sm">
-          Don't have an account?{" "}
+          Don&apos;t have an account?{" "}
           <Link
             href="/sign-up"
             className="font-medium text-primary hover:underline"

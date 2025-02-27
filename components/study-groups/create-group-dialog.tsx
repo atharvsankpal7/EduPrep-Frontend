@@ -27,7 +27,7 @@ export function CreateGroupDialog({ open, onOpenChange }: CreateGroupDialogProps
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      fullname: "",
+      // fullName: "",
       description: "",
       category: "",
     },

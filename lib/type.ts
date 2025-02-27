@@ -107,15 +107,19 @@ export enum DifficultyLevel {
   MEDIUM = 2,
   HARD = 3,
 }
-
+export interface ITestSection {
+  sectionName: string;
+  sectionDuration: number; // in minutes
+  questions: string[]; // questionIds for this section
+  totalQuestions: number;
+}
 export interface ITest {
   testName: string;
-  testDuration: number;
-  totalQuestions: number;
+  sections: ITestSection[];
+  totalDuration: number; // total duration in minutes (sum of all section durations)
+  totalQuestions: number; // total questions across all sections
   expiryTime: Date;
-  testQuestions: string[]; // questionId
   createdBy: string; // userId
-  duration: number;
 }
 
 
@@ -146,10 +150,6 @@ export interface ICetSection {
   questions: IQuestion[];
 }
 
-export interface ICetTest extends ITest {
-  sections: ICetSection[];
-  currentSection: number;
-}
 
 export interface IQuestion {
   question: string;
