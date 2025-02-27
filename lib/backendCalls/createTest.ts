@@ -7,17 +7,17 @@ import {
   TCreateUndergraduateTestRequest,
   TCreateCustomTestRequest,
 } from "../type";
+import { BACKEND_URL } from "../constant";
 
-export const BACKEND_URL = `http://localhost:5000/api/v1/test`;
+const backend_url = BACKEND_URL + "/test";
 
 const makeRequest = async <T>(url: string, data?: any): Promise<T> => {
   try {
     console.log("Making request to:", url);
-    // console.log("Current cookies:", document.cookie);
     const response = await axios.post<T>(url, data, {
       withCredentials: true, // This enables sending cookies
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     });
     console.log("Response received:", response.data);
@@ -32,15 +32,15 @@ const makeRequest = async <T>(url: string, data?: any): Promise<T> => {
 };
 
 const getGateTest = (): Promise<TCreateTestResponse> =>
-  makeRequest(`${BACKEND_URL}/undergraduate/gate`);
+  makeRequest(`${backend_url}/undergraduate/gate`);
 
 const getCompanySpecificTest = (
   company: string
 ): Promise<TCreateTestResponse> =>
-  makeRequest(`${BACKEND_URL}/undergraduate/companySpecific`, { company });
+  makeRequest(`${backend_url}/undergraduate/companySpecific`, { company });
 
 const getCetTest = (): Promise<TCreateTestResponse> =>
-  makeRequest(`${BACKEND_URL}/juniorcollege/cet`);
+  makeRequest(`${backend_url}/juniorcollege/cet`);
 
 const getCustomTest = ({
   time,
@@ -48,7 +48,7 @@ const getCustomTest = ({
   topicList,
   educationLevel,
 }: TCreateCustomTestRequest) =>
-  makeRequest(`${BACKEND_URL}/${educationLevel.toLowerCase()}/custom`, {
+  makeRequest(`${backend_url}/${educationLevel.toLowerCase()}/custom`, {
     time,
     numberOfQuestions,
     topicList,
