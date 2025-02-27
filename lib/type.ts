@@ -115,6 +115,7 @@ export interface ITest {
   expiryTime: Date;
   testQuestions: string[]; // questionId
   createdBy: string; // userId
+  duration: number;
 }
 
 
@@ -138,4 +139,27 @@ export interface ICompanySpecificTestDetails {
   time: number;
   numberOfQuestions: number;
   topicList: string[];
+}
+export interface ICetSection {
+  name: string;
+  duration: number; // in minutes
+  questions: IQuestion[];
+}
+
+export interface ICetTest extends ITest {
+  sections: ICetSection[];
+  currentSection: number;
+}
+
+export interface IQuestion {
+  question: string;
+  options: string[];
+  correctAnswer: number;
+}
+
+export interface ITest {
+  testId: string;
+  testName: string;
+  testDuration: number;
+  totalQuestions: number;
 }
