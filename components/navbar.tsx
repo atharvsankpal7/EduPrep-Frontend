@@ -37,6 +37,9 @@ export function NavBar() {
       if (response.ok) {
         logout();
       }
+      if(response.status === 401) {
+        logout();
+      }
     } catch (error) {
       console.error('Logout failed:', error);
     }
