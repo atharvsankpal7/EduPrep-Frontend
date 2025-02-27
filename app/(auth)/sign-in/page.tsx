@@ -62,9 +62,6 @@ export default function SignInPage() {
 
       const data = await response.json();
       login(data.data.user);
-      console.log(data)
-      // Log cookies
-      console.log('Cookies:', document.cookie);
 
       toast({
         title: "Welcome back!",

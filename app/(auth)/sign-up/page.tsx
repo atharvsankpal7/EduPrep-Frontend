@@ -18,9 +18,13 @@ import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-
+import { useAuthStore } from "@/lib/stores/auth-store";
 const formSchema = z.object({
-  urn: z.string().transform((val) => parseInt(val)).pipe(z.number().min(8, "Please enter valid URN")),  name: z.string().min(2, "Name must be at least 2 characters"),
+  urn: z
+    .string()
+    .transform((val) => parseInt(val))
+    .pipe(z.number().min(8, "Please enter valid URN")),
+  fullName: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
 });
@@ -29,11 +33,12 @@ export default function SignUpPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const BACKEND_URL = `http://localhost:5000/api/v1`;
+  const register = useAuthStore((state) => state.login);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
+      fullName: "",
       email: "",
       password: "",
       urn: 0,
@@ -42,14 +47,19 @@ export default function SignUpPage() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    
+
     try {
-      await axios.post(`${BACKEND_URL}/user/register`, {
-        fullName: values.name,
-        urn: values.urn,
-        password: values.password,
-        email: values.email,
+      const response = await fetch(`${BACKEND_URL}/user/register`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
       });
+
+      if (!response.ok) throw new Error();
+
+      const data = await response.json();
+      register(data.data.user);
 
       router.push("/");
       toast({
@@ -92,7 +102,7 @@ export default function SignUpPage() {
             />
             <FormField
               control={form.control}
-              name="name"
+              name="fullName"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Full Name</FormLabel>
