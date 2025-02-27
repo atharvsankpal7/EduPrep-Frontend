@@ -115,19 +115,16 @@ export default function GateTestPage() {
 
   if (testStarted) {
     return (
-      // <TestInterface
-      //   testId="gate-123"
-      //   testName="GATE Computer Science Mock Test"
-      //   duration={180}
-      //   totalQuestions={65}
-      //   questions={demoQuestions}
-      //   onComplete={  (answers) => {
-      //     console.log("Test completed with answers:", answers);
-      //   }}
-      // />
-      <div>
-        Hello
-      </div>
+      <TestInterface
+        testId="gate-123"
+        testName="GATE Computer Science Mock Test"
+        duration={180}
+        totalQuestions={65}
+        questions={demoQuestions}
+        onComplete={  (answers) => {
+          console.log("Test completed with answers:", answers);
+        }}
+      />
     );
   }
 
