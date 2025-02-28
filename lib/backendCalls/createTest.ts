@@ -47,12 +47,27 @@ const getCustomTest = ({
   numberOfQuestions,
   topicList,
   educationLevel,
-}: TCreateCustomTestRequest) =>
-  makeRequest(`${backend_url}/${educationLevel.toLowerCase()}/custom`, {
-    time,
-    numberOfQuestions,
-    topicList,
-  });
+}: TCreateCustomTestRequest) => {
+  // Format the request differently based on education level
+  if (educationLevel === EducationLevel.JuniorCollege) {
+    // For junior college, extract just the topic names into a flat array
+    const topicNames = topicList.subjects.flatMap(subject => subject.topics);
+    
+    return makeRequest(`${backend_url}/${educationLevel.toLowerCase()}/custom`, {
+      time,
+      numberOfQuestions,
+      topicList: topicNames,
+      educationLevel: [educationLevel] // Keep this as an array as required by the API
+    });
+  } else {
+    // For undergraduate, keep the original format
+    return makeRequest(`${backend_url}/${educationLevel.toLowerCase()}/custom`, {
+      time,
+      numberOfQuestions,
+      topicList,
+    });
+  }
+};
 
 const createUndergraduateTest = async ({
   numberOfQuestions = 30,

@@ -60,24 +60,23 @@ export default function CustomTestPage() {
 
   const startTest = async () => {
     if (!selectedTopics || !testConfig) return;
-    console.log("Selected Topics:", selectedTopics.subjects);
+    console.log("Selected Topics:", selectedTopics);
     try {
       const response = await createTest({
         educationLevel: EducationLevel.JuniorCollege,
-        topicList: selectedTopics.subjects.map(subject=>{subject.topics.map(topic=>topic)}),
+        topicList: selectedTopics,
         numberOfQuestions: testConfig.questionCount,
         time: testConfig.duration,
       }) as any;
-
-      if (!response.testId) {
-        throw new Error("Failed to create test");
-      }
-      router.push(`/test/${response.testId}`);
+      console.log("Response:", response.data.testDetails.testId);
+      // if (!data.data.testDetails.testId) {
+      //   throw new Error("Failed to create test");
+      // }
+      router.push(`/test/${response.data.testDetails.testId}`);
     } catch (error) {
       setShowError(true);
     }
   };
-
   const handleBack = () => {
     router.push("/test/junior-college");
   };
