@@ -18,18 +18,39 @@ import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/stores/auth-store";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const formSchema = z.object({
   urn: z
     .string()
+    .min(1, "URN is required")
     .transform((val) => parseInt(val))
     .pipe(z.number().min(8, "Please enter valid URN")),
-  fullName: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-  city: z.string().min(2, "City must be at least 2 characters"),
+  fullName: z
+    .string()
+    .min(1, "Full name is required")
+    .min(2, "Name must be at least 2 characters")
+    .regex(/^[a-zA-Z\s]*$/, "Name can only contain letters and spaces"),
+  email: z
+    .string()
+    .min(1, "Email is required")
+    .email("Invalid email address format"),
+  password: z
+    .string()
+    .min(1, "Password is required")
+    .min(8, "Password must be at least 8 characters"),
+  city: z
+    .string()
+    .min(1, "City is required")
+    .min(2, "City must be at least 2 characters"),
   contactNumber: z
     .string()
+    .min(1, "Contact number is required")
     .min(10, "Contact number must be at least 10 digits")
     .max(15, "Contact number must not exceed 15 digits")
     .regex(/^\d+$/, "Contact number must contain only digits"),
@@ -38,6 +59,8 @@ const formSchema = z.object({
 export default function SignUpPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [errorModal, setErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const BACKEND_URL = `http://localhost:5000/api/v1`;
   const register = useAuthStore((state) => state.login);
 
@@ -51,6 +74,7 @@ export default function SignUpPage() {
       city: "",
       contactNumber: "",
     },
+    mode: "onChange",
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -64,26 +88,30 @@ export default function SignUpPage() {
         body: JSON.stringify(values),
       });
 
-      if (!response.ok) throw new Error();
-
       const data = await response.json();
-      register(data.data.user);
 
+      if (!response.ok) {
+        setErrorMessage(data.message || "Registration failed");
+        setErrorModal(true);
+        throw new Error(data.message);
+      }
+
+      register(data.data.user);
       router.push("/");
       toast({
         title: "Account created successfully!",
         description: "Please check your email to verify your account.",
       });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Something went wrong. Please try again.",
-        variant: "destructive",
-      });
+    } catch (error: any) {
+      setErrorMessage(
+        error.message || "Something went wrong. Please try again."
+      );
+      setErrorModal(true);
     } finally {
       setIsLoading(false);
     }
   }
+
   return (
     <div className="container flex items-center justify-center min-h-screen py-12">
       <div className="w-full max-w-md space-y-6">
@@ -104,7 +132,7 @@ export default function SignUpPage() {
                   <FormControl>
                     <Input placeholder="21031038" {...field} type="number" />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-red-500" />
                 </FormItem>
               )}
             />
@@ -117,7 +145,7 @@ export default function SignUpPage() {
                   <FormControl>
                     <Input placeholder="John Doe" {...field} />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-red-500" />
                 </FormItem>
               )}
             />
@@ -134,7 +162,7 @@ export default function SignUpPage() {
                       {...field}
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-red-500" />
                 </FormItem>
               )}
             />
@@ -147,7 +175,7 @@ export default function SignUpPage() {
                   <FormControl>
                     <Input placeholder="9876543210" {...field} />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-red-500" />
                 </FormItem>
               )}
             />
@@ -160,7 +188,7 @@ export default function SignUpPage() {
                   <FormControl>
                     <Input placeholder="Mumbai" {...field} />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-red-500" />
                 </FormItem>
               )}
             />
@@ -173,7 +201,7 @@ export default function SignUpPage() {
                   <FormControl>
                     <Input placeholder="********" type="password" {...field} />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-red-500" />
                 </FormItem>
               )}
             />
@@ -191,6 +219,15 @@ export default function SignUpPage() {
             Sign in
           </Link>
         </div>
+
+        <Dialog open={errorModal} onOpenChange={setErrorModal}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Error</DialogTitle>
+              <p className="text-red-500">{errorMessage}</p>
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

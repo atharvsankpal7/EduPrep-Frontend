@@ -17,31 +17,55 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/stores/auth-store";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const BACKEND_URL = `http://localhost:5000/api/v1`;
 
 const emailFormSchema = z.object({
-  email: z.string().email("Invalid email format"),
-  password: z.string().min(8).max(64),
+  email: z.string().email("Invalid email format").min(1, "Email is required"),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .max(64, "Password must not exceed 64 characters")
+    
 });
 
 const urnFormSchema = z.object({
-  urn: z.string().min(8, "URN must be at least 8 characters"),
-  password: z.string().min(8).max(64),
+  urn: z
+    .string()
+    .min(8, "URN must be at least 8 characters")
+    .regex(/^[0-9]+$/, "URN must contain only numbers"),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .max(64, "Password must not exceed 64 characters"),
 });
 
 export default function SignInPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("email");
+  const [errorDialogOpen, setErrorDialogOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const router = useRouter();
   const login = useAuthStore((state) => state.login);
 
   const emailForm = useForm({
+    resolver: zodResolver(emailFormSchema),
     defaultValues: { email: "", password: "" },
+    mode: "onChange",
   });
 
   const urnForm = useForm({
+    resolver: zodResolver(urnFormSchema),
     defaultValues: { urn: "", password: "" },
+    mode: "onChange",
   });
 
   async function onSubmit(
@@ -53,30 +77,34 @@ export default function SignInPage() {
     try {
       const response = await fetch(`${BACKEND_URL}/user/login`, {
         method: "POST",
-        credentials: 'include',
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(values),
       });
 
-      if (!response.ok) throw new Error();
-
       const data = await response.json();
+
+      if (!response.ok) {
+        setErrorMessage(data.message || "Invalid credentials");
+        setErrorDialogOpen(true);
+        throw new Error(data.message);
+      }
+
       login(data.data.user);
 
       toast({
         title: "Welcome back!",
         description: "You have successfully signed in.",
       });
-      if(data.data.user.role === "admin") {
+      if (data.data.user.role === "admin") {
         router.push("/admin/dashboard");
-      } 
+      }
       router.push("/");
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Invalid credentials.",
-        variant: "destructive",
-      });
+      setErrorMessage(
+        error instanceof Error ? error.message : "An unexpected error occurred"
+      );
+      setErrorDialogOpen(true);
     } finally {
       setIsLoading(false);
     }
@@ -117,7 +145,7 @@ export default function SignInPage() {
                           {...field}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-red-500" />
                     </FormItem>
                   )}
                 />
@@ -134,11 +162,15 @@ export default function SignInPage() {
                           {...field}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-red-500" />
                     </FormItem>
                   )}
                 />
-                <Button className="w-full" type="submit" disabled={isLoading}>
+                <Button
+                  className="w-full"
+                  type="submit"
+                  disabled={isLoading || !emailForm.formState.isValid}
+                >
                   {isLoading ? "Signing in..." : "Sign In"}
                 </Button>
               </form>
@@ -160,7 +192,7 @@ export default function SignInPage() {
                       <FormControl>
                         <Input placeholder="Enter your URN" {...field} />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-red-500" />
                     </FormItem>
                   )}
                 />
@@ -177,11 +209,15 @@ export default function SignInPage() {
                           {...field}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-red-500" />
                     </FormItem>
                   )}
                 />
-                <Button className="w-full" type="submit" disabled={isLoading}>
+                <Button
+                  className="w-full"
+                  type="submit"
+                  disabled={isLoading || !urnForm.formState.isValid}
+                >
                   {isLoading ? "Signing in..." : "Sign In"}
                 </Button>
               </form>
@@ -190,7 +226,7 @@ export default function SignInPage() {
         </Tabs>
 
         <div className="text-center text-sm">
-          Don&apos;t have an account?{" "}
+          Don't have an account?{" "}
           <Link
             href="/sign-up"
             className="font-medium text-primary hover:underline"
@@ -198,6 +234,15 @@ export default function SignInPage() {
             Sign up
           </Link>
         </div>
+
+        <Dialog open={errorDialogOpen} onOpenChange={setErrorDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Error</DialogTitle>
+              <DialogDescription>{errorMessage}</DialogDescription>
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

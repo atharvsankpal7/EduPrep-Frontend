@@ -95,40 +95,41 @@ export default function TestResultPage({ params }: { params: { id: string } }) {
   }
 
   return (
-    <div className="container py-8">
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold">Test Results</h1>
+    <div className="container py-8 max-w-4xl mx-auto">
+      <div className="space-y-8">
+        <div className="flex flex-col items-center text-center">
+          <h1 className="text-4xl font-bold mb-6">Test Results</h1>
           <div className="flex space-x-4">
             <button 
               onClick={() => setActiveTab("summary")}
-              className={`px-4 py-2 rounded-md ${activeTab === "summary" ? "bg-primary text-primary-foreground" : "bg-muted"}`}
+              className={`px-6 py-2.5 rounded-lg transition-all duration-200 hover:opacity-90 ${activeTab === "summary" ? "bg-primary text-primary-foreground shadow-md" : "bg-muted hover:bg-muted/80"}`}
             >
               Summary
             </button>
-            <button 
+            {/* <button 
               onClick={() => setActiveTab("questions")}
-              className={`px-4 py-2 rounded-md ${activeTab === "questions" ? "bg-primary text-primary-foreground" : "bg-muted"}`}
-            >
+              className={`px-6 py-2.5 rounded-lg transition-all duration-200 hover:opacity-90 ${activeTab === "questions" ? "bg-primary text-primary-foreground shadow-md" : "bg-muted hover:bg-muted/80"}`}
+            > q
               Question Analysis
-            </button>
+            </button> */}
           </div>
         </div>
 
-        {activeTab === "summary" ? (
-          <TestResult
-            totalQuestions={result.totalQuestions}
-            correctAnswers={result.correctAnswers} 
-            score={(result.correctAnswers / result.totalQuestions) * 100}
-            timeSpent={result.timeSpent}
-            tabSwitches={result.tabSwitches || 0}
-            autoSubmitted={result.autoSubmitted || false}
-            sectionResults={result.sectionResults}
-          />
-        ) : (
-          <QuestionAnalysis questionAnalysis={result.questionAnalysis || []} />
-        )}
+        <div className="bg-card rounded-xl shadow-lg p-6">
+          {activeTab === "summary" ? (
+            <TestResult
+              totalQuestions={result.totalQuestions}
+              correctAnswers={result.correctAnswers} 
+              score={(result.correctAnswers / result.totalQuestions) * 100}
+              timeSpent={result.timeSpent}
+              tabSwitches={result.tabSwitches || 0}
+              autoSubmitted={result.autoSubmitted || false}
+              sectionResults={result.sectionResults}
+            />
+          ) : (
+            <QuestionAnalysis questionAnalysis={result.questionAnalysis || []} />
+          )}
+        </div>
       </div>
     </div>
-  );
-}
+  );}
