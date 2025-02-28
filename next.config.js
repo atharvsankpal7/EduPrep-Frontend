@@ -4,7 +4,19 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: false,
   },
-  images: { unoptimized: true },
+  images: { 
+    unoptimized: true,
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**',
+      },
+      {
+        protocol: 'http',
+        hostname: '**',
+      },
+    ],
+  },
 };
 
 module.exports = nextConfig;

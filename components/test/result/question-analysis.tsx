@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle, XCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import Image from "next/image";
 
 interface QuestionAnalysisItem {
   questionText: string;
@@ -18,6 +19,30 @@ interface QuestionAnalysisProps {
 }
 
 export default function QuestionAnalysis({ questionAnalysis }: QuestionAnalysisProps) {
+  // Function to check if a string is a valid image URL
+  const isImageUrl = (str: string) => {
+    return str.match(/\.(jpeg|jpg|gif|png)$/) !== null || str.startsWith('http') && (str.includes('/images/') || str.includes('/img/'));
+  };
+
+  // Function to render text or image based on content
+  const renderContent = (content: string) => {
+    if (isImageUrl(content)) {
+      return (
+        <div className="flex justify-center my-2">
+          <Image 
+            src={content} 
+            alt="Question content" 
+            width={500} 
+            height={300} 
+            className="max-w-full object-contain rounded-md"
+            unoptimized // For external images
+          />
+        </div>
+      );
+    }
+    return <span>{content}</span>;
+  };
+
   // Animation variants
   const container = {
     hidden: { opacity: 0 },
@@ -78,7 +103,7 @@ export default function QuestionAnalysis({ questionAnalysis }: QuestionAnalysisP
                   <div className="flex-1 space-y-4">
                     <div>
                       <h3 className="font-medium text-lg mb-2">
-                        Question {index + 1}: {question.questionText}
+                        Question {index + 1}: {renderContent(question.questionText)}
                       </h3>
                     </div>
                     <div className="grid gap-2">
@@ -98,7 +123,9 @@ export default function QuestionAnalysis({ questionAnalysis }: QuestionAnalysisP
                             <span className="w-6 h-6 flex items-center justify-center rounded-full border mr-2 text-sm">
                               {String.fromCharCode(65 + optIndex)}
                             </span>
-                            <span>{option}</span>
+                            <div className="flex-1">
+                              {renderContent(option)}
+                            </div>
                             {optIndex === question.correctAnswer && (
                               <Badge className="ml-auto" variant="outline">Correct Answer</Badge>
                             )}

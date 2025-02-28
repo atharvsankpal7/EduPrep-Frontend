@@ -1,78 +1,78 @@
 "use client";
 
-import { useState } from "react";
-import { TestInterface } from "@/components/test/test-interface";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { TestInfoDisplay } from "@/components/test/test-info-display";
-import { TestResultDetails } from "@/components/test/test-result-details";
-import { cetQuestions } from "@/lib/data/cet-demo-test";
+import { ErrorMessageDialog } from "@/components/test/error-message";
+import { createTest } from "@/lib/backendCalls/createTest";
+import { EducationLevel } from "@/lib/type";
+import { useToast } from "@/components/ui/use-toast";
+import LoadingComponent from "@/components/loading";
+import { useAuthStore } from "@/lib/stores/auth-store";
 
 export default function CetTestPage() {
-  const [testStarted, setTestStarted] = useState(false);
-  const [testCompleted, setTestCompleted] = useState(false);
-  const [userAnswers, setUserAnswers] = useState<Record<number, number>>({});
-  const [timeSpent, setTimeSpent] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [showError, setShowError] = useState(false);
+  const router = useRouter();
+  const { toast } = useToast();
+  const { isAuthenticated } = useAuthStore();
 
-  const sections = [
-    {
-      name: "Physics & Chemistry",
-      duration: 90,
-      questions: cetQuestions.slice(0, 50)
-    },
-    {
-      name: "Mathematics",
-      duration: 90,
-      questions: cetQuestions.slice(50, 100)
+  const startTest = async () => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to take a CET test",
+        variant: "destructive",
+      });
+      router.push("/sign-in");
+      return;
     }
-  ];
 
-  const handleTestComplete = (answers: Record<number, number>, time: number) => {
-    setUserAnswers(answers);
-    setTimeSpent(time);
-    setTestCompleted(true);
+    try {
+      setLoading(true);
+      const response = await createTest({
+        educationLevel: EducationLevel.JuniorCollege,
+        isCet: true,
+      }) as any;
+      
+      if (!response.data.testDetails.testId) {
+        throw new Error("Failed to create test");
+      }
+      
+      router.push(`/test/${response.data.testDetails.testId}`);
+    } catch (error) {
+      console.error("Error creating test:", error);
+      setShowError(true);
+      toast({
+        title: "Error",
+        description: "Failed to create test. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleRetry = () => {
-    setTestStarted(false);
-    setTestCompleted(false);
-    setUserAnswers({});
-    setTimeSpent(0);
-  };
-
-  if (testCompleted) {
-    return (
-      <TestResultDetails
-        questions={cetQuestions}
-        userAnswers={userAnswers}
-        timeSpent={timeSpent}
-        onRetry={handleRetry}
-      />
-    );
-  }
-
-  if (testStarted) {
-    return (
-      <TestInterface
-        testId="cet-demo"
-        testName="CET Mock Test"
-        sections={sections}
-        onComplete={handleTestComplete}
-      />
-    );
+  if (loading) {
+    return <LoadingComponent />;
   }
 
   return (
-    <TestInfoDisplay
-      title="CET Mock Test"
-      description="Complete mock test simulating the actual CET exam environment"
-      duration={180}
-      questionCount={100}
-      onStart={() => setTestStarted(true)}
-      requirements={[
-        "Valid ID proof",
-        "Working webcam and microphone",
-        "Stable internet connection",
-        "Quiet environment",
-      ]}
-    />
+    <>
+      <ErrorMessageDialog open={showError} onClose={() => setShowError(false)} />
+      <TestInfoDisplay
+        title="CET Mock Test"
+        description="Complete mock test simulating the actual CET exam environment"
+        duration={180}
+        questionCount={100}
+        onStart={startTest}
+        requirements={[
+          "Valid ID proof",
+          "Working webcam and microphone",
+          "Stable internet connection",
+          "Quiet environment",
+        ]}
+      />
+    </>
   );
 }

@@ -31,6 +31,7 @@ export interface Question {
   question: string;
   options: string[];
   correctAnswer?: number;
+  id?: string; // Added id to track original question IDs
 }
 
 interface Section {

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle2, XCircle, BarChart2, Clock } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Question } from "./test-interface";
+import Image from "next/image";
 
 interface TestResultDetailsProps {
   questions: Question[];
@@ -28,6 +29,30 @@ export function TestResultDetails({
     return count + (userAnswers[index] === question.correctAnswer ? 1 : 0);
   }, 0);
   const score = (correctAnswers / totalQuestions) * 100;
+
+  // Function to check if a string is a valid image URL
+  const isImageUrl = (str: string) => {
+    return str.match(/\.(jpeg|jpg|gif|png)$/) !== null || str.startsWith('http') && (str.includes('/images/') || str.includes('/img/'));
+  };
+
+  // Function to render text or image based on content
+  const renderContent = (content: string) => {
+    if (isImageUrl(content)) {
+      return (
+        <div className="flex justify-center my-2">
+          <Image 
+            src={content} 
+            alt="Question content" 
+            width={500} 
+            height={300} 
+            className="max-w-full object-contain rounded-md"
+            unoptimized // For external images
+          />
+        </div>
+      );
+    }
+    return <span>{content}</span>;
+  };
 
   return (
     <div className="container py-8">
@@ -120,7 +145,7 @@ export function TestResultDetails({
                   )}
                   <div className="flex-1">
                     <p className="font-medium mb-2">
-                      Question {index + 1}: {question.question}
+                      Question {index + 1}: {renderContent(question.question)}
                     </p>
                     <div className="grid gap-2">
                       {question.options.map((option, optIndex) => (
@@ -134,7 +159,7 @@ export function TestResultDetails({
                               : "bg-muted"
                           }`}
                         >
-                          {option}
+                          {renderContent(option)}
                         </div>
                       ))}
                     </div>
