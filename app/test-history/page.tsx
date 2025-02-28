@@ -534,7 +534,7 @@ const TestHistoryPage = () => {
                                   <span className="font-medium">{rec.topic}</span>
                                 </div>
                                 <span className={getScoreColor(rec.correctPercentage)}>
-                                  {rec.correctPercentage.toFixed(1)}%
+                                  {rec?.correctPercentage?.toFixed(1)}%
                                 </span>
                               </div>
                               <Progress value={rec.correctPercentage} className="h-2" />
@@ -651,7 +651,7 @@ const TestHistoryPage = () => {
                             <div className="flex justify-between items-center">
                               <span className="font-medium">{topic.topic}</span>
                               <span className={getScoreColor(topic.percentage)}>
-                                {topic.correctAnswers} / {topic.totalQuestions} ({topic.percentage.toFixed(1)}%)
+                                {topic.correctAnswers} / {topic.totalQuestions} ({topic?.percentage?.toFixed(1)}%)
                               </span>
                             </div>
                             <Progress value={topic.percentage} className="h-2" />
