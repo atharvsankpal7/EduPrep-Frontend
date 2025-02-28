@@ -23,6 +23,7 @@ const makeRequest = async <T>(url: string, data?: any): Promise<T> => {
     console.log("Response received:", response.data);
     return response.data;
   } catch (error) {
+    console.error("Error in makeRequest:", error);
     if (error instanceof Error) {
       throw new Error(`Failed to create test: ${error.message}`);
     } else {
@@ -104,7 +105,7 @@ export const createTest = async ({
   numberOfQuestions = 30,
   company,
   topicList,
-  time = 60 * 60 * 60,
+  time = 60 * 60, // Changed from 60*60*60 to 60*60 (60 minutes in seconds)
   isCet = false,
 }: {
   educationLevel: EducationLevel;
@@ -114,25 +115,32 @@ export const createTest = async ({
   time?: number;
   isCet?: boolean;
 }) => {
-  if (educationLevel === EducationLevel.Undergraduate) {
-    const category = company
-      ? TUnderGraduateTestCategories.COMPANY_SPECIFIC
-      : topicList
-      ? TUnderGraduateTestCategories.CUSTOM
-      : TUnderGraduateTestCategories.GATE;
+  try {
+    console.log("Creating test with params:", { educationLevel, numberOfQuestions, company, topicList, time, isCet });
+    
+    if (educationLevel === EducationLevel.Undergraduate) {
+      const category = company
+        ? TUnderGraduateTestCategories.COMPANY_SPECIFIC
+        : topicList
+        ? TUnderGraduateTestCategories.CUSTOM
+        : TUnderGraduateTestCategories.GATE;
 
-    return createUndergraduateTest({
-      numberOfQuestions,
-      company,
-      topicList,
-      category,
-      educationLevel,
-      time,
-    });
+      return createUndergraduateTest({
+        numberOfQuestions,
+        company,
+        topicList,
+        category,
+        educationLevel,
+        time,
+      });
+    }
+
+    if (isCet) return getCetTest();
+
+    if (!topicList) throw new Error("Topic list is required for custom test");
+    return getCustomTest({ numberOfQuestions, topicList, educationLevel, time });
+  } catch (error) {
+    console.error("Error in createTest:", error);
+    throw error;
   }
-
-  if (isCet) return getCetTest();
-
-  if (!topicList) throw new Error("Topic list is required for custom test");
-  return getCustomTest({ numberOfQuestions, topicList, educationLevel, time });
 };

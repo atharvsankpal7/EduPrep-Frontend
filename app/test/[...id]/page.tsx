@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { TestInterface } from "@/components/test/test-interface";
-import { IQuestion, ITest } from "@/lib/type";
 import axios from "axios";
 import LoadingComponent from "@/components/loading";
 
@@ -12,30 +11,25 @@ interface TestPageProps {
   searchParams?: Record<string, string | string[] | undefined>;
 }
 
-interface ApiResponse {
-  statusCode: number;
-  data: {
-    test: {
-      _id: string;
-      testName: string;
-      totalDuration: number;
+interface TestResponse {
+  test: {
+    _id: string;
+    testName: string;
+    totalDuration: number;
+    totalQuestions: number;
+    sections: {
+      sectionName: string;
+      sectionDuration: number;
       totalQuestions: number;
-      sections: {
-        sectionName: string;
-        sectionDuration: number;
-        totalQuestions: number;
-        questions: {
-          _id: string;
-          questionText: string;
-          options: string[];
-          answer: number;
-          explanation: string;
-        }[];
+      questions: {
+        _id: string;
+        questionText: string;
+        options: string[];
+        answer: number;
+        explanation: string;
       }[];
-    };
+    }[];
   };
-  message: string;
-  success: boolean;
 }
 
 interface TestSection {
@@ -45,35 +39,36 @@ interface TestSection {
     question: string;
     options: string[];
     correctAnswer: number;
+    id: string; // Added id to track original question IDs
   }[];
 }
 
 export default function TestPage({ params }: TestPageProps) {
   const testId = params.id;
-  const [testData, setTestData] = useState<ApiResponse["data"] | null>(null);
+  const [testData, setTestData] = useState<TestResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    const BACKEND_URL =
-      process.env.NEXT_PUBLIC_BACKEND_URL ||
-      "http://localhost:5000/api/v1/test";
+    const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000/api/v1/test";
 
     const fetchTestConfig = async () => {
       try {
         setLoading(true);
         const url = `${BACKEND_URL}/${testId}`;
-        const response = await axios.get<ApiResponse>(url, {
+        const response = await axios.get(url, {
           withCredentials: true,
         });
-        console.log("Response data:", response.data);
-
-        if (!response.data.success || !response.data.data.test) {
+        
+        const responseData = response.data.data;
+        console.log(responseData);
+        
+        if (!responseData.test) {
           throw new Error("Invalid test data received");
         }
 
-        setTestData(response.data.data);
+        setTestData(responseData);
         setError(null);
       } catch (error) {
         console.error("Failed to fetch test data:", error);
@@ -86,58 +81,48 @@ export default function TestPage({ params }: TestPageProps) {
     fetchTestConfig();
   }, [testId]);
 
-  const handleTestComplete = async (
-    answers: Record<number, number>,
-    timeSpent: number
-  ) => {
+  const handleTestComplete = async (answers: Record<number, number>, timeSpent: number) => {
     try {
-      const BACKEND_URL =
-        process.env.NEXT_PUBLIC_BACKEND_URL ||
-        "http://localhost:5000/api/v1/test";
-
+      const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000/api/v1/test";
+      
       if (!testData) return;
-
-      // Create an array of all question objects with their _id to match with answers
-      const allQuestions: { _id: string; index: number }[] = [];
-
-      testData.test.sections.forEach((section) => {
-        section.questions.forEach((question, questionIndex) => {
-          allQuestions.push({
-            _id: question._id,
-            index: allQuestions.length, // Global index for matching with answers
+      
+      // Create a map to track all question answers
+      const selectedAnswers: { questionId: string, selectedOption: number, sectionName: string }[] = [];
+      
+      let globalQuestionIndex = 0;
+      
+      testData.test.sections.forEach(section => {
+        section.questions.forEach(question => {
+          const selectedOption = answers[globalQuestionIndex] !== undefined ? answers[globalQuestionIndex] : 0;
+          
+          selectedAnswers.push({
+            questionId: question._id,
+            selectedOption: selectedOption,
+            sectionName: section.sectionName
           });
+          
+          globalQuestionIndex++;
         });
       });
 
-      // Map answers to match backend expectation
-      const selectedAnswers = allQuestions.map((question, index) => ({
-        questionId: question._id,
-        selectedOption: answers[index] || 0, // Use the index to get the selected answer
-      }));
-
-      console.log("Submitting answers:", selectedAnswers);
-
       // Submit test
-      await axios.patch(
-        `${BACKEND_URL}/${testId}/submit`,
-        {
-          selectedAnswers,
-          timeTaken: Math.floor(timeSpent / 60), // Convert to minutes
-          autoSubmission: {
-            isAutoSubmitted: false,
-            tabSwitches: 0,
-          },
-        },
-        {
-          withCredentials: true,
-          headers: {
-            "Content-Type": "application/json",
-          },
+     const response =  await axios.patch(`${BACKEND_URL}/${testId}/submit`, {
+        selectedAnswers,
+        timeTaken: Math.floor(timeSpent / 60), // Convert to minutes
+        autoSubmission: {
+          isAutoSubmitted: false,
+          tabSwitches: 0
         }
-      );
-
+      }, {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      console.log("response from submitted result",response.data.data.testResult._id);
       // Redirect to results page
-      router.push(`/result/${testId}`);
+      router.push(`/result/${response.data.data.testResult._id}`);
     } catch (error) {
       console.error("Failed to submit test:", error);
       setError("Failed to submit test. Please try again.");
@@ -149,32 +134,24 @@ export default function TestPage({ params }: TestPageProps) {
   }
 
   if (error) {
-    return (
-      <div className="container py-8 text-center text-destructive">{error}</div>
-    );
+    return <div className="container py-8 text-center text-destructive">{error}</div>;
   }
 
   if (!testData) {
-    return (
-      <div className="container py-8 text-center">No test data available</div>
-    );
+    return <div className="container py-8 text-center">No test data available</div>;
   }
 
   // Transform the test data into sections format for the TestInterface component
-  const sections: TestSection[] = testData.test.sections.map((section) => {
-    // Map section questions directly from the API response
-    const sectionQuestions = section.questions.map((question) => {
-      return {
-        question: question.questionText,
-        options: question.options,
-        correctAnswer: question.answer,
-      };
-    });
-
+  const sections: TestSection[] = testData.test.sections.map(section => {
     return {
       name: section.sectionName,
       duration: section.sectionDuration,
-      questions: sectionQuestions,
+      questions: section.questions.map(q => ({
+        question: q.questionText,
+        options: q.options,
+        correctAnswer: q.answer,
+        id: q._id
+      }))
     };
   });
 

@@ -11,6 +11,7 @@ import { CetTopicsSelector } from "@/components/custom-practice/cet-topics-selec
 import { fetchCetTopics, CetSubjectTopics } from "@/lib/backendCalls/fetchCetTopics";
 import { useToast } from "@/components/ui/use-toast";
 import LoadingComponent from "@/components/loading";
+import { useAuthStore } from "@/lib/stores/auth-store";
 
 export default function CustomTestPage() {
   const [showConfig, setShowConfig] = useState(false);
@@ -24,6 +25,7 @@ export default function CustomTestPage() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const { toast } = useToast();
+  const { isAuthenticated } = useAuthStore();
 
   useEffect(() => {
     const loadTopics = async () => {
@@ -60,23 +62,40 @@ export default function CustomTestPage() {
 
   const startTest = async () => {
     if (!selectedTopics || !testConfig) return;
-    console.log("Selected Topics:", selectedTopics);
+    console.log("Selected Topics:", selectedTopics.subjects);
+
+    if (!isAuthenticated) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to create a custom test",
+        variant: "destructive",
+      });
+      router.push("/sign-in");
+      return;
+    }
+
     try {
       const response = await createTest({
         educationLevel: EducationLevel.JuniorCollege,
         topicList: selectedTopics,
         numberOfQuestions: testConfig.questionCount,
-        time: testConfig.duration,
+        time: testConfig.duration * 60, // Convert minutes to seconds
       }) as any;
-      console.log("Response:", response.data.testDetails.testId);
-      // if (!data.data.testDetails.testId) {
-      //   throw new Error("Failed to create test");
-      // }
+      if (!response.data.testDetails.testId) {
+        throw new Error("Failed to create test");
+      }
       router.push(`/test/${response.data.testDetails.testId}`);
     } catch (error) {
+      console.error("Error creating test:", error);
       setShowError(true);
+      toast({
+        title: "Error",
+        description: "Failed to create test. Please try again.",
+        variant: "destructive",
+      });
     }
   };
+
   const handleBack = () => {
     router.push("/test/junior-college");
   };

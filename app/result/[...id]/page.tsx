@@ -37,7 +37,7 @@ export default function TestResultPage({ params }: { params: { id: string } }) {
       try {
         setLoading(true);
         const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000/api/v1/test";
-        const response = await axios.get(`${BACKEND_URL}/${params.id}/result`);
+        const response = await axios.get(`${BACKEND_URL}/${params.id}/result`,{withCredentials: true});
         
         // Process the response to include section results
         const resultData = response.data.data;

@@ -9,6 +9,8 @@ import { createTest } from "@/lib/backendCalls/createTest";
 import { EducationLevel, TopicList } from "@/lib/type";
 import { undergraduateSubjects } from "@/lib/data/undergraduate-subjects";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/components/ui/use-toast";
+import { useAuthStore } from "@/lib/stores/auth-store";
 
 export default function CustomTestPage() {
   const [showConfig, setShowConfig] = useState(false);
@@ -19,6 +21,8 @@ export default function CustomTestPage() {
     questionCount: number;
   } | null>(null);
   const router = useRouter();
+  const { toast } = useToast();
+  const { isAuthenticated } = useAuthStore();
 
   const handleTopicsSelected = (topics: TopicList) => {
     setSelectedTopics(topics);
@@ -36,12 +40,22 @@ export default function CustomTestPage() {
   const startTest = async () => {
     if (!selectedTopics || !testConfig) return;
 
+    if (!isAuthenticated) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to create a custom test",
+        variant: "destructive",
+      });
+      router.push("/sign-in");
+      return;
+    }
+
     try {
       const response = await createTest({
         educationLevel: EducationLevel.Undergraduate,
         topicList: selectedTopics,
         numberOfQuestions: testConfig.questionCount,
-        time: testConfig.duration * 60,
+        time: testConfig.duration * 60, // Convert minutes to seconds
       }) as any;
 
       if (!response.testId) {
@@ -49,7 +63,13 @@ export default function CustomTestPage() {
       }
       router.push(`/test/${response.testId}`);
     } catch (error) {
+      console.error("Error creating test:", error);
       setShowError(true);
+      toast({
+        title: "Error",
+        description: "Failed to create test. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 

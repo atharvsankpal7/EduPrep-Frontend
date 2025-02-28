@@ -13,6 +13,8 @@ import { createTest } from "@/lib/backendCalls/createTest";
 import { EducationLevel } from "@/lib/type";
 import { useState } from "react";
 import { ErrorMessageDialog } from "@/components/test/error-message";
+import { useToast } from "@/components/ui/use-toast";
+import { useAuthStore } from "@/lib/stores/auth-store";
 
 const companies = [
   {
@@ -55,8 +57,20 @@ const item = {
 export default function CompanyTestPage() {
   const router = useRouter();
   const [showError, setShowError] = useState(false);
+  const { toast } = useToast();
+  const { isAuthenticated } = useAuthStore();
 
   const handleStartTest = async (company: string) => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to take a company test",
+        variant: "destructive",
+      });
+      router.push("/sign-in");
+      return;
+    }
+
     try {
       const response = await createTest({
         educationLevel: EducationLevel.Undergraduate,
@@ -67,7 +81,13 @@ export default function CompanyTestPage() {
       }
       router.push(`/test/${response.testId}`);
     } catch (error) {
+      console.error("Error creating test:", error);
       setShowError(true);
+      toast({
+        title: "Error",
+        description: "Failed to create test. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
