@@ -13,7 +13,7 @@ import { useAuthStore } from "@/lib/stores/auth-store";
 const studentRoutes = [
   { href: "/", label: "Home" },
   { href: "/test", label: "Mock Tests" },
-  { href: "/test-history", label: "Test History" },
+  // { href: "/test-history", label: "Test History" },
   // { href: "/analytics", label: "Analytics" },
   // { href: "/study-groups", label: "Study Groups" },
   // { href: "/recommendations", label: "Recommendations" },

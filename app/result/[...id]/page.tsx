@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { TestResult } from "@/components/test/test-result";
 import InvalidResult from "@/components/test/result/invalid-result";
+import QuestionAnalysis from "@/components/test/result/question-analysis";
 import axios from "axios";
 import LoadingComponent from "@/components/loading";
 
@@ -15,6 +16,14 @@ interface SectionResult {
   timeSpent: number;
 }
 
+interface QuestionAnalysisItem {
+  questionText: string;
+  options: string[];
+  correctAnswer: number;
+  selectedAnswer: number;
+  isCorrect: boolean;
+}
+
 interface TestResultData {
   id: string;
   totalQuestions: number;
@@ -24,6 +33,7 @@ interface TestResultData {
   tabSwitches: number;
   autoSubmitted: boolean;
   sectionResults?: SectionResult[];
+  questionAnalysis?: QuestionAnalysisItem[];
 }
 
 export default function TestResultPage({ params }: { params: { id: string } }) {
@@ -31,6 +41,7 @@ export default function TestResultPage({ params }: { params: { id: string } }) {
   const [result, setResult] = useState<TestResultData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("summary");
 
   useEffect(() => {
     const fetchResult = async () => {
@@ -41,7 +52,7 @@ export default function TestResultPage({ params }: { params: { id: string } }) {
         
         // Process the response to include section results
         const resultData = response.data.data;
-        
+        console.log(response.data.data)
         // Transform section data if available
         const sectionResults = resultData.sectionResults?.map((section: any) => ({
           name: section.sectionName,
@@ -53,7 +64,8 @@ export default function TestResultPage({ params }: { params: { id: string } }) {
         
         setResult({
           ...resultData,
-          sectionResults
+          sectionResults,
+          questionAnalysis: resultData.questionAnalysis || []
         });
       } catch (error) {
         console.error("Failed to fetch test result:", error);
@@ -83,14 +95,40 @@ export default function TestResultPage({ params }: { params: { id: string } }) {
   }
 
   return (
-    <TestResult
-      totalQuestions={result.totalQuestions}
-      correctAnswers={result.correctAnswers} 
-      score={(result.correctAnswers / result.totalQuestions) * 100}
-      timeSpent={result.timeSpent}
-      tabSwitches={result.tabSwitches || 0}
-      autoSubmitted={result.autoSubmitted || false}
-      sectionResults={result.sectionResults}
-    />
+    <div className="container py-8">
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold">Test Results</h1>
+          <div className="flex space-x-4">
+            <button 
+              onClick={() => setActiveTab("summary")}
+              className={`px-4 py-2 rounded-md ${activeTab === "summary" ? "bg-primary text-primary-foreground" : "bg-muted"}`}
+            >
+              Summary
+            </button>
+            <button 
+              onClick={() => setActiveTab("questions")}
+              className={`px-4 py-2 rounded-md ${activeTab === "questions" ? "bg-primary text-primary-foreground" : "bg-muted"}`}
+            >
+              Question Analysis
+            </button>
+          </div>
+        </div>
+
+        {activeTab === "summary" ? (
+          <TestResult
+            totalQuestions={result.totalQuestions}
+            correctAnswers={result.correctAnswers} 
+            score={(result.correctAnswers / result.totalQuestions) * 100}
+            timeSpent={result.timeSpent}
+            tabSwitches={result.tabSwitches || 0}
+            autoSubmitted={result.autoSubmitted || false}
+            sectionResults={result.sectionResults}
+          />
+        ) : (
+          <QuestionAnalysis questionAnalysis={result.questionAnalysis || []} />
+        )}
+      </div>
+    </div>
   );
 }
