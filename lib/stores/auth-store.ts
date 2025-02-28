@@ -6,6 +6,9 @@ interface User {
   fullName: string;
   email: string;
   urn: number;
+  city?: string;
+  contactNumber?: string;
+  role?: string;
 }
 
 interface AuthState {

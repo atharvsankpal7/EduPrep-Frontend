@@ -16,9 +16,9 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
-import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/stores/auth-store";
+
 const formSchema = z.object({
   urn: z
     .string()
@@ -27,6 +27,12 @@ const formSchema = z.object({
   fullName: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
+  city: z.string().min(2, "City must be at least 2 characters"),
+  contactNumber: z
+    .string()
+    .min(10, "Contact number must be at least 10 digits")
+    .max(15, "Contact number must not exceed 15 digits")
+    .regex(/^\d+$/, "Contact number must contain only digits"),
 });
 
 export default function SignUpPage() {
@@ -42,6 +48,8 @@ export default function SignUpPage() {
       email: "",
       password: "",
       urn: 0,
+      city: "",
+      contactNumber: "",
     },
   });
 
@@ -125,6 +133,32 @@ export default function SignUpPage() {
                       type="email"
                       {...field}
                     />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="contactNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Contact Number</FormLabel>
+                  <FormControl>
+                    <Input placeholder="9876543210" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="city"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>City</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Mumbai" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

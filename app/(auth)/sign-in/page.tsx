@@ -67,6 +67,9 @@ export default function SignInPage() {
         title: "Welcome back!",
         description: "You have successfully signed in.",
       });
+      if(data.data.user.role === "admin") {
+        router.push("/admin/dashboard");
+      } 
       router.push("/");
     } catch (error) {
       toast({
