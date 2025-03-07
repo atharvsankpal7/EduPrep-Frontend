@@ -40,14 +40,14 @@ export function HeroSection() {
                 Start Practice Test <ArrowRight className="w-4 h-4 ml-2" />
               </Link>
             </Button>
-            <Button 
+            {/* <Button 
               size="lg" 
               variant="outline" 
               className="hover-glow hover-glow-warm w-full sm:w-auto glass-effect" 
               asChild
             >
               <Link href="/study-groups">Join Study Group</Link>
-            </Button>
+            </Button> */}
           </div>
         </motion.div>
       </div>

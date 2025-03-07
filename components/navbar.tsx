@@ -32,7 +32,7 @@ export function NavBar() {
 
   const handleLogout = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/v1/user/logout', {
+      const response = await fetch('http://:5000/api/v1/user/logout', {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -101,6 +101,30 @@ export function NavBar() {
                     </Link>
                   ))
                 )}
+                 <Link
+                      key={'sign-up'}
+                      href={'sign-up'}
+                      className={cn(
+                        "text-sm font-medium transition-colors hover:text-primary",
+                        pathname === 'sign-up'
+                          ? "text-primary"
+                          : "text-muted-foreground"
+                      )}
+                    >
+                      {'sign-up'}
+                    </Link>
+                 <Link
+                      key={'sign-in'}
+                      href={'sign-in'}
+                      className={cn(
+                        "text-sm font-medium transition-colors hover:text-primary",
+                        pathname === 'sign-in'
+                          ? "text-primary"
+                          : "text-muted-foreground"
+                      )}
+                    >
+                      {'sign-in'}
+                    </Link>
               </nav>
             </SheetContent>
           </Sheet>

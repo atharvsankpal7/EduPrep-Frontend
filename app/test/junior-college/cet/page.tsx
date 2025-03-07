@@ -11,6 +11,11 @@ import LoadingComponent from "@/components/loading";
 import { useAuthStore } from "@/lib/stores/auth-store";
 
 export default function CetTestPage() {
+
+
+  useEffect(()=>{
+    console.log('hello there')
+  },[])
   const [loading, setLoading] = useState(false);
   const [showError, setShowError] = useState(false);
   const router = useRouter();
