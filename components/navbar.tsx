@@ -32,7 +32,7 @@ export function NavBar() {
 
   const handleLogout = async () => {
     try {
-      const response = await fetch('http://:5000/api/v1/user/logout', {
+      const response = await fetch('http://localhost:5000/api/v1/user/logout', {
         method: 'POST',
         credentials: 'include',
         headers: {

@@ -15,7 +15,7 @@ const examTypes = [
   {
     id: "gate",
     title: "CET Exam",
-    description: "Practice tests specifically designed for GATE examination",
+    description: "Practice tests specifically designed for CET examination",
     icon: GraduationCap,
     href: "/test/junior-college/cet",
   },

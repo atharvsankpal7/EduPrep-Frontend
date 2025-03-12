@@ -70,7 +70,9 @@ export default function CustomTestPage() {
         description: "Please sign in to create a custom test",
         variant: "destructive",
       });
-      router.push("/sign-in");
+      // Include the current URL as the callback URL
+      const currentPath = window.location.pathname;
+      router.push(`/sign-in?callbackUrl=${encodeURIComponent(currentPath)}`);
       return;
     }
 

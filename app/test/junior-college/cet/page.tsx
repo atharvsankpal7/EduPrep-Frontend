@@ -11,8 +11,6 @@ import LoadingComponent from "@/components/loading";
 import { useAuthStore } from "@/lib/stores/auth-store";
 
 export default function CetTestPage() {
-
-
   useEffect(()=>{
     console.log('hello there')
   },[])
@@ -29,7 +27,9 @@ export default function CetTestPage() {
         description: "Please sign in to take a CET test",
         variant: "destructive",
       });
-      router.push("/sign-in");
+      // Include the current URL as the callback URL
+      const currentPath = window.location.pathname;
+      router.push(`/sign-in?callbackUrl=${encodeURIComponent(currentPath)}`);
       return;
     }
 

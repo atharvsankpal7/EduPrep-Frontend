@@ -53,11 +53,11 @@ export function TestResult({
         </CardHeader>
         <CardContent className="space-y-6">
           <Tabs defaultValue="overall" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full ">
               <TabsTrigger value="overall">Overall Results</TabsTrigger>
-              <TabsTrigger value="sections" disabled={sectionResults.length === 0}>
+              {/* <TabsTrigger value="sections" disabled={sectionResults.length === 0}>
                 Section-wise Results
-              </TabsTrigger>
+              </TabsTrigger> */}
             </TabsList>
             
             <TabsContent value="overall" className="space-y-6">

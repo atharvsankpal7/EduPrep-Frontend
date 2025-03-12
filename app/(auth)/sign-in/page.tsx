@@ -15,7 +15,7 @@ import { toast } from "@/components/ui/use-toast";
 import Link from "next/link";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuthStore } from "@/lib/stores/auth-store";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -29,12 +29,11 @@ import {
 const BACKEND_URL = `http://localhost:5000/api/v1`;
 
 const emailFormSchema = z.object({
-  email: z.string().email("Invalid email format").min(1, "Email is required"),
+  email: z.string().email("Please enter a valid email address").min(1, "Email is required"),
   password: z
     .string()
     .min(8, "Password must be at least 8 characters")
     .max(64, "Password must not exceed 64 characters")
-    
 });
 
 const urnFormSchema = z.object({
@@ -54,6 +53,7 @@ export default function SignInPage() {
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const router = useRouter();
+  const searchParams = useSearchParams();
   const login = useAuthStore((state) => state.login);
 
   const emailForm = useForm({
@@ -85,7 +85,13 @@ export default function SignInPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        setErrorMessage(data.message || "Invalid credentials");
+        let errorMsg = "Invalid credentials";
+        if (data.message === "User not found") {
+          errorMsg = "No account found with these credentials. Please check your details or sign up.";
+        } else if (data.message === "Invalid password") {
+          errorMsg = "Incorrect password. Please try again.";
+        }
+        setErrorMessage(errorMsg);
         setErrorDialogOpen(true);
         throw new Error(data.message);
       }
@@ -96,10 +102,15 @@ export default function SignInPage() {
         title: "Welcome back!",
         description: "You have successfully signed in.",
       });
+
+      // Get the callback URL from the search params or default to home
+      const callbackUrl = searchParams.get("callbackUrl") || "/";
+      
       if (data.data.user.role === "admin") {
         router.push("/admin/dashboard");
+      } else {
+        router.push(callbackUrl);
       }
-      router.push("/");
     } catch (error) {
       setErrorMessage(
         error instanceof Error ? error.message : "An unexpected error occurred"
@@ -238,8 +249,10 @@ export default function SignInPage() {
         <Dialog open={errorDialogOpen} onOpenChange={setErrorDialogOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Error</DialogTitle>
-              <DialogDescription>{errorMessage}</DialogDescription>
+              <DialogTitle>Sign In Failed</DialogTitle>
+              <DialogDescription className="text-red-500">
+                {errorMessage}
+              </DialogDescription>
             </DialogHeader>
           </DialogContent>
         </Dialog>
