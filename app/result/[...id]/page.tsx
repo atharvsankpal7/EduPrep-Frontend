@@ -49,7 +49,7 @@ export default function TestResultPage({ params }: { params: { id: string } }) {
     const fetchResult = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`${BACKEND_URL}/${params.id}/result`,{withCredentials: true});
+        const response = await axios.get(`${BACKEND_URL}/test/${params.id}/result`,{withCredentials: true});
         
         // Process the response to include section results
         const resultData = response.data.data;

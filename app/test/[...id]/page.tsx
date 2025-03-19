@@ -108,7 +108,7 @@ export default function TestPage({ params }: TestPageProps) {
       });
 
       // Submit test
-     const response =  await axios.patch(`${BACKEND_URL}/${testId}/submit`, {
+     const response =  await axios.patch(`${BACKEND_URL}/test/${testId}/submit`, {
         selectedAnswers,
         timeTaken: Math.floor(timeSpent / 60), // Convert to minutes
         autoSubmission: {
