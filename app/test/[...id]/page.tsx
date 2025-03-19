@@ -57,7 +57,8 @@ export default function TestPage({ params }: TestPageProps) {
     const fetchTestConfig = async () => {
       try {
         setLoading(true);
-        const url = `${BACKEND_URL}/${testId}`;
+        const url = `${BACKEND_URL}/test/${testId}`;
+        console.log("url", url);
         const response = await axios.get(url, {
           withCredentials: true,
         });
