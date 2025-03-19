@@ -9,6 +9,8 @@ import { Menu, Users } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { TeacherNav } from "@/components/navbar/teacher-nav";
 import { useAuthStore } from "@/lib/stores/auth-store";
+import { BACKEND_URL } from "@/lib/constant";
+
 
 const studentRoutes = [
   { href: "/", label: "Home" },
@@ -32,7 +34,7 @@ export function NavBar() {
 
   const handleLogout = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/v1/user/logout', {
+      const response = await fetch(`${BACKEND_URL}/user/logout`, {
         method: 'POST',
         credentials: 'include',
         headers: {

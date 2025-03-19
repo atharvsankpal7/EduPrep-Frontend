@@ -26,7 +26,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-const BACKEND_URL = `http://localhost:5000/api/v1`;
+import { BACKEND_URL } from "@/lib/constant";
 
 const emailFormSchema = z.object({
   email: z.string().email("Please enter a valid email address").min(1, "Email is required"),

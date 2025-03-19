@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { TestInterface } from "@/components/test/test-interface";
 import axios from "axios";
 import LoadingComponent from "@/components/loading";
+import { BACKEND_URL } from "@/lib/constant";
 
 interface TestPageProps {
   params: { id: string };
@@ -51,7 +52,7 @@ export default function TestPage({ params }: TestPageProps) {
   const router = useRouter();
 
   useEffect(() => {
-    const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000/api/v1/test";
+;
 
     const fetchTestConfig = async () => {
       try {
@@ -83,7 +84,6 @@ export default function TestPage({ params }: TestPageProps) {
 
   const handleTestComplete = async (answers: Record<number, number>, timeSpent: number) => {
     try {
-      const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000/api/v1/test";
       
       if (!testData) return;
       

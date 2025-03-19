@@ -7,6 +7,8 @@ import InvalidResult from "@/components/test/result/invalid-result";
 import QuestionAnalysis from "@/components/test/result/question-analysis";
 import axios from "axios";
 import LoadingComponent from "@/components/loading";
+import { BACKEND_URL } from "@/lib/constant";
+
 
 interface SectionResult {
   name: string;
@@ -47,7 +49,6 @@ export default function TestResultPage({ params }: { params: { id: string } }) {
     const fetchResult = async () => {
       try {
         setLoading(true);
-        const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000/api/v1/test";
         const response = await axios.get(`${BACKEND_URL}/${params.id}/result`,{withCredentials: true});
         
         // Process the response to include section results

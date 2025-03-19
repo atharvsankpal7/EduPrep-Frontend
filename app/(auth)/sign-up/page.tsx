@@ -24,6 +24,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { BACKEND_URL } from "@/lib/constant";
+
 
 const formSchema = z.object({
   urn: z
@@ -61,7 +63,6 @@ export default function SignUpPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorModal, setErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const BACKEND_URL = `http://localhost:5000/api/v1`;
   const register = useAuthStore((state) => state.login);
 
   const form = useForm<z.infer<typeof formSchema>>({
