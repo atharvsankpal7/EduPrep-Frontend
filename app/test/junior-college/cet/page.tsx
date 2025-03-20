@@ -11,9 +11,12 @@ import LoadingComponent from "@/components/loading";
 import { useAuthStore } from "@/lib/stores/auth-store";
 
 export default function CetTestPage() {
-  useEffect(()=>{
-    console.log('hello there')
-  },[])
+  useEffect(() => {
+    const user = useAuthStore.getState().user;
+    if (!user) {
+      router.push("/sign-up");
+    }
+  }, []);
   const [loading, setLoading] = useState(false);
   const [showError, setShowError] = useState(false);
   const router = useRouter();
@@ -35,15 +38,15 @@ export default function CetTestPage() {
 
     try {
       setLoading(true);
-      const response = await createTest({
+      const response = (await createTest({
         educationLevel: EducationLevel.JuniorCollege,
         isCet: true,
-      }) as any;
-      
+      })) as any;
+
       if (!response.data.testDetails.testId) {
         throw new Error("Failed to create test");
       }
-      
+
       router.push(`/test/${response.data.testDetails.testId}`);
     } catch (error) {
       console.error("Error creating test:", error);
@@ -64,7 +67,10 @@ export default function CetTestPage() {
 
   return (
     <>
-      <ErrorMessageDialog open={showError} onClose={() => setShowError(false)} />
+      <ErrorMessageDialog
+        open={showError}
+        onClose={() => setShowError(false)}
+      />
       <TestInfoDisplay
         title="CET Mock Test"
         description="Complete mock test simulating the actual CET exam environment"

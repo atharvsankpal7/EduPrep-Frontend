@@ -1,15 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
 import Link from "next/link";
@@ -36,20 +28,8 @@ const emailFormSchema = z.object({
     .max(64, "Password must not exceed 64 characters")
 });
 
-const urnFormSchema = z.object({
-  urn: z
-    .string()
-    .min(8, "URN must be at least 8 characters")
-    .regex(/^[0-9]+$/, "URN must contain only numbers"),
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters")
-    .max(64, "Password must not exceed 64 characters"),
-});
-
 export default function SignInPage() {
   const [isLoading, setIsLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState("email");
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const router = useRouter();
@@ -62,17 +42,7 @@ export default function SignInPage() {
     mode: "onChange",
   });
 
-  const urnForm = useForm({
-    resolver: zodResolver(urnFormSchema),
-    defaultValues: { urn: "", password: "" },
-    mode: "onChange",
-  });
-
-  async function onSubmit(
-    values:
-      | { email: string; password: string }
-      | { urn: string; password: string }
-  ) {
+  async function onSubmit(values: { email: string; password: string }) {
     setIsLoading(true);
     try {
       const response = await fetch(`${BACKEND_URL}/user/login`, {
@@ -131,113 +101,57 @@ export default function SignInPage() {
           </p>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="email">Email</TabsTrigger>
-            <TabsTrigger value="urn">URN</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="email">
-            <Form {...emailForm}>
-              <form
-                onSubmit={emailForm.handleSubmit(onSubmit)}
-                className="space-y-4"
-              >
-                <FormField
-                  control={emailForm.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Enter your email"
-                          type="email"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage className="text-red-500" />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={emailForm.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Password</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="********"
-                          type="password"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage className="text-red-500" />
-                    </FormItem>
-                  )}
-                />
-                <Button
-                  className="w-full"
-                  type="submit"
-                  disabled={isLoading || !emailForm.formState.isValid}
-                >
-                  {isLoading ? "Signing in..." : "Sign In"}
-                </Button>
-              </form>
-            </Form>
-          </TabsContent>
-
-          <TabsContent value="urn">
-            <Form {...urnForm}>
-              <form
-                onSubmit={urnForm.handleSubmit(onSubmit)}
-                className="space-y-4"
-              >
-                <FormField
-                  control={urnForm.control}
-                  name="urn"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>URN</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter your URN" {...field} />
-                      </FormControl>
-                      <FormMessage className="text-red-500" />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={urnForm.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Password</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="********"
-                          type="password"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage className="text-red-500" />
-                    </FormItem>
-                  )}
-                />
-                <Button
-                  className="w-full"
-                  type="submit"
-                  disabled={isLoading || !urnForm.formState.isValid}
-                >
-                  {isLoading ? "Signing in..." : "Sign In"}
-                </Button>
-              </form>
-            </Form>
-          </TabsContent>
-        </Tabs>
+        <Form {...emailForm}>
+          <form
+            onSubmit={emailForm.handleSubmit(onSubmit)}
+            className="space-y-4"
+          >
+            <FormField
+              control={emailForm.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Enter your email"
+                      type="email"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage className="text-red-500" />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={emailForm.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="********"
+                      type="password"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage className="text-red-500" />
+                </FormItem>
+              )}
+            />
+            <Button
+              className="w-full"
+              type="submit"
+              disabled={isLoading || !emailForm.formState.isValid}
+            >
+              {isLoading ? "Signing in..." : "Sign In"}
+            </Button>
+          </form>
+        </Form>
 
         <div className="text-center text-sm">
-          Don&apos;t have an account?{" "}
+          Don't have an account?{" "}
           <Link
             href="/sign-up"
             className="font-medium text-primary hover:underline"

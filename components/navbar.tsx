@@ -10,7 +10,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { TeacherNav } from "@/components/navbar/teacher-nav";
 import { useAuthStore } from "@/lib/stores/auth-store";
 import { BACKEND_URL } from "@/lib/constant";
-
+import { useRouter } from "next/navigation";
 
 const studentRoutes = [
   { href: "/", label: "Home" },
@@ -31,14 +31,14 @@ export function NavBar() {
   const isTeacherRoute = pathname.startsWith("/teacher");
   const isAdminRoute = pathname.startsWith("/admin");
   const { isAuthenticated, user, logout } = useAuthStore();
-
+  const router = useRouter();
   const handleLogout = async () => {
     try {
       const response = await fetch(`${BACKEND_URL}/user/logout`, {
-        method: 'POST',
-        credentials: 'include',
+        method: "POST",
+        credentials: "include",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ id: user?.id }),
       });
@@ -49,8 +49,9 @@ export function NavBar() {
       if (response.status === 401) {
         logout();
       }
+      router.push("/sign-up");
     } catch (error) {
-      console.error('Logout failed:', error);
+      console.error("Logout failed:", error);
     }
   };
 
@@ -103,30 +104,30 @@ export function NavBar() {
                     </Link>
                   ))
                 )}
-                 <Link
-                      key={'sign-up'}
-                      href={'sign-up'}
-                      className={cn(
-                        "text-sm font-medium transition-colors hover:text-primary",
-                        pathname === 'sign-up'
-                          ? "text-primary"
-                          : "text-muted-foreground"
-                      )}
-                    >
-                      {'sign-up'}
-                    </Link>
-                 <Link
-                      key={'sign-in'}
-                      href={'sign-in'}
-                      className={cn(
-                        "text-sm font-medium transition-colors hover:text-primary",
-                        pathname === 'sign-in'
-                          ? "text-primary"
-                          : "text-muted-foreground"
-                      )}
-                    >
-                      {'sign-in'}
-                    </Link>
+                <Link
+                  key={"sign-up"}
+                  href={"sign-up"}
+                  className={cn(
+                    "text-sm font-medium transition-colors hover:text-primary",
+                    pathname === "sign-up"
+                      ? "text-primary"
+                      : "text-muted-foreground"
+                  )}
+                >
+                  {"sign-up"}
+                </Link>
+                <Link
+                  key={"sign-in"}
+                  href={"sign-in"}
+                  className={cn(
+                    "text-sm font-medium transition-colors hover:text-primary",
+                    pathname === "sign-in"
+                      ? "text-primary"
+                      : "text-muted-foreground"
+                  )}
+                >
+                  {"sign-in"}
+                </Link>
               </nav>
             </SheetContent>
           </Sheet>

@@ -1,5 +1,6 @@
+"use client";
 import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
 import {
   GraduationCap,
   Info,
@@ -7,16 +8,20 @@ import {
   Briefcase,
   Star,
   Globe,
-  Phone
+  Phone,
+  CopyrightIcon,
+  X,
 } from "lucide-react";
 import Image from "next/image";
 
 interface Props {}
 
 const AdcetInfo = () => {
+  const [showModal, setShowModal] = useState(false);
+
   const menuItems = [
     {
-      href: "/test",
+      href: "/test/junior-college/cet",
       icon: GraduationCap,
       alt: "Mock Test",
       label: "Mock Test",
@@ -53,8 +58,17 @@ const AdcetInfo = () => {
     },
   ];
 
-
-  const MenuItem = ({ href, icon: Icon, alt, label }: { href: string; icon: any; alt: string; label: string }) => (
+  const MenuItem = ({
+    href,
+    icon: Icon,
+    alt,
+    label,
+  }: {
+    href: string;
+    icon: any;
+    alt: string;
+    label: string;
+  }) => (
     <Link
       href={href}
       className="flex flex-col items-center p-4 bg-white rounded-lg border  border-1 border-slate-500 transition-shadow"
@@ -77,7 +91,7 @@ const AdcetInfo = () => {
           className="mx-auto"
         />
         <div className="space-y-1">
-          <p className="text-sm">Sant Dnyaneshwar Shikshan Sanstha&apos;s</p>
+          <p className="text-sm">Sant Dnyaneshwar Shikshan Sanstha's</p>
           <h1 className="text-lg font-bold text-blue-900">
             Annasaheb Dange College of Engineering and Technology (ADCET), Ashta
           </h1>
@@ -86,14 +100,13 @@ const AdcetInfo = () => {
             Kolhapur, Approved By AICTE, New Delhi & Govt. of Maharashtra
           </p>
           <div className="text-green-700 font-semibold text-sm">
-            <p>Accredited by NAAC &apos;A++&apos; Grade, Bangalore</p>
+            <p>Accredited by NAAC 'A++' Grade, Bangalore</p>
             <p>Eligible Programs Accredited by NBA, New Delhi</p>
           </div>
         </div>
       </div>
 
       {/* Grid Menu */}
-
       <div className="grid grid-cols-2 gap-4 p-4">
         {menuItems.map((item, index) => (
           <MenuItem
@@ -105,6 +118,7 @@ const AdcetInfo = () => {
           />
         ))}
       </div>
+
       {/* Contact Section */}
       <div className="mt-auto p-4 bg-gray-50">
         <h2 className="font-semibold mb-2">Contact Us</h2>
@@ -113,15 +127,14 @@ const AdcetInfo = () => {
         </p>
         <div className="h-48 w-full rounded-lg overflow-hidden mb-4">
           <iframe
-
             src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3815.4711947989086!2d74.41702511142599!3d16.941714610788097!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc1524e1c1f8a55%3A0x7cc3eff1560a3c39!2sADCET%20Ashta!5e0!3m2!1sen!2sin!4v1647887842014!5m2!1sen!2sin"
             width="100%"
             height="100%"
             style={{ border: 0 }}
             allowFullScreen
             loading="lazy"
-
-          ></iframe>        </div>
+          ></iframe>{" "}
+        </div>
       </div>
 
       {/* Floating Call Button */}
@@ -131,6 +144,56 @@ const AdcetInfo = () => {
       >
         <Phone className="h-6 w-6" />
       </a>
+      <button
+        onClick={() => setShowModal(true)}
+        className="fixed bottom-4 right-24 bg-blue-800 text-white rounded-full p-4 shadow-lg hover:bg-blue-900 transition-colors"
+      >
+        <CopyrightIcon className="h-6 w-6" />
+      </button>
+
+      {/* Copyright Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full relative">
+            <button
+              onClick={() => setShowModal(false)}
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+            >
+              <X className="h-6 w-6" />
+            </button>
+            <h2 className="text-xl font-bold mb-4 text-black">
+              EduPrep's Development Team
+            </h2>
+            <div className="space-y-4">
+              <div>
+                <h3 className="font-semibold text-black">Project Guide</h3>
+                <p className="text-black">Dr. A.J.Shikalgar</p>
+              </div>
+              <div>
+                <h3 className="font-semibold text-black">Team Members</h3>
+                <ul className="list-disc list-inside text-black">
+                  <li>
+                    <a
+                      href="https://www.linkedin.com/in/atharv-sankpal-235a7730a/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline"
+                    >
+                      Atharv Santosh Sankpal
+                    </a>
+                  </li>
+                  <li>Vaishnavi Rajarm Sutar</li>
+                  <li>Shrinath Hanmant Dongare</li>
+                  <li>Mansi Manohar Sawant</li>
+                </ul>
+              </div>
+              <div className="text-center text-sm text-black mt-6">
+                <p>© 2025 EduPrep Mobile App. All Rights Reserved.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

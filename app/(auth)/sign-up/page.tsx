@@ -26,13 +26,7 @@ import {
 } from "@/components/ui/dialog";
 import { BACKEND_URL } from "@/lib/constant";
 
-
 const formSchema = z.object({
-  urn: z
-    .string()
-    .min(1, "URN is required")
-    .transform((val) => parseInt(val))
-    .pipe(z.number().min(8, "Please enter valid URN")),
   fullName: z
     .string()
     .min(1, "Full name is required")
@@ -71,7 +65,6 @@ export default function SignUpPage() {
       fullName: "",
       email: "",
       password: "",
-      urn: 0,
       city: "",
       contactNumber: "",
     },
@@ -124,19 +117,6 @@ export default function SignUpPage() {
         </div>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="urn"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>URN</FormLabel>
-                  <FormControl>
-                    <Input placeholder="21031038" {...field} type="number" />
-                  </FormControl>
-                  <FormMessage className="text-red-500" />
-                </FormItem>
-              )}
-            />
             <FormField
               control={form.control}
               name="fullName"
