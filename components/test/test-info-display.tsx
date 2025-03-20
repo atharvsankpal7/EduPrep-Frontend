@@ -42,7 +42,6 @@ export function TestInfoDisplay({
   instructions = [
     "Ensure you have a stable internet connection",
     "Find a quiet place without distractions",
-    "Keep your webcam and microphone ready for proctoring",
     "The test will automatically submit when the time is up",
     "Switching tabs or windows will be recorded",
   ],

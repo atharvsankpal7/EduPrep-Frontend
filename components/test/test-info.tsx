@@ -180,7 +180,6 @@ export default function GateTestPage() {
               <ul className="list-disc list-inside space-y-2 text-muted-foreground">
                 <li>Ensure you have a stable internet connection</li>
                 <li>Find a quiet place without distractions</li>
-                <li>Keep your webcam and microphone ready for proctoring</li>
                 <li>The test will automatically submit when the time is up</li>
                 <li>Switching tabs or windows will be recorded</li>
               </ul>

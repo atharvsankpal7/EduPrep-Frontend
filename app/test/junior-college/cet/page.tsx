@@ -78,10 +78,8 @@ export default function CetTestPage() {
         questionCount={100}
         onStart={startTest}
         requirements={[
-          "Valid ID proof",
-          "Working webcam and microphone",
+          "Enough time for the test",
           "Stable internet connection",
-          "Quiet environment",
         ]}
       />
     </>
