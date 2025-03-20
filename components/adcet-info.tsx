@@ -162,7 +162,7 @@ const AdcetInfo = () => {
               <X className="h-6 w-6" />
             </button>
             <h2 className="text-xl font-bold mb-4 text-black">
-              EduPrep's Development Team
+              EduPrep&apos;s Development Team
             </h2>
             <div className="space-y-4">
               <div>
