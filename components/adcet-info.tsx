@@ -91,7 +91,7 @@ const AdcetInfo = () => {
           className="mx-auto"
         />
         <div className="space-y-1">
-          <p className="text-sm">Sant Dnyaneshwar Shikshan Sanstha's</p>
+          <p className="text-sm">Sant Dnyaneshwar Shikshan Sanstha&apos;s</p>
           <h1 className="text-lg font-bold text-blue-900">
             Annasaheb Dange College of Engineering and Technology (ADCET), Ashta
           </h1>
@@ -100,7 +100,7 @@ const AdcetInfo = () => {
             Kolhapur, Approved By AICTE, New Delhi & Govt. of Maharashtra
           </p>
           <div className="text-green-700 font-semibold text-sm">
-            <p>Accredited by NAAC 'A++' Grade, Bangalore</p>
+            <p>Accredited by NAAC &apos;A++&apos; Grade, Bangalore</p>
             <p>Eligible Programs Accredited by NBA, New Delhi</p>
           </div>
         </div>
