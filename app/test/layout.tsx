@@ -1,3 +1,5 @@
+import { NavBar } from "@/components/navbar";
+
 export default function TestLayout({
   children,
 }: {
@@ -5,6 +7,7 @@ export default function TestLayout({
 }) {
   return (
     <div className="min-h-screen bg-background">
+      <NavBar/>
       {children}
     </div>
   );
