@@ -1,5 +1,5 @@
-// components/test/result/question-analysis.tsx
 import React from 'react';
+import Image from 'next/image';
 
 interface QuestionAnalysisItemProps {
   questionText: string;
@@ -8,6 +8,31 @@ interface QuestionAnalysisItemProps {
   selectedOption: number;
   isCorrect: boolean;
 }
+
+// Helper function to check if content is an image URL
+const isImageUrl = (str: string) => {
+  return str.match(/\.(jpeg|jpg|gif|png)$/) !== null || 
+         (str.startsWith('http') && (str.includes('/images/') || str.includes('/img/')));
+};
+
+// Component to render content (text or image)
+const ContentRenderer = ({ content }: { content: string }) => {
+  if (isImageUrl(content)) {
+    return (
+      <div className="flex justify-center my-2">
+        <Image 
+          src={content} 
+          alt="Question content" 
+          width={500} 
+          height={300} 
+          className="max-w-full object-contain rounded-md"
+          unoptimized // For external images
+        />
+      </div>
+    );
+  }
+  return <span>{content}</span>;
+};
 
 const QuestionAnalysis = ({ 
   questionAnalysis 
@@ -53,7 +78,9 @@ const QuestionAnalysis = ({
                 </span>
               </div>
               
-              <p className="mb-4 text-gray-800">{question.questionText}</p>
+              <div className="mb-4">
+                <ContentRenderer content={question.questionText} />
+              </div>
               
               <div className="space-y-3">
                 {question.options.map((option, optIndex) => (
@@ -68,7 +95,7 @@ const QuestionAnalysis = ({
                     }`}
                   >
                     <div className="flex-1">
-                      <p>{option}</p>
+                      <ContentRenderer content={option} />
                     </div>
                     <div className="flex items-center">
                       {optIndex === question.correctOption && (
@@ -90,9 +117,9 @@ const QuestionAnalysis = ({
                 ))}
               </div>
               
-              {!question.isCorrect && (
+              {!question.isCorrect && question.selectedOption === -1 && (
                 <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-                  <p className="text-blue-800 font-medium">Correct Answer: Option {question.correctOption + 1}</p>
+                  <p className="text-blue-800 font-medium">Not attempted</p>
                 </div>
               )}
             </div>

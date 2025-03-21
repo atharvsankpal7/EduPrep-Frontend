@@ -10,7 +10,6 @@ import { EducationLevel, TopicList } from "@/lib/type";
 import { undergraduateSubjects } from "@/lib/data/undergraduate-subjects";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
-import { useAuthStore } from "@/lib/stores/auth-store";
 
 export default function CustomTestPage() {
   const [showConfig, setShowConfig] = useState(false);
@@ -22,7 +21,6 @@ export default function CustomTestPage() {
   } | null>(null);
   const router = useRouter();
   const { toast } = useToast();
-  const { isAuthenticated } = useAuthStore();
 
   const handleTopicsSelected = (topics: TopicList) => {
     setSelectedTopics(topics);
@@ -40,25 +38,13 @@ export default function CustomTestPage() {
   const startTest = async () => {
     if (!selectedTopics || !testConfig) return;
 
-    if (!isAuthenticated) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to create a custom test",
-        variant: "destructive",
-      });
-      // Include the current URL as the callback URL
-      const currentPath = window.location.pathname;
-      router.push(`/sign-in?callbackUrl=${encodeURIComponent(currentPath)}`);
-      return;
-    }
-
     try {
-      const response = await createTest({
+      const response = (await createTest({
         educationLevel: EducationLevel.Undergraduate,
         topicList: selectedTopics,
         numberOfQuestions: testConfig.questionCount,
         time: testConfig.duration * 60, // Convert minutes to seconds
-      }) as any;
+      })) as any;
 
       if (!response.testId) {
         throw new Error("Failed to create test");
@@ -78,7 +64,10 @@ export default function CustomTestPage() {
   if (testConfig && selectedTopics) {
     return (
       <>
-        <ErrorMessageDialog open={showError} onClose={() => setShowError(false)} />
+        <ErrorMessageDialog
+          open={showError}
+          onClose={() => setShowError(false)}
+        />
         <TestInfoDisplay
           title="Custom Practice Test"
           description="Personalized test based on your selected topics"

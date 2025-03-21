@@ -8,34 +8,14 @@ import { createTest } from "@/lib/backendCalls/createTest";
 import { EducationLevel } from "@/lib/type";
 import { useToast } from "@/components/ui/use-toast";
 import LoadingComponent from "@/components/loading";
-import { useAuthStore } from "@/lib/stores/auth-store";
 
 export default function CetTestPage() {
-  useEffect(() => {
-    const user = useAuthStore.getState().user;
-    if (!user) {
-      router.push("/sign-up");
-    }
-  }, []);
   const [loading, setLoading] = useState(false);
   const [showError, setShowError] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
-  const { isAuthenticated } = useAuthStore();
 
   const startTest = async () => {
-    if (!isAuthenticated) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to take a CET test",
-        variant: "destructive",
-      });
-      // Include the current URL as the callback URL
-      const currentPath = window.location.pathname;
-      router.push(`/sign-in?callbackUrl=${encodeURIComponent(currentPath)}`);
-      return;
-    }
-
     try {
       setLoading(true);
       const response = (await createTest({

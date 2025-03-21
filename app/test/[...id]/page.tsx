@@ -6,7 +6,7 @@ import { TestInterface } from "@/components/test/test-interface";
 import axios from "axios";
 import LoadingComponent from "@/components/loading";
 import { BACKEND_URL } from "@/lib/constant";
-import { useAuthStore } from "@/lib/stores/auth-store";
+import { checkAuthStatus } from "@/lib/auth";
 
 interface TestPageProps {
   params: { id: string };
@@ -53,10 +53,6 @@ export default function TestPage({ params }: TestPageProps) {
   const router = useRouter();
 
   useEffect(() => {
-    const user  = useAuthStore.getState().user;
-    if(!user) {
-      router.push("/sign-up");
-    }
 
     const fetchTestConfig = async () => {
       try {

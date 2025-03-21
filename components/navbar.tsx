@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Menu, Users } from "lucide-react";
+import { Menu, Users, Loader2 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { TeacherNav } from "@/components/navbar/teacher-nav";
 import { useAuthStore } from "@/lib/stores/auth-store";
@@ -15,10 +15,6 @@ import { useRouter } from "next/navigation";
 const studentRoutes = [
   { href: "/", label: "Home" },
   { href: "/test", label: "Mock Tests" },
-  // { href: "/test-history", label: "Test History" },
-  // { href: "/analytics", label: "Analytics" },
-  // { href: "/study-groups", label: "Study Groups" },
-  // { href: "/recommendations", label: "Recommendations" },
 ];
 
 const adminRoutes = [
@@ -30,8 +26,9 @@ export function NavBar() {
   const pathname = usePathname();
   const isTeacherRoute = pathname.startsWith("/teacher");
   const isAdminRoute = pathname.startsWith("/admin");
-  const { isAuthenticated, user, logout } = useAuthStore();
+  const { isAuthenticated, user, logout, isLoading } = useAuthStore();
   const router = useRouter();
+
   const handleLogout = async () => {
     try {
       const response = await fetch(`${BACKEND_URL}/user/logout`, {
@@ -57,6 +54,14 @@ export function NavBar() {
 
   const navRoutes = isAdminRoute ? adminRoutes : studentRoutes;
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-16 border-b">
+        <Loader2 className="h-6 w-6 animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center">
@@ -73,23 +78,8 @@ export function NavBar() {
               <nav className="flex flex-col gap-4 mt-6">
                 {isTeacherRoute ? (
                   <TeacherNav />
-                ) : isAdminRoute ? (
-                  adminRoutes.map((route) => (
-                    <Link
-                      key={route.href}
-                      href={route.href}
-                      className={cn(
-                        "text-sm font-medium transition-colors hover:text-primary",
-                        pathname === route.href
-                          ? "text-primary"
-                          : "text-muted-foreground"
-                      )}
-                    >
-                      {route.label}
-                    </Link>
-                  ))
                 ) : (
-                  studentRoutes.map((route) => (
+                  navRoutes.map((route) => (
                     <Link
                       key={route.href}
                       href={route.href}
@@ -104,30 +94,6 @@ export function NavBar() {
                     </Link>
                   ))
                 )}
-                <Link
-                  key={"sign-up"}
-                  href={"sign-up"}
-                  className={cn(
-                    "text-sm font-medium transition-colors hover:text-primary",
-                    pathname === "sign-up"
-                      ? "text-primary"
-                      : "text-muted-foreground"
-                  )}
-                >
-                  {"sign-up"}
-                </Link>
-                <Link
-                  key={"sign-in"}
-                  href={"sign-in"}
-                  className={cn(
-                    "text-sm font-medium transition-colors hover:text-primary",
-                    pathname === "sign-in"
-                      ? "text-primary"
-                      : "text-muted-foreground"
-                  )}
-                >
-                  {"sign-in"}
-                </Link>
               </nav>
             </SheetContent>
           </Sheet>

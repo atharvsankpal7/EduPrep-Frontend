@@ -1,13 +1,17 @@
+"use client";
+
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { Toaster } from '@/components/ui/toaster';
 import { QueryProvider } from '@/components/providers/query-provider';
+import { useEffect } from 'react';
+import { checkAuthStatus } from '@/lib/auth';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
 
-export const metadata: Metadata = {
+const metadata: Metadata = {
   title: 'ADCET - Online Test Platform',
   description: 'Enhance your test preparation with our advanced mock test platform',
   icons: {
@@ -20,6 +24,10 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  useEffect(() => {
+    checkAuthStatus();
+  }, []);
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
@@ -31,6 +39,7 @@ export default function RootLayout({
         >
           <QueryProvider>
             <main className="min-h-screen bg-background">
+
               {children}
             </main>
             <Toaster />
