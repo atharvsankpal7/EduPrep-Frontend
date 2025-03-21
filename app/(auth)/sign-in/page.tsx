@@ -56,7 +56,9 @@ export default function SignInPage() {
 
       if (!response.ok) {
         let errorMsg = "Invalid credentials";
-        if (data.message === "User not found") {
+        if (response.status === 401) {
+          errorMsg = "Invalid email or password";
+        } else if (data.message === "User not found") {
           errorMsg = "No account found with these credentials. Please check your details or sign up.";
         } else if (data.message === "Invalid password") {
           errorMsg = "Incorrect password. Please try again.";
@@ -90,7 +92,6 @@ export default function SignInPage() {
       setIsLoading(false);
     }
   }
-
   return (
     <div className="container flex items-center justify-center min-h-screen py-12">
       <div className="w-full max-w-md space-y-6">

@@ -9,7 +9,6 @@ import axios from "axios";
 import LoadingComponent from "@/components/loading";
 import { BACKEND_URL } from "@/lib/constant";
 
-
 interface SectionResult {
   name: string;
   totalQuestions: number;
@@ -21,8 +20,8 @@ interface SectionResult {
 interface QuestionAnalysisItem {
   questionText: string;
   options: string[];
-  correctAnswer: number;
-  selectedAnswer: number;
+  correctOption: number;
+  selectedOption: number;
   isCorrect: boolean;
 }
 
@@ -49,24 +48,29 @@ export default function TestResultPage({ params }: { params: { id: string } }) {
     const fetchResult = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`${BACKEND_URL}/test/${params.id}/result`,{withCredentials: true});
-        
+        const response = await axios.get(
+          `${BACKEND_URL}/test/${params.id}/result`,
+          { withCredentials: true }
+        );
+
         // Process the response to include section results
         const resultData = response.data.data;
-        console.log(response.data.data)
+        console.log(response.data.data);
+
         // Transform section data if available
-        const sectionResults = resultData.sectionResults?.map((section: any) => ({
-          name: section.sectionName,
-          totalQuestions: section.totalQuestions,
-          correctAnswers: section.correctAnswers,
-          score: (section.correctAnswers / section.totalQuestions) * 100,
-          timeSpent: section.timeSpent
-        })) || [];
-        
+        const sectionResults =
+          resultData.sectionResults?.map((section: any) => ({
+            name: section.sectionName,
+            totalQuestions: section.totalQuestions,
+            correctAnswers: section.correctAnswers,
+            score: (section.correctAnswers / section.totalQuestions) * 100,
+            timeSpent: section.timeSpent,
+          })) || [];
+
         setResult({
           ...resultData,
           sectionResults,
-          questionAnalysis: resultData.questionAnalysis || []
+          questionAnalysis: resultData.questionAnalysis || [],
         });
       } catch (error) {
         console.error("Failed to fetch test result:", error);
@@ -84,11 +88,15 @@ export default function TestResultPage({ params }: { params: { id: string } }) {
   }
 
   if (error) {
-    return <div className="container py-8 text-center text-destructive">{error}</div>;
+    return (
+      <div className="container py-8 text-center text-destructive">{error}</div>
+    );
   }
 
   if (!result) {
-    return <div className="container py-8 text-center">No result data available</div>;
+    return (
+      <div className="container py-8 text-center">No result data available</div>
+    );
   }
 
   if (result.invalid) {
@@ -99,38 +107,24 @@ export default function TestResultPage({ params }: { params: { id: string } }) {
     <div className="container py-8 max-w-4xl mx-auto">
       <div className="space-y-8">
         <div className="flex flex-col items-center text-center">
-          <h1 className="text-4xl font-bold mb-6">Test Results</h1>
-          <div className="flex space-x-4">
-            <button 
-              onClick={() => setActiveTab("summary")}
-              className={`px-6 py-2.5 rounded-lg transition-all duration-200 hover:opacity-90 ${activeTab === "summary" ? "bg-primary text-primary-foreground shadow-md" : "bg-muted hover:bg-muted/80"}`}
-            >
-              Summary
-            </button>
-            {/* <button 
-              onClick={() => setActiveTab("questions")}
-              className={`px-6 py-2.5 rounded-lg transition-all duration-200 hover:opacity-90 ${activeTab === "questions" ? "bg-primary text-primary-foreground shadow-md" : "bg-muted hover:bg-muted/80"}`}
-            > q
-              Question Analysis
-            </button> */}
-          </div>
+          <h1 className="text-4xl font-bold ">Test Results</h1>
+          
         </div>
 
         <div className="bg-card rounded-xl shadow-lg p-6">
-          {activeTab === "summary" ? (
-            <TestResult
-              totalQuestions={result.totalQuestions}
-              correctAnswers={result.correctAnswers} 
-              score={(result.correctAnswers / result.totalQuestions) * 100}
-              timeSpent={result.timeSpent}
-              tabSwitches={result.tabSwitches || 0}
-              autoSubmitted={result.autoSubmitted || false}
-              sectionResults={result.sectionResults}
-            />
-          ) : (
-            <QuestionAnalysis questionAnalysis={result.questionAnalysis || []} />
-          )}
+          <TestResult
+            totalQuestions={result.totalQuestions}
+            correctAnswers={result.correctAnswers}
+            score={(result.correctAnswers / result.totalQuestions) * 100}
+            timeSpent={result.timeSpent}
+            tabSwitches={result.tabSwitches || 0}
+            autoSubmitted={result.autoSubmitted || false}
+            sectionResults={result.sectionResults}
+          />
+
+          <QuestionAnalysis questionAnalysis={result.questionAnalysis || []} />
         </div>
       </div>
     </div>
-  );}
+  );
+}

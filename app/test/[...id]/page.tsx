@@ -99,18 +99,18 @@ export default function TestPage({ params }: TestPageProps) {
       
       testData.test.sections.forEach(section => {
         section.questions.forEach(question => {
-          const selectedOption = answers[globalQuestionIndex] !== undefined ? answers[globalQuestionIndex] : 0;
+          const selectedOption = answers[globalQuestionIndex];
           
           selectedAnswers.push({
             questionId: question._id,
-            selectedOption: selectedOption,
+            selectedOption: selectedOption !== undefined ? selectedOption + 1 : -1, // Add 1 to match 1-based indexing, -1 for unanswered
             sectionName: section.sectionName
           });
           
           globalQuestionIndex++;
         });
       });
-
+      console.log("Selected Answers:", selectedAnswers);
       // Submit test
      const response =  await axios.patch(`${BACKEND_URL}/test/${testId}/submit`, {
         selectedAnswers,
