@@ -7,6 +7,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { QueryProvider } from '@/components/providers/query-provider';
 import { useEffect } from 'react';
 import { checkAuthStatus } from '@/lib/auth';
+import { Footer } from '@/components/footer';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -38,10 +39,12 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <QueryProvider>
-            <main className="min-h-screen bg-background">
-
-              {children}
-            </main>
+            <div className="flex flex-col min-h-screen">
+              <main className="flex-1 bg-background">
+                {children}
+              </main>
+              <Footer />
+            </div>
             <Toaster />
           </QueryProvider>
         </ThemeProvider>
