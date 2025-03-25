@@ -16,6 +16,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
 
 import { BACKEND_URL } from "@/lib/constant";
@@ -51,21 +52,35 @@ export default function SignInPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(values),
       });
+      if(response.status === 401) {
+        setErrorMessage("Invalid credentials. Please try again.");
+        setErrorDialogOpen(true);
+        return;
+      }
+      if (!response.ok) {
+        setErrorMessage("An unexpected error occurred. Please try again.");
+        setErrorDialogOpen(true);
+        return;
+      }
+      if(response.status === 500) {
+        setErrorMessage("Invalid username or password. Please try again.");
+        setErrorDialogOpen(true);
+        return;
+      }
+      // Check if the response is JSON
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        setErrorMessage("An unexpected error occurred. Please try again.");
+        setErrorDialogOpen(true);
+        return;
+      }
 
       const data = await response.json();
 
       if (!response.ok) {
-        let errorMsg = "Invalid credentials";
-        if (response.status === 401) {
-          errorMsg = "Invalid email or password";
-        } else if (data.message === "User not found") {
-          errorMsg = "No account found with these credentials. Please check your details or sign up.";
-        } else if (data.message === "Invalid password") {
-          errorMsg = "Incorrect password. Please try again.";
-        }
-        setErrorMessage(errorMsg);
+        setErrorMessage("Invalid credentials. Please try again.");
         setErrorDialogOpen(true);
-        throw new Error(data.message);
+        return;
       }
 
       login(data.data.user);
@@ -79,19 +94,18 @@ export default function SignInPage() {
       const callbackUrl = searchParams.get("callbackUrl") || "/";
       
       if (data.data.user.role === "admin") {
-        router.push("/admin/dashboard");
+        router.push("/admin/students");
       } else {
         router.push(callbackUrl);
       }
     } catch (error) {
-      setErrorMessage(
-        error instanceof Error ? error.message : "An unexpected error occurred"
-      );
+      setErrorMessage("An unexpected error occurred. Please try again.");
       setErrorDialogOpen(true);
     } finally {
       setIsLoading(false);
     }
   }
+
   return (
     <div className="container flex items-center justify-center min-h-screen py-12">
       <div className="w-full max-w-md space-y-6">
@@ -152,7 +166,7 @@ export default function SignInPage() {
         </Form>
 
         <div className="text-center text-sm">
-          Don&apos;t have an account?{" "}
+          Don't have an account?{" "}
           <Link
             href="/sign-up"
             className="font-medium text-primary hover:underline"
@@ -162,13 +176,18 @@ export default function SignInPage() {
         </div>
 
         <Dialog open={errorDialogOpen} onOpenChange={setErrorDialogOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Sign In Failed</DialogTitle>
-              <DialogDescription className="text-red-500">
+          <DialogContent className="sm:max-w-[425px] p-6">
+            <DialogHeader className="space-y-4">
+              <DialogTitle className="text-2xl font-bold text-red-600">Sign In Failed</DialogTitle>
+              <DialogDescription className="text-base text-red-500">
                 {errorMessage}
               </DialogDescription>
             </DialogHeader>
+            <DialogFooter className="mt-6">
+              <Button variant="default" onClick={() => setErrorDialogOpen(false)} className="w-full">
+                Try Again
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>

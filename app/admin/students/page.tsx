@@ -37,7 +37,6 @@ import { Loader2, Search, Filter, RefreshCw, Download } from "lucide-react";
 
 interface Student {
   _id: string;
-  urn: number;
   email: string;
   fullName: string;
   role: string;
@@ -55,8 +54,7 @@ interface PaginationInfo {
 }
 
 export default function StudentsPage() {
-  const [allStudents, setAllStudents] = useState<Student[]>([]);
-  const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
+  const [students, setStudents] = useState<Student[]>([]);
   const [pagination, setPagination] = useState<PaginationInfo>({
     total: 0,
     page: 1,
@@ -75,57 +73,39 @@ export default function StudentsPage() {
 
   useEffect(() => {
     fetchStudents();
-  }, []);
-
-  useEffect(() => {
-    filterStudents();
-  }, [cityFilter, startDate, endDate, searchQuery, allStudents]);
-
-  const filterStudents = () => {
-    let filtered = [...allStudents];
-
-    if (cityFilter && cityFilter !== "all") {
-      filtered = filtered.filter(
-        (student) => student.city?.toLowerCase() === cityFilter.toLowerCase()
-      );
-    }
-
-    if (startDate) {
-      filtered = filtered.filter(
-        (student) => new Date(student.createdAt) >= startDate
-      );
-    }
-
-    if (endDate) {
-      filtered = filtered.filter(
-        (student) => new Date(student.createdAt) <= endDate
-      );
-    }
-
-    if (searchQuery) {
-      filtered = filtered.filter((student) =>
-        student.fullName.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
-    setFilteredStudents(filtered);
-    setPagination((prev) => ({
-      ...prev,
-      total: filtered.length,
-      pages: Math.ceil(filtered.length / prev.limit),
-    }));
-  };
+  }, [pagination.page, pagination.limit, cityFilter, startDate, endDate, searchQuery]);
 
   const fetchStudents = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${BACKEND_URL}/admin/students`, {
-        method: "GET",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
+      const queryParams = new URLSearchParams({
+        page: pagination.page.toString(),
+        limit: pagination.limit.toString(),
       });
+
+      if (cityFilter && cityFilter !== "all") {
+        queryParams.append("city", cityFilter);
+      }
+      if (startDate) {
+        queryParams.append("startDate", startDate.toISOString());
+      }
+      if (endDate) {
+        queryParams.append("endDate", endDate.toISOString());
+      }
+      if (searchQuery) {
+        queryParams.append("search", searchQuery);
+      }
+
+      const response = await fetch(
+        `${BACKEND_URL}/admin/students?${queryParams}`,
+        {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to fetch students");
@@ -133,17 +113,19 @@ export default function StudentsPage() {
 
       const data = await response.json();
 
-      setAllStudents(data.data.students);
-      setFilteredStudents(data.data.students);
+      setStudents(data.data.students);
+      setPagination(data.data.pagination);
 
-      const uniqueCities = Array.from(
-        new Set(
-          data.data.students
-            .map((student: Student) => student.city?.toLowerCase())
-            .filter(Boolean)
-        )
-      ) as string[];
-      setCities(uniqueCities);
+      if (!cities.length) {
+        const uniqueCities = Array.from(
+          new Set(
+            data.data.students
+              .map((student: Student) => student.city?.toLowerCase())
+              .filter(Boolean)
+          )
+        ) as string[];
+        setCities(uniqueCities);
+      }
     } catch (error) {
       console.error("Error fetching students:", error);
       toast({
@@ -157,8 +139,7 @@ export default function StudentsPage() {
   };
 
   const handleDownload = () => {
-    const studentsToExport = filteredStudents.map((student) => ({
-      URN: student.urn,
+    const studentsToExport = students.map((student) => ({
       Name: student.fullName,
       Email: student.email,
       City: student.city || "N/A",
@@ -176,19 +157,16 @@ export default function StudentsPage() {
     setPagination((prev) => ({ ...prev, page }));
   };
 
+  const handleLimitChange = (value: string) => {
+    setPagination((prev) => ({ ...prev, limit: parseInt(value), page: 1 }));
+  };
+
   const handleReset = () => {
     setCityFilter("");
     setStartDate(undefined);
     setEndDate(undefined);
     setSearchQuery("");
-
-    setFilteredStudents(allStudents);
-  };
-
-  const getCurrentPageStudents = () => {
-    const start = (pagination.page - 1) * pagination.limit;
-    const end = start + pagination.limit;
-    return filteredStudents.slice(start, end);
+    setPagination((prev) => ({ ...prev, page: 1 }));
   };
 
   return (
@@ -244,6 +222,21 @@ export default function StudentsPage() {
               <DatePicker date={endDate} setDate={setEndDate} />
             </div>
 
+            <div className="w-full md:w-[120px] space-y-2">
+              <label className="text-sm font-medium">Items per page</label>
+              <Select value={pagination.limit.toString()} onValueChange={handleLimitChange}>
+                <SelectTrigger className="transition-all hover:border-primary">
+                  <SelectValue placeholder="10" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="10">10</SelectItem>
+                  <SelectItem value="25">25</SelectItem>
+                  <SelectItem value="50">50</SelectItem>
+                  <SelectItem value="100">100</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="flex gap-2">
               <Button
                 onClick={handleReset}
@@ -269,8 +262,7 @@ export default function StudentsPage() {
         <CardHeader>
           <CardTitle className="text-xl font-semibold">Students List</CardTitle>
           <CardDescription>
-            Showing {getCurrentPageStudents().length} of{" "}
-            {filteredStudents.length} students
+            Showing {students.length} of {pagination.total} students
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -284,7 +276,6 @@ export default function StudentsPage() {
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-muted/50">
-                      <TableHead className="font-semibold">URN</TableHead>
                       <TableHead className="font-semibold">Name</TableHead>
                       <TableHead className="font-semibold">Email</TableHead>
                       <TableHead className="font-semibold">City</TableHead>
@@ -295,13 +286,12 @@ export default function StudentsPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {getCurrentPageStudents().length > 0 ? (
-                      getCurrentPageStudents().map((student) => (
+                    {students.length > 0 ? (
+                      students.map((student) => (
                         <TableRow
                           key={student._id}
                           className="hover:bg-muted/50 transition-colors"
                         >
-                          <TableCell>{student.urn}</TableCell>
                           <TableCell className="font-medium">
                             {student.fullName}
                           </TableCell>
@@ -317,7 +307,7 @@ export default function StudentsPage() {
                       ))
                     ) : (
                       <TableRow>
-                        <TableCell colSpan={6} className="text-center py-10">
+                        <TableCell colSpan={5} className="text-center py-10">
                           No students found
                         </TableCell>
                       </TableRow>

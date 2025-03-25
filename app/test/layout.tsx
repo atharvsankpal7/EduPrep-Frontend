@@ -20,7 +20,7 @@ export default function TestLayout({
 
     // If not authenticated and not loading, redirect to sign in
     if (!isAuthenticated && !isLoading) {
-      router.push(`/sign-in?callbackUrl=${encodeURIComponent(pathname)}`);
+      router.push(`/sign-up?callbackUrl=${encodeURIComponent(pathname)}`);
     }
   }, [isAuthenticated, isLoading, router, pathname]);
 
