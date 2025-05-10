@@ -1,23 +1,22 @@
-"use client";
 
-import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
-import { ThemeProvider } from '@/components/providers/theme-provider';
-import { Toaster } from '@/components/ui/toaster';
-import { QueryProvider } from '@/components/providers/query-provider';
-import { useEffect } from 'react';
-import { checkAuthStatus } from '@/lib/auth';
-import { Footer } from '@/components/footer';
-import './globals.css';
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import { ThemeProvider } from "@/components/providers/theme-provider";
+import { Toaster } from "@/components/ui/toaster";
+import { QueryProvider } from "@/components/providers/query-provider";
+import { Footer } from "@/components/footer";
+import { AuthProvider } from "@/components/providers/auth-provider";
+import "./globals.css";
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ subsets: ["latin"] });
 
-const metadata: Metadata = {
-  title: 'ADCET - Online Test Platform',
-  description: 'Enhance your test preparation with our advanced mock test platform',
+export const metadata: Metadata = {
+  title: "ADCET - Online Test Platform",
+  description:
+    "Enhance your test preparation with our advanced mock test platform",
   icons: {
-    icon: '/favicon.ico'
-  }
+    icon: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({
@@ -25,10 +24,6 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  useEffect(() => {
-    checkAuthStatus();
-  }, []);
-
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
@@ -39,13 +34,13 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <QueryProvider>
-            <div className="flex flex-col min-h-screen">
-              <main className="flex-1 bg-background">
-                {children}
-              </main>
-              <Footer />
-            </div>
-            <Toaster />
+            <AuthProvider>
+              <div className="flex flex-col min-h-screen">
+                <main className="flex-1 bg-background">{children}</main>
+                <Footer />
+              </div>
+              <Toaster />
+            </AuthProvider>
           </QueryProvider>
         </ThemeProvider>
       </body>

@@ -13,8 +13,8 @@ import {
   X,
 } from "lucide-react";
 import Image from "next/image";
+import { Button } from "./ui/button";
 
-interface Props {}
 
 const AdcetInfo = () => {
   const [showModal, setShowModal] = useState(false);
@@ -133,34 +133,35 @@ const AdcetInfo = () => {
             style={{ border: 0 }}
             allowFullScreen
             loading="lazy"
+            title="ADCET Map"
           ></iframe>{" "}
         </div>
       </div>
 
       {/* Floating Call Button */}
-      <a
+      <Link
         href="tel:+91-8600600700"
         className="fixed bottom-4 right-4 bg-blue-800 text-white rounded-full p-4 shadow-lg hover:bg-blue-900 transition-colors"
       >
         <Phone className="h-6 w-6" />
-      </a>
-      <button
+      </Link>
+      <Button
         onClick={() => setShowModal(true)}
         className="fixed bottom-4 right-24 bg-blue-800 text-white rounded-full p-4 shadow-lg hover:bg-blue-900 transition-colors"
       >
         <CopyrightIcon className="h-6 w-6" />
-      </button>
+      </Button>
 
       {/* Copyright Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg p-6 max-w-md w-full relative">
-            <button
+            <Button
               onClick={() => setShowModal(false)}
               className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
             >
               <X className="h-6 w-6" />
-            </button>
+            </Button>
             <h2 className="text-xl font-bold mb-4 text-black">
               EduPrep&apos;s Development Team
             </h2>
@@ -173,14 +174,14 @@ const AdcetInfo = () => {
                 <h3 className="font-semibold text-black">Team Members</h3>
                 <ul className="list-disc list-inside text-black">
                   <li>
-                    <a
+                    <Link
                       href="https://www.linkedin.com/in/atharv-sankpal-235a7730a/"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-blue-600 hover:underline"
                     >
                       Atharv Santosh Sankpal
-                    </a>
+                    </Link>
                   </li>
                   <li>Vaishnavi Rajarm Sutar</li>
                   <li>Shrinath Hanmant Dongare</li>

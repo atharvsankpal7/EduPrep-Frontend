@@ -1,32 +1,21 @@
 "use client";
+
 import { NavBar } from "@/components/navbar";
-import { checkAuthStatus } from "@/lib/auth";
-import { useAuthStore } from "@/lib/stores/auth-store";
-import { useRouter, usePathname } from "next/navigation";
-import { useEffect } from "react";
+import { useRequireAuth } from "@/hooks/use-require-auth";
 
-export default function TestLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const { isAuthenticated, isLoading } = useAuthStore();
-  const router = useRouter();
-  const pathname = usePathname();
+export default function TestLayout({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, isLoading } = useRequireAuth();
 
-  useEffect(() => {
-    // Check auth status on mount
-    checkAuthStatus();
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <span>Loading...</span>
+      </div>
+    );
+  }
 
-    // If not authenticated and not loading, redirect to sign in
-    if (!isAuthenticated && !isLoading) {
-      router.push(`/sign-up?callbackUrl=${encodeURIComponent(pathname)}`);
-    }
-  }, [isAuthenticated, isLoading, router, pathname]);
-
-  // Show nothing while loading or if not authenticated
-  if (isLoading || !isAuthenticated) {
-    return null;
+  if (!isAuthenticated) {
+    return null; // show nothing while redirecting
   }
 
   return (
