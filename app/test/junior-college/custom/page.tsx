@@ -87,7 +87,7 @@ export default function CustomTestPage() {
   };
 
   const handleBack = () => {
-    router.push("/test/junior-college");
+    router.back();
   };
 
   if (loading) {

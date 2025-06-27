@@ -1,2 +1,2 @@
 export const BACKEND_URL =
-  process.env.BACKEND_URL || `https://janai-te-shirsai.in/api/v1`;
+  process.env.NEXT_PUBLIC_BACKEND_URL;

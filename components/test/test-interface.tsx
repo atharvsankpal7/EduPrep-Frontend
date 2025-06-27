@@ -244,7 +244,7 @@ export function TestInterface({
   }
 
   return (
-    <div className="min-h-screen bg-background" ref={containerRef}>
+    <div className="min-h-screen bg-background lg:py-10 py-2" ref={containerRef}>
       <TestHeader testName={`${testName} - ${sections[currentSection].name}`} />
 
       <div className="container py-6">
@@ -338,8 +338,8 @@ export function TestInterface({
         </div>
 
         {/* Bottom Navigation */}
-        <div className="fixed bottom-0 left-0 right-0 bg-background border-t py-4">
-          <div className="container flex justify-between items-center">
+        <div className="fixed bottom-0 left-0 right-0 bg-background border-t py-4 px-2">
+          <div className="container flex justify-between items-center  mx-auto">
             <button
               onClick={() => setCurrentQuestion((prev) => Math.max(0, prev - 1))}
               disabled={currentQuestion === 0}

@@ -9,8 +9,8 @@ interface WarningModalProps {
 
 export function WarningModal({ onStart }: WarningModalProps) {
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center">
-      <div className="bg-card border rounded-lg shadow-lg max-w-md w-full p-6 mx-4">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center overflow-y-auto">
+      <div className="bg-card border rounded-lg shadow-lg max-w-md w-full p-6 m-4">
         <div className="flex flex-col items-center text-center space-y-4">
           <div className="bg-yellow-100 text-yellow-600 p-3 rounded-full">
             <AlertTriangle className="h-8 w-8" />

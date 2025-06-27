@@ -63,8 +63,8 @@ export function NavBar() {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 container flex h-16 items-center justify-between">
+      {/* <div className=" w-full"> */}
         <div className="flex items-center gap-2">
           <Sheet>
             <SheetTrigger asChild className="md:hidden">
@@ -94,9 +94,13 @@ export function NavBar() {
                     </Link>
                   ))
                 )}
+                {isAuthenticated && (
+                  <Button variant="outline" onClick={handleLogout} className="mt-2">
+                    Log Out
+                  </Button>
+                )}
               </nav>
-            </SheetContent>
-          </Sheet>
+            </SheetContent>          </Sheet>
 
           <Link href="/" className="flex items-center space-x-2">
             <span className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
@@ -161,7 +165,7 @@ export function NavBar() {
             </div>
           )}
         </div>
-      </div>
+      {/* </div> */}
     </header>
   );
 }

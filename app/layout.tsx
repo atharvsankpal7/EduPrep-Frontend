@@ -35,8 +35,8 @@ export default function RootLayout({
         >
           <QueryProvider>
             <AuthProvider>
-              <div className="flex flex-col min-h-screen">
-                <main className="flex-1 bg-background">{children}</main>
+              <div className="flex flex-col min-h-screen ">
+                <main className="flex-1 bg-background ">{children}</main>
                 <Footer />
               </div>
               <Toaster />
