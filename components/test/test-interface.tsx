@@ -93,11 +93,11 @@ export function TestInterface({
 
     if (testStarted) {
       enterFullscreen();
-      
+
       // Hide navbar by adding a class to the body
       document.body.classList.add('test-mode');
     }
-    
+
     // Cleanup function to exit fullscreen when component unmounts
     return () => {
       if (document.exitFullscreen && document.fullscreenElement) {
@@ -113,7 +113,7 @@ export function TestInterface({
     const handleVisibilityChange = () => {
       if (document.hidden && testStarted) {
         incrementTabSwitches();
-        
+
         if (tabSwitchCount < 2) {
           setWarningModalOpen(true);
           setIsLastWarning(false);
@@ -192,7 +192,7 @@ export function TestInterface({
       const newSectionCompleted = [...sectionCompleted];
       newSectionCompleted[currentSection] = true;
       setSectionCompleted(newSectionCompleted);
-      
+
       // Show warning dialog before proceeding
       const dialog = document.getElementById('section-warning-dialog') as HTMLButtonElement;
       if (dialog) {
@@ -205,7 +205,7 @@ export function TestInterface({
     if (currentSection < sections.length - 1) {
       // Add current section's time spent to total
       setTotalTimeSpent(prev => prev + (sections[currentSection].duration * 60 - timeLeft));
-      
+
       setCurrentSection(currentSection + 1);
       setCurrentQuestion(0);
       setTimeLeft(sections[currentSection + 1].duration * 60);

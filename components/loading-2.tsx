@@ -44,7 +44,7 @@ const PWALoadingScreen = () => {
       clearInterval(progressTimer);
       clearInterval(tipTimer);
     };
-  }, []);
+  }, [loadingTips]);
 
   return (
     <div className="fixed inset-0 flex items-center justify-center min-h-screen bg-gradient-to-br from-emerald-900 via-teal-800 to-cyan-900 w-full z-50 overflow-hidden">
