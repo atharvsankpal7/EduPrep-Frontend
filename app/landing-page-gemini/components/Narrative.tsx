@@ -14,14 +14,14 @@ export const Narrative = () => {
 
     return (
         <section ref={sectionRef} className="min-h-screen flex items-center justify-center py-24 relative z-10">
-            <motion.div 
+            <motion.div
                 style={{ opacity, scale }}
                 className="max-w-4xl mx-auto px-6 text-center"
             >
                 <h2 className="font-heading text-4xl md:text-6xl text-slate-300 leading-tight mb-12">
                     Most students practice <span className="text-red-400">the wrong way</span>.
                 </h2>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12 text-left">
                     <div className="space-y-6">
                         <p className="text-xl md:text-2xl font-light text-slate-400 font-body">
@@ -30,7 +30,7 @@ export const Narrative = () => {
                     </div>
                     <div className="space-y-6">
                         <p className="text-xl md:text-2xl font-light text-slate-400 font-body">
-                             Without knowing your weak spots, studying is just luck. You don't need more hours. You need to know <span className="text-white border-b border-indigo-500 pb-1">where you are losing marks</span>.
+                            Without knowing your weak spots, studying is just luck. You don&apos;t need more hours. You need to know <span className="text-white border-b border-indigo-500 pb-1">where you are losing marks</span>.
                         </p>
                     </div>
                 </div>

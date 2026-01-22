@@ -72,10 +72,10 @@ export default function Conversion() {
                 ✓
               </div>
               <h3 className="font-display text-3xl font-bold mb-4 text-[#F5F5DC]">
-                You're on the list!
+                You&apos;re on the list!
               </h3>
               <p className="font-body text-[#A8A890]">
-                We'll be in touch shortly with your personalized onboarding plan.
+                We&apos;ll be in touch shortly with your personalized onboarding plan.
               </p>
             </div>
           ) : (

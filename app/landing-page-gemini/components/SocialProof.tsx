@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 export const SocialProof = () => {
     return (
         <section id="reviews" className="py-24 flex items-center justify-center relative">
-             <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-slate-800 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-slate-800 to-transparent" />
             <div className="container mx-auto px-6 text-center">
                 <motion.div
                     initial={{ scale: 0.9, opacity: 0 }}
@@ -13,13 +13,13 @@ export const SocialProof = () => {
                     viewport={{ once: true }}
                 >
                     <QuoteIcon className="w-10 h-10 text-sky-500 mx-auto mb-8 opacity-50" />
-                    
+
                     <h3 className="font-heading font-medium text-3xl md:text-5xl leading-tight max-w-5xl mx-auto mb-12 text-slate-200">
-                        "EduPrep helps me <span className="text-sky-400">understand the exam</span>. The strict timing forced me to improve my speed."
+                        &quot;EduPrep helps me <span className="text-sky-400">understand the exam</span>. The strict timing forced me to improve my speed.&quot;
                     </h3>
-                    
+
                     <div className="flex flex-col items-center justify-center gap-2">
-                         <div className="w-16 h-1 bg-gradient-to-r from-sky-500 to-indigo-500 rounded-full mb-4" />
+                        <div className="w-16 h-1 bg-gradient-to-r from-sky-500 to-indigo-500 rounded-full mb-4" />
                         <div className="font-bold text-white text-lg tracking-wide">WHY IT WORKS</div>
                         <div className="flex flex-wrap justify-center gap-4 mt-4 text-sm text-slate-400 font-mono">
                             <span className="px-3 py-1 bg-slate-900 rounded-full border border-slate-800">REAL EXAM PRACTICE</span>
