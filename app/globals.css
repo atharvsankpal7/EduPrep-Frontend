@@ -244,3 +244,84 @@
   );
   background-size: 20px 20px;
 }
+
+/* Landing Page GLM Styles */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+.landing-page-glm {
+  --landing-bg: #0D1B1C;
+  --landing-bg-alt: #0A1415;
+  --landing-text: #F5F5DC;
+  --landing-text-muted: #A8A890;
+  --landing-accent: #D47E3E;
+  --landing-accent-light: #E09558;
+  --landing-secondary: #C9A961;
+  --font-landing-display: 'Cormorant Garamond', serif;
+  --font-landing-body: 'DM Sans', sans-serif;
+  --font-landing-mono: 'IBM Plex Mono', monospace;
+}
+
+.landing-page-glm .font-display { font-family: var(--font-landing-display); }
+.landing-page-glm .font-body { font-family: var(--font-landing-body); }
+.landing-page-glm .font-mono { font-family: var(--font-landing-mono); }
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.landing-page-glm .animate-fade-in-up {
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+}
+
+.landing-page-glm .animate-fade-in {
+  animation: fadeIn 1s ease-out forwards;
+  opacity: 0;
+}
+
+.landing-page-glm .animate-scale-in {
+  animation: scaleIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+}
+
+.landing-page-glm .delay-100 { animation-delay: 100ms; }
+.landing-page-glm .delay-200 { animation-delay: 200ms; }
+.landing-page-glm .delay-300 { animation-delay: 300ms; }
+.landing-page-glm .delay-400 { animation-delay: 400ms; }
+.landing-page-glm .delay-500 { animation-delay: 500ms; }
+.landing-page-glm .delay-600 { animation-delay: 600ms; }
+
+.landing-page-glm .scroll-reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.landing-page-glm .scroll-reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
