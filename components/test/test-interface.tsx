@@ -239,6 +239,25 @@ export function TestInterface({
   const currentSectionQuestions = sections[currentSection].questions;
   const currentQuestionData = currentSectionQuestions[currentQuestion];
 
+  // Calculate start index for current section to map global answers to section-relative
+  const currentSectionStartIndex = sections
+    .slice(0, currentSection)
+    .reduce((acc, section) => acc + section.questions.length, 0);
+
+  // Map global answers to relative 1-based indices for current section
+  const currentSectionAnswered = Object.keys(answers).reduce((acc, key) => {
+    const globalIndex = parseInt(key);
+    if (
+      globalIndex >= currentSectionStartIndex &&
+      globalIndex < currentSectionStartIndex + currentSectionQuestions.length
+    ) {
+      // relative 1-based index
+      const relativeIndex = globalIndex - currentSectionStartIndex + 1;
+      acc[relativeIndex] = answers[globalIndex];
+    }
+    return acc;
+  }, {} as Record<number, number>);
+
   if (!testStarted) {
     return <WarningModal onStart={startTest} />;
   }
@@ -330,7 +349,7 @@ export function TestInterface({
               <QuestionNavigation
                 totalQuestions={currentSectionQuestions.length}
                 currentQuestion={currentQuestion + 1}
-                answeredQuestions={answers}
+                answeredQuestions={currentSectionAnswered}
                 onQuestionSelect={(num) => setCurrentQuestion(num - 1)}
               />
             </div>

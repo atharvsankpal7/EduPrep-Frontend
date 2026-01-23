@@ -20,22 +20,35 @@ export function QuestionNavigation({
     <div className="space-y-4">
       <h3 className="font-medium">Question Navigation</h3>
       
-      <div className="grid grid-cols-5 gap-2">
-        {Array.from({ length: totalQuestions }, (_, i) => i + 1).map((num) => (
-          <Button
-            key={num}
-            variant="outline"
-            size="sm"
-            className={cn(
-              "w-full h-8",
-              currentQuestion === num && "ring-2 ring-primary",
-              answeredQuestions[num] && "bg-primary/10 hover:bg-primary/20"
-            )}
-            onClick={() => onQuestionSelect(num)}
-          >
-            {num}
-          </Button>
-        ))}
+      <div className="grid grid-cols-5 gap-2" role="navigation" aria-label="Questions list">
+        {Array.from({ length: totalQuestions }, (_, i) => i + 1).map((num) => {
+          const isAnswered = !!answeredQuestions[num];
+          const isCurrent = currentQuestion === num;
+          const statusText = isCurrent
+            ? "Current Question"
+            : isAnswered
+            ? "Answered"
+            : "Not Answered";
+
+          return (
+            <Button
+              key={num}
+              variant="outline"
+              size="sm"
+              className={cn(
+                "w-full h-8",
+                isCurrent && "ring-2 ring-primary",
+                isAnswered && "bg-primary/10 hover:bg-primary/20"
+              )}
+              onClick={() => onQuestionSelect(num)}
+              aria-label={`Question ${num}, ${statusText}`}
+              aria-current={isCurrent ? "true" : undefined}
+              title={`Question ${num}: ${statusText}`}
+            >
+              {num}
+            </Button>
+          );
+        })}
       </div>
 
       <div className="flex items-center justify-between text-sm text-muted-foreground">
