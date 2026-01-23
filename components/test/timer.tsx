@@ -1,30 +1,43 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Clock, AlertTriangle } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
 interface TimerProps {
-  timeLeft: number;
-  setTimeLeft: React.Dispatch<React.SetStateAction<number>>;
+  duration: number;
+  onTimeUpdate: (time: number) => void;
   onTimeUp: () => void;
 }
 
-export function Timer({ timeLeft, setTimeLeft, onTimeUp }: TimerProps) {
+export function Timer({ duration, onTimeUpdate, onTimeUp }: TimerProps) {
+  const [timeLeft, setTimeLeft] = useState(duration);
+  const callbackRef = useRef({ onTimeUpdate, onTimeUp });
+
+  useEffect(() => {
+    callbackRef.current = { onTimeUpdate, onTimeUp };
+  }, [onTimeUpdate, onTimeUp]);
+
+  useEffect(() => {
+    setTimeLeft(duration);
+  }, [duration]);
+
   useEffect(() => {
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
-        if (prev <= 1) {
+        const newValue = prev - 1;
+        callbackRef.current.onTimeUpdate(newValue);
+        if (newValue <= 0) {
           clearInterval(timer);
-          onTimeUp();
+          callbackRef.current.onTimeUp();
           return 0;
         }
-        return prev - 1;
+        return newValue;
       });
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [setTimeLeft, onTimeUp]);
+  }, []);
 
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;

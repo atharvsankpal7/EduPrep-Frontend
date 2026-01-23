@@ -56,7 +56,7 @@ export function TestInterface({
   const [currentSection, setCurrentSection] = useState(0);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<Record<number, number>>({});
-  const [timeLeft, setTimeLeft] = useState(sections[0].duration * 60);
+  const timeLeftRef = useRef(sections[0].duration * 60);
   const [warnings, setWarnings] = useState<string[]>([]);
   const [testStarted, setTestStarted] = useState(false);
   const [sectionCompleted, setSectionCompleted] = useState<boolean[]>(
@@ -204,11 +204,11 @@ export function TestInterface({
   const confirmNextSection = () => {
     if (currentSection < sections.length - 1) {
       // Add current section's time spent to total
-      setTotalTimeSpent(prev => prev + (sections[currentSection].duration * 60 - timeLeft));
+      setTotalTimeSpent(prev => prev + (sections[currentSection].duration * 60 - timeLeftRef.current));
 
       setCurrentSection(currentSection + 1);
       setCurrentQuestion(0);
-      setTimeLeft(sections[currentSection + 1].duration * 60);
+      timeLeftRef.current = sections[currentSection + 1].duration * 60;
       toast({
         title: "New Section Started",
         description: `You are now in ${sections[currentSection + 1].name}`,
@@ -226,7 +226,7 @@ export function TestInterface({
 
   const handleSubmit = () => {
     // Calculate total time spent including current section
-    const finalTimeSpent = totalTimeSpent + (sections[currentSection].duration * 60 - timeLeft);
+    const finalTimeSpent = totalTimeSpent + (sections[currentSection].duration * 60 - timeLeftRef.current);
     onComplete(answers, finalTimeSpent);
   };
 
@@ -300,8 +300,9 @@ export function TestInterface({
           <div className="lg:col-span-3 space-y-6">
             <div className="bg-card rounded-lg shadow-lg p-4">
               <Timer
-                timeLeft={timeLeft}
-                setTimeLeft={setTimeLeft}
+                key={currentSection}
+                duration={sections[currentSection].duration * 60}
+                onTimeUpdate={(t) => (timeLeftRef.current = t)}
                 onTimeUp={handleTimeUp}
               />
             </div>
