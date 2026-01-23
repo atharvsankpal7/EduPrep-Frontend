@@ -15,76 +15,77 @@ import {
 import Image from "next/image";
 import { Button } from "./ui/button";
 
+const menuItems = [
+  {
+    href: "/test/junior-college/cet",
+    icon: GraduationCap,
+    alt: "Mock Test",
+    label: "Mock Test",
+  },
+  {
+    href: "/about",
+    icon: Info,
+    alt: "About Us",
+    label: "About Us",
+  },
+  {
+    href: "/programs",
+    icon: BookOpen,
+    alt: "Programs",
+    label: "Programs",
+  },
+  {
+    href: "/placements",
+    icon: Briefcase,
+    alt: "Placements",
+    label: "Placements",
+  },
+  {
+    href: "/reviews",
+    icon: Star,
+    alt: "Reviews",
+    label: "Reviews",
+  },
+  {
+    href: "https://www.adcet.ac.in",
+    icon: Globe,
+    alt: "Visit Website",
+    label: "Visit Website",
+  },
+];
+
+const MenuItem = React.memo(({
+  href,
+  icon: Icon,
+  alt,
+  label,
+}: {
+  href: string;
+  icon: any;
+  alt: string;
+  label: string;
+}) => (
+  <Link
+    href={href}
+    className="flex flex-col items-center p-4 bg-white rounded-lg border  border-1 border-slate-500 transition-shadow"
+  >
+    <div className="w-12 h-12 mb-2 flex items-center justify-center">
+      <Icon size={32} className="text-blue-500" />
+    </div>
+    <span className="text-sm font-medium text-slate-950">{label}</span>
+  </Link>
+));
+MenuItem.displayName = "MenuItem";
 
 const AdcetInfo = () => {
   const [showModal, setShowModal] = useState(false);
 
-  const menuItems = [
-    {
-      href: "/test/junior-college/cet",
-      icon: GraduationCap,
-      alt: "Mock Test",
-      label: "Mock Test",
-    },
-    {
-      href: "/about",
-      icon: Info,
-      alt: "About Us",
-      label: "About Us",
-    },
-    {
-      href: "/programs",
-      icon: BookOpen,
-      alt: "Programs",
-      label: "Programs",
-    },
-    {
-      href: "/placements",
-      icon: Briefcase,
-      alt: "Placements",
-      label: "Placements",
-    },
-    {
-      href: "/reviews",
-      icon: Star,
-      alt: "Reviews",
-      label: "Reviews",
-    },
-    {
-      href: "https://www.adcet.ac.in",
-      icon: Globe,
-      alt: "Visit Website",
-      label: "Visit Website",
-    },
-  ];
-
-  const MenuItem = ({
-    href,
-    icon: Icon,
-    alt,
-    label,
-  }: {
-    href: string;
-    icon: any;
-    alt: string;
-    label: string;
-  }) => (
-    <Link
-      href={href}
-      className="flex flex-col items-center p-4 bg-white rounded-lg border  border-1 border-slate-500 transition-shadow"
-    >
-      <div className="w-12 h-12 mb-2 flex items-center justify-center">
-        <Icon size={32} className="text-blue-500" />
-      </div>
-      <span className="text-sm font-medium text-slate-950">{label}</span>
-    </Link>
-  );
   return (
     <div className="flex flex-col min-h-screen bg-white">
       {/* Header Section */}
       <div className="text-center p-4 space-y-2">
         <Image
-          src="https://www.adcet.ac.in/uploads/1676968661.png"
+          src="/adcet-logo.png"
           alt="ADCET Logo"
           width={100}
           height={100}
