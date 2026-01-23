@@ -58,13 +58,11 @@ export default function TestPage({ params }: TestPageProps) {
       try {
         setLoading(true);
         const url = `${BACKEND_URL}/test/${testId}`;
-        console.log("url", url);
         const response = await axios.get(url, {
           withCredentials: true,
         });
         
         const responseData = response.data.data;
-        console.log(responseData);
         
         if (!responseData.test) {
           throw new Error("Invalid test data received");
@@ -106,7 +104,6 @@ export default function TestPage({ params }: TestPageProps) {
           globalQuestionIndex++;
         });
       });
-      console.log("Selected Answers:", selectedAnswers);
       // Submit test
      const response =  await axios.patch(`${BACKEND_URL}/test/${testId}/submit`, {
         selectedAnswers,
@@ -121,7 +118,6 @@ export default function TestPage({ params }: TestPageProps) {
           'Content-Type': 'application/json'
         }
       });
-      console.log("response from submitted result",response.data.data.testResult._id);
       // Redirect to results page
       router.push(`/result/${response.data.data.testResult._id}`);
     } catch (error) {

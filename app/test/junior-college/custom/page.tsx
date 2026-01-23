@@ -60,7 +60,6 @@ export default function CustomTestPage() {
 
   const startTest = async () => {
     if (!selectedTopics || !testConfig) return;
-    console.log("Selected Topics:", selectedTopics.subjects);
 
     
 
