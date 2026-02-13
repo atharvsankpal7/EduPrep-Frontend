@@ -6,6 +6,7 @@ import {
   TUnderGraduateTestCategories,
   TCreateUndergraduateTestRequest,
   TCreateCustomTestRequest,
+  TCreateTestParams,
 } from "../type";
 import { BACKEND_URL } from "../constant";
 
@@ -95,14 +96,7 @@ export const createTest = async ({
   topicList,
   time = 60,
   isCet = false,
-}: {
-  educationLevel: EducationLevel;
-  numberOfQuestions?: number;
-  company?: string;
-  topicList?: TopicList;
-  time?: number;
-  isCet?: boolean;
-}) => {
+}: TCreateTestParams) => {
   try {
     console.log("Creating test with params:", { educationLevel, numberOfQuestions, company, topicList, time, isCet });
     

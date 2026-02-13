@@ -56,6 +56,15 @@ export type TCreateCustomTestRequest = {
   educationLevel: EducationLevel;
 };
 
+export type TCreateTestParams = {
+  educationLevel: EducationLevel;
+  numberOfQuestions?: number;
+  company?: string;
+  topicList?: TopicList;
+  time?: number;
+  isCet?: boolean;
+};
+
 
 
 export interface IUser {
