@@ -2,8 +2,11 @@
 
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Bookmark, BookmarkCheck, CheckCircle2 } from "lucide-react";
 import Image from "next/image";
+import { cn } from "@/lib/utils";
+import { questionStatusMeta, testUi } from "@/components/test/test-design-system";
 
 interface QuestionPanelProps {
   questionNumber: number;
@@ -11,6 +14,8 @@ interface QuestionPanelProps {
   options: string[];
   onAnswer: (answerId: number) => void;
   selectedAnswer?: number;
+  isMarkedForReview: boolean;
+  onToggleReview: () => void;
 }
 
 export function QuestionPanel({
@@ -19,24 +24,28 @@ export function QuestionPanel({
   options,
   onAnswer,
   selectedAnswer,
+  isMarkedForReview,
+  onToggleReview,
 }: QuestionPanelProps) {
-  // Function to check if a string is a valid image URL
   const isImageUrl = (str: string) => {
-    return str.match(/\.(jpeg|jpg|gif|png)$/) !== null || str.startsWith('http') && (str.includes('/images/') || str.includes('/img/'));
+    return (
+      str.match(/\.(jpeg|jpg|gif|png)$/i) !== null ||
+      (str.startsWith("http") &&
+        (str.includes("/images/") || str.includes("/img/")))
+    );
   };
 
-  // Function to render text or image based on content
   const renderContent = (content: string) => {
     if (isImageUrl(content)) {
       return (
         <div className="flex justify-center my-2">
-          <Image 
-            src={content} 
-            alt="Question content" 
-            width={500} 
-            height={300} 
+          <Image
+            src={content}
+            alt="Question content"
+            width={500}
+            height={300}
             className="max-w-full object-contain rounded-md"
-            unoptimized // For external images
+            unoptimized
           />
         </div>
       );
@@ -46,48 +55,97 @@ export function QuestionPanel({
 
   return (
     <div className="space-y-6">
-      <div className="space-y-2">
-        <h2 className="text-sm font-medium text-muted-foreground">
-          Question {questionNumber}
-        </h2>
-        <div className="text-lg font-medium">
-          {renderContent(questionText)}
+      <div className="flex flex-col gap-4 border-b border-[hsl(var(--test-border))] pb-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="space-y-2">
+          <h2 className={testUi.bodyText}>Question {questionNumber}</h2>
+          <div className="text-lg font-medium text-[hsl(var(--test-foreground))]">
+            {renderContent(questionText)}
+          </div>
         </div>
+        <Button
+          variant="outline"
+          onClick={onToggleReview}
+          className={cn(
+            testUi.secondaryButton,
+            "shrink-0",
+            isMarkedForReview &&
+              "border-violet-300 bg-violet-100 text-violet-800 hover:bg-violet-100"
+          )}
+        >
+          {isMarkedForReview ? (
+            <BookmarkCheck className="h-4 w-4" />
+          ) : (
+            <Bookmark className="h-4 w-4" />
+          )}
+          {isMarkedForReview ? "Marked for Review" : "Mark for Review"}
+        </Button>
       </div>
 
       <RadioGroup
         value={selectedAnswer?.toString()}
-        onValueChange={(value) => onAnswer(parseInt(value))}
+        onValueChange={(value) => onAnswer(parseInt(value, 10))}
         className="space-y-3"
       >
-        {options.map((option, idx) => (
-          <Card
-            key={idx}
-            className={`p-4 cursor-pointer transition-transform duration-200 ${
-              selectedAnswer === idx
-                ? "ring-2 ring-primary bg-primary/10"
-                : "hover:bg-muted/50"
-            }`}
-          >
-            <RadioGroupItem
-              value={idx.toString()}
-              id={`option-${idx}`}
-              className="peer sr-only"
-            />
-            <Label
-              htmlFor={`option-${idx}`}
-              className="flex items-center space-x-3 cursor-pointer"
+        {options.map((option, idx) => {
+          const optionId = `question-${questionNumber}-option-${idx}`;
+          const isSelected = selectedAnswer === idx;
+
+          return (
+            <div
+              key={idx}
+              onClick={() => onAnswer(idx)}
+              className={cn(
+                "cursor-pointer rounded-xl border p-4",
+                isSelected
+                  ? questionStatusMeta.answered.buttonClassName
+                  : "border-[hsl(var(--test-border))] hover:bg-[hsl(var(--test-surface-muted))]"
+              )}
             >
-              <span className="w-6 h-6 flex items-center justify-center rounded-full border border-primary/20 text-sm">
-                {String.fromCharCode(65 + idx)} {/* A, B, C, etc. */}
-              </span>
-              <div className="flex-1">
-                {renderContent(option)}
-              </div>
-            </Label>
-          </Card>
-        ))}
+              <RadioGroupItem
+                value={idx.toString()}
+                id={optionId}
+                className="peer sr-only"
+              />
+              <Label
+                htmlFor={optionId}
+                className={cn(
+                  "flex cursor-pointer items-start gap-3 text-[hsl(var(--test-foreground))]",
+                  isSelected && "text-emerald-900"
+                )}
+              >
+                <span
+                  className={cn(
+                    "mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-xs font-semibold",
+                    isSelected
+                      ? "border-emerald-600 bg-emerald-50 text-emerald-700"
+                      : "border-[hsl(var(--test-border-strong))] text-[hsl(var(--test-muted-foreground))]"
+                  )}
+                >
+                  {String.fromCharCode(65 + idx)}
+                </span>
+                <div className="flex-1">{renderContent(option)}</div>
+                {isSelected && (
+                  <span className="inline-flex items-center gap-1 rounded-full border border-emerald-300 bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700">
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    Selected
+                  </span>
+                )}
+              </Label>
+            </div>
+          );
+        })}
       </RadioGroup>
+
+      <div className={`flex items-center justify-between ${testUi.bodyText}`}>
+        <span>
+          {selectedAnswer === undefined
+            ? "Select one option to continue."
+            : "Answer selected."}
+        </span>
+        <span>
+          {isMarkedForReview ? "This question is flagged for review." : " "}
+        </span>
+      </div>
     </div>
   );
 }

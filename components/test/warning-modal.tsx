@@ -2,6 +2,7 @@
 
 import { AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { testUi } from "@/components/test/test-design-system";
 
 interface WarningModalProps {
   onStart: () => void;
@@ -40,7 +41,7 @@ export function WarningModal({ onStart }: WarningModalProps) {
           <Button 
             onClick={onStart} 
             size="lg" 
-            className="w-full mt-4"
+            className={`${testUi.primaryButton} w-full mt-4`}
           >
             I Understand, Start Test
           </Button>

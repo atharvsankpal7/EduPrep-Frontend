@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Clock, AlertTriangle } from "lucide-react";
+import { formatCompactDurationFromMinutes } from "@/lib/time";
 
 interface TestConfigDialogProps {
   open: boolean;
@@ -60,7 +61,7 @@ export function TestConfigDialog({
                 />
                 <div className="flex justify-between text-sm text-muted-foreground">
                   <span>15 min</span>
-                  <span>{duration} min</span>
+                  <span>{formatCompactDurationFromMinutes(duration)}</span>
                   <span>180 min</span>
                 </div>
               </div>

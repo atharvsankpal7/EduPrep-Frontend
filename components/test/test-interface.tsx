@@ -1,11 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 import { Timer } from "@/components/test/timer";
 import { QuestionPanel } from "@/components/test/question-panel";
 import { TestHeader } from "@/components/test/test-header";
-import { TestProgress } from "@/components/test/test-progress";
 import { QuestionNavigation } from "@/components/test/question-navigation";
 import { TabSwitchWarningModal } from "@/components/test/tab-switch-warning-modal";
 import { useToast } from "@/components/ui/use-toast";
@@ -20,18 +18,22 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, Loader2 } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useTestStore } from "@/lib/stores/test-store";
 import { WarningModal } from "@/components/test/warning-modal";
+import {
+  QuestionStatus,
+  testInterfaceTheme,
+  testUi,
+} from "@/components/test/test-design-system";
+import { TestSurface } from "@/components/test/ui/test-surface";
 
 export interface Question {
   question: string;
   options: string[];
   correctAnswer?: number;
-  id?: string; // Added id to track original question IDs
+  id?: string;
 }
 
 interface Section {
@@ -48,7 +50,7 @@ export interface TestInterfaceProps {
 }
 
 export function TestInterface({
-  testId,
+  testId: _testId,
   testName,
   sections,
   onComplete,
@@ -56,35 +58,44 @@ export function TestInterface({
   const [currentSection, setCurrentSection] = useState(0);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<Record<number, number>>({});
+  const [visitedQuestions, setVisitedQuestions] = useState<Record<number, boolean>>(
+    {}
+  );
+  const [markedForReview, setMarkedForReview] = useState<
+    Record<number, boolean>
+  >({});
   const [timeLeft, setTimeLeft] = useState(sections[0].duration * 60);
-  const [warnings, setWarnings] = useState<string[]>([]);
   const [testStarted, setTestStarted] = useState(false);
   const [sectionCompleted, setSectionCompleted] = useState<boolean[]>(
     new Array(sections.length).fill(false)
   );
   const [totalTimeSpent, setTotalTimeSpent] = useState(0);
+  const [sessionTabSwitchCount, setSessionTabSwitchCount] = useState(0);
   const [warningModalOpen, setWarningModalOpen] = useState(false);
-  const [warningMessage, setWarningMessage] = useState("");
-  const [showWarningModal, setShowWarningModal] = useState(true);
   const [isLastWarning, setIsLastWarning] = useState(false);
   const [isAutoSubmitted, setIsAutoSubmitted] = useState(false);
+  const hasAutoSubmittedRef = useRef(false);
+  const handleSubmitRef = useRef<() => void>(() => undefined);
   const { toast } = useToast();
-  const { tabSwitchCount, incrementTabSwitches } = useTestStore();
 
-  // Refs for document events
-  const containerRef = useRef<HTMLDivElement>(null);
+  const getSectionStartIndex = (sectionIndex: number) =>
+    sections
+      .slice(0, sectionIndex)
+      .reduce((total, section) => total + section.questions.length, 0);
 
-  // Enter fullscreen on component mount
+  const currentSectionStartIndex = getSectionStartIndex(currentSection);
+  const currentGlobalQuestionIndex = currentSectionStartIndex + currentQuestion;
+
   useEffect(() => {
     const enterFullscreen = async () => {
       try {
-        const elem = document.documentElement;
-        if (elem.requestFullscreen) {
-          await elem.requestFullscreen();
-        } else if ((elem as any).webkitRequestFullscreen) {
-          await (elem as any).webkitRequestFullscreen();
-        } else if ((elem as any).msRequestFullscreen) {
-          await (elem as any).msRequestFullscreen();
+        const element = document.documentElement;
+        if (element.requestFullscreen) {
+          await element.requestFullscreen();
+        } else if ((element as any).webkitRequestFullscreen) {
+          await (element as any).webkitRequestFullscreen();
+        } else if ((element as any).msRequestFullscreen) {
+          await (element as any).msRequestFullscreen();
         }
       } catch (error) {
         console.error("Failed to enter fullscreen:", error);
@@ -93,51 +104,72 @@ export function TestInterface({
 
     if (testStarted) {
       enterFullscreen();
-
-      // Hide navbar by adding a class to the body
-      document.body.classList.add('test-mode');
+      document.body.classList.add("test-mode");
     }
 
-    // Cleanup function to exit fullscreen when component unmounts
     return () => {
       if (document.exitFullscreen && document.fullscreenElement) {
         document.exitFullscreen();
       }
-      // Remove the test-mode class
-      document.body.classList.remove('test-mode');
+      document.body.classList.remove("test-mode");
     };
   }, [testStarted]);
 
-  // Track tab switches
+  useEffect(() => {
+    handleSubmitRef.current = () => {
+      const finalTimeSpent =
+        totalTimeSpent + (sections[currentSection].duration * 60 - timeLeft);
+      onComplete(answers, finalTimeSpent);
+    };
+  }, [answers, currentSection, onComplete, sections, timeLeft, totalTimeSpent]);
+
+  const handleSubmit = () => {
+    handleSubmitRef.current();
+  };
+
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.hidden && testStarted) {
-        incrementTabSwitches();
-
-        if (tabSwitchCount < 2) {
-          setWarningModalOpen(true);
-          setIsLastWarning(false);
-          setIsAutoSubmitted(false);
-        } else if (tabSwitchCount === 2) {
-          setWarningModalOpen(true);
-          setIsLastWarning(true);
-          setIsAutoSubmitted(false);
-        } else {
-          setWarningModalOpen(true);
-          setIsAutoSubmitted(true);
-          handleSubmit();
-        }
+      if (document.hidden && testStarted && !hasAutoSubmittedRef.current) {
+        setSessionTabSwitchCount((previous) => previous + 1);
       }
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
-  }, [tabSwitchCount, incrementTabSwitches, testStarted]);
+    return () =>
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, [testStarted]);
 
-  // Prevent copy-paste
   useEffect(() => {
-    const preventCopyPaste = (e: ClipboardEvent) => {
-      e.preventDefault();
+    if (!testStarted || sessionTabSwitchCount === 0) {
+      return;
+    }
+
+    if (sessionTabSwitchCount <= 2) {
+      setWarningModalOpen(true);
+      setIsLastWarning(false);
+      setIsAutoSubmitted(false);
+      return;
+    }
+
+    if (sessionTabSwitchCount === 3) {
+      setWarningModalOpen(true);
+      setIsLastWarning(true);
+      setIsAutoSubmitted(false);
+      return;
+    }
+
+    if (!hasAutoSubmittedRef.current) {
+      hasAutoSubmittedRef.current = true;
+      setWarningModalOpen(true);
+      setIsLastWarning(false);
+      setIsAutoSubmitted(true);
+      handleSubmitRef.current();
+    }
+  }, [sessionTabSwitchCount, testStarted]);
+
+  useEffect(() => {
+    const preventCopyPaste = (event: ClipboardEvent) => {
+      event.preventDefault();
       toast({
         title: "Action not allowed",
         description: "Copy and paste are disabled during the test",
@@ -156,12 +188,11 @@ export function TestInterface({
       document.removeEventListener("paste", preventCopyPaste);
       document.removeEventListener("cut", preventCopyPaste);
     };
-  }, [toast, testStarted]);
+  }, [testStarted, toast]);
 
-  // Prevent context menu
   useEffect(() => {
-    const preventContextMenu = (e: MouseEvent) => {
-      e.preventDefault();
+    const preventContextMenu = (event: MouseEvent) => {
+      event.preventDefault();
     };
 
     if (testStarted) {
@@ -171,47 +202,76 @@ export function TestInterface({
     return () => document.removeEventListener("contextmenu", preventContextMenu);
   }, [testStarted]);
 
+  useEffect(() => {
+    if (!testStarted) {
+      return;
+    }
+
+    setVisitedQuestions((previous) =>
+      previous[currentGlobalQuestionIndex]
+        ? previous
+        : { ...previous, [currentGlobalQuestionIndex]: true }
+    );
+  }, [currentGlobalQuestionIndex, testStarted]);
+
+  const getQuestionStatus = (globalQuestionIndex: number): QuestionStatus => {
+    if (markedForReview[globalQuestionIndex]) {
+      return "markedForReview";
+    }
+
+    if (answers[globalQuestionIndex] !== undefined) {
+      return "answered";
+    }
+
+    if (visitedQuestions[globalQuestionIndex]) {
+      return "visitedUnanswered";
+    }
+
+    return "notVisited";
+  };
+
   const handleAnswer = (answerId: number) => {
-    const questionIndex = getGlobalQuestionIndex();
-    setAnswers((prev) => ({
-      ...prev,
-      [questionIndex]: answerId,
+    setAnswers((previous) => ({
+      ...previous,
+      [currentGlobalQuestionIndex]: answerId,
     }));
   };
 
-  const getGlobalQuestionIndex = () => {
-    let index = currentQuestion;
-    for (let i = 0; i < currentSection; i++) {
-      index += sections[i].questions.length;
-    }
-    return index;
+  const handleToggleReview = () => {
+    setMarkedForReview((previous) => ({
+      ...previous,
+      [currentGlobalQuestionIndex]: !previous[currentGlobalQuestionIndex],
+    }));
   };
 
   const handleNextSection = () => {
     if (currentSection < sections.length - 1) {
-      const newSectionCompleted = [...sectionCompleted];
-      newSectionCompleted[currentSection] = true;
-      setSectionCompleted(newSectionCompleted);
+      const updatedSectionCompleted = [...sectionCompleted];
+      updatedSectionCompleted[currentSection] = true;
+      setSectionCompleted(updatedSectionCompleted);
 
-      // Show warning dialog before proceeding
-      const dialog = document.getElementById('section-warning-dialog') as HTMLButtonElement;
-      if (dialog) {
-        dialog.click();
-      }
+      const sectionDialogTrigger = document.getElementById(
+        "section-warning-dialog"
+      ) as HTMLButtonElement | null;
+
+      sectionDialogTrigger?.click();
     }
   };
 
   const confirmNextSection = () => {
     if (currentSection < sections.length - 1) {
-      // Add current section's time spent to total
-      setTotalTimeSpent(prev => prev + (sections[currentSection].duration * 60 - timeLeft));
+      setTotalTimeSpent(
+        (previous) =>
+          previous + (sections[currentSection].duration * 60 - timeLeft)
+      );
 
-      setCurrentSection(currentSection + 1);
+      const nextSection = currentSection + 1;
+      setCurrentSection(nextSection);
       setCurrentQuestion(0);
-      setTimeLeft(sections[currentSection + 1].duration * 60);
+      setTimeLeft(sections[nextSection].duration * 60);
       toast({
         title: "New Section Started",
-        description: `You are now in ${sections[currentSection + 1].name}`,
+        description: `You are now in ${sections[nextSection].name}`,
       });
     }
   };
@@ -219,178 +279,184 @@ export function TestInterface({
   const handleTimeUp = () => {
     if (currentSection < sections.length - 1) {
       handleNextSection();
-    } else {
-      handleSubmit();
+      return;
     }
+
+    handleSubmit();
   };
 
-  const handleSubmit = () => {
-    // Calculate total time spent including current section
-    const finalTimeSpent = totalTimeSpent + (sections[currentSection].duration * 60 - timeLeft);
-    onComplete(answers, finalTimeSpent);
-  };
-
-  const startTest = () => {
-    setShowWarningModal(false);
+  const handleStartTest = () => {
+    hasAutoSubmittedRef.current = false;
+    setSessionTabSwitchCount(0);
+    setWarningModalOpen(false);
+    setIsLastWarning(false);
+    setIsAutoSubmitted(false);
     setTestStarted(true);
   };
 
-  // Current section's questions
   const currentSectionQuestions = sections[currentSection].questions;
   const currentQuestionData = currentSectionQuestions[currentQuestion];
+  const questionStatuses = currentSectionQuestions.map((_, index) =>
+    getQuestionStatus(currentSectionStartIndex + index)
+  );
 
   if (!testStarted) {
-    return <WarningModal onStart={startTest} />;
+    return <WarningModal onStart={handleStartTest} />;
   }
 
   return (
-    <div className="min-h-screen bg-background lg:py-10 py-2" ref={containerRef}>
+    <div className={cn(testUi.page, "py-2 lg:py-8")} style={testInterfaceTheme}>
       <TestHeader testName={`${testName} - ${sections[currentSection].name}`} />
 
-      <div className="container py-6">
-        <div className="mb-4">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold">
-              Section: {sections[currentSection].name}
-            </h2>
-            {currentSection < sections.length - 1 && (
-              <Button
-                onClick={handleNextSection}
-                variant="outline"
-              >
-                Next Section
-              </Button>
-            )}
+      <div className={testUi.container}>
+        <TestSurface className="mb-6 p-4 lg:p-5">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div className="space-y-1">
+              <h2 className={testUi.sectionTitle}>
+                Section: {sections[currentSection].name}
+              </h2>
+              <p className={testUi.bodyText}>
+                Attempt questions, flag uncertain ones, and review before
+                submission.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <Timer
+                variant="inline"
+                timeLeft={timeLeft}
+                totalTime={sections[currentSection].duration * 60}
+                setTimeLeft={setTimeLeft}
+                onTimeUp={handleTimeUp}
+              />
+              {currentSection < sections.length - 1 && (
+                <Button
+                  onClick={handleNextSection}
+                  variant="outline"
+                  className={testUi.secondaryButton}
+                >
+                  Next Section
+                </Button>
+              )}
+            </div>
           </div>
-          <div className="flex gap-2 mt-2">
+
+          <div className="mt-4 flex flex-wrap gap-2">
             {sections.map((section, index) => (
-              <Badge
-                key={index}
-                variant={index === currentSection ? "default" : "outline"}
+              <span
+                key={section.name}
                 className={cn(
-                  sectionCompleted[index] ? "opacity-50" : "",
-                  "transition-all duration-300"
+                  "rounded-full border px-3 py-1.5 text-sm font-medium",
+                  index === currentSection
+                    ? "border-[hsl(var(--test-primary))] bg-teal-50 text-[hsl(var(--test-primary))]"
+                    : "border-[hsl(var(--test-border-strong))] bg-[hsl(var(--test-surface-muted))] text-[hsl(var(--test-muted-foreground))]",
+                  sectionCompleted[index] && "opacity-65"
                 )}
               >
                 {section.name}
-              </Badge>
+              </span>
             ))}
           </div>
-        </div>
+        </TestSurface>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
           <div className="lg:col-span-9">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <div className="bg-card rounded-lg shadow-lg p-6">
+            <div key={currentGlobalQuestionIndex}>
+              <TestSurface className="p-5 lg:p-6">
                 <QuestionPanel
                   questionNumber={currentQuestion + 1}
                   questionText={currentQuestionData.question}
                   options={currentQuestionData.options}
                   onAnswer={handleAnswer}
-                  selectedAnswer={answers[getGlobalQuestionIndex()]}
+                  selectedAnswer={answers[currentGlobalQuestionIndex]}
+                  isMarkedForReview={
+                    Boolean(markedForReview[currentGlobalQuestionIndex])
+                  }
+                  onToggleReview={handleToggleReview}
                 />
-              </div>
-            </motion.div>
+              </TestSurface>
+            </div>
           </div>
 
-          <div className="lg:col-span-3 space-y-6">
-            <div className="bg-card rounded-lg shadow-lg p-4">
-              <Timer
-                timeLeft={timeLeft}
-                setTimeLeft={setTimeLeft}
-                onTimeUp={handleTimeUp}
-              />
-            </div>
-
-            <div className="bg-card rounded-lg shadow-lg p-4">
-              <TestProgress
+          <div className="space-y-4 lg:col-span-3">
+            <TestSurface className="p-4">
+              <QuestionNavigation
+                questionStatuses={questionStatuses}
                 currentQuestion={currentQuestion + 1}
-                totalQuestions={currentSectionQuestions.length}
-                answeredQuestions={
-                  Object.keys(answers).filter((key) => {
-                    const questionIndex = parseInt(key);
-                    let prevQuestionsCount = 0;
-                    for (let i = 0; i < currentSection; i++) {
-                      prevQuestionsCount += sections[i].questions.length;
-                    }
-                    return (
-                      questionIndex >= prevQuestionsCount &&
-                      questionIndex < prevQuestionsCount + currentSectionQuestions.length
-                    );
-                  }).length
+                onQuestionSelect={(questionNumber) =>
+                  setCurrentQuestion(questionNumber - 1)
                 }
               />
-            </div>
-
-            <div className="bg-card rounded-lg shadow-lg p-4">
-              <QuestionNavigation
-                totalQuestions={currentSectionQuestions.length}
-                currentQuestion={currentQuestion + 1}
-                answeredQuestions={answers}
-                onQuestionSelect={(num) => setCurrentQuestion(num - 1)}
-              />
-            </div>
+            </TestSurface>
           </div>
         </div>
 
-        {/* Bottom Navigation */}
-        <div className="fixed bottom-0 left-0 right-0 bg-background border-t py-4 px-2">
-          <div className="container flex justify-between items-center  mx-auto">
-            <button
-              onClick={() => setCurrentQuestion((prev) => Math.max(0, prev - 1))}
+        <div className={testUi.fixedBar}>
+          <div className="mx-auto flex w-full max-w-[1380px] items-center justify-between gap-3 px-1 lg:px-6">
+            <Button
+              onClick={() =>
+                setCurrentQuestion((previous) => Math.max(0, previous - 1))
+              }
               disabled={currentQuestion === 0}
-              className="px-4 py-2 rounded-md bg-primary/10 hover:bg-primary/20 transition-colors disabled:opacity-50"
+              variant="outline"
+              className={cn(testUi.secondaryButton, "min-w-[110px]")}
             >
               Previous
-            </button>
+            </Button>
+
+            <span className={`hidden sm:block ${testUi.bodyText}`}>
+              Question {currentQuestion + 1} of {currentSectionQuestions.length}
+            </span>
 
             {currentQuestion === currentSectionQuestions.length - 1 ? (
               currentSection === sections.length - 1 ? (
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <button className="px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
+                    <Button className={cn(testUi.primaryButton, "min-w-[110px]")}>
                       Submit Test
-                    </button>
+                    </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
                       <AlertDialogTitle>Submit Test?</AlertDialogTitle>
                       <AlertDialogDescription>
-                        Are you sure you want to submit the test? This action cannot be undone.
+                        Are you sure you want to submit the test? This action
+                        cannot be undone.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={handleSubmit}>
+                      <AlertDialogCancel className={testUi.secondaryButton}>
+                        Cancel
+                      </AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleSubmit}
+                        className={testUi.primaryButton}
+                      >
                         Submit
                       </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
               ) : (
-                <Button onClick={handleNextSection}>Next Section</Button>
+                <Button onClick={handleNextSection} className={testUi.primaryButton}>
+                  Next Section
+                </Button>
               )
             ) : (
-              <button
+              <Button
                 onClick={() =>
-                  setCurrentQuestion((prev) =>
-                    Math.min(currentSectionQuestions.length - 1, prev + 1)
+                  setCurrentQuestion((previous) =>
+                    Math.min(currentSectionQuestions.length - 1, previous + 1)
                   )
                 }
-                className="px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+                className={cn(testUi.primaryButton, "min-w-[110px]")}
               >
                 Next
-              </button>
+              </Button>
             )}
           </div>
         </div>
       </div>
 
-      {/* Section Warning Dialog */}
       <AlertDialog>
         <AlertDialogTrigger id="section-warning-dialog" className="hidden" />
         <AlertDialogContent>
@@ -401,27 +467,34 @@ export function TestInterface({
             </AlertDialogTitle>
             <AlertDialogDescription>
               You are about to move to the next section. Please note:
-              <ul className="list-disc list-inside mt-2 space-y-1">
+              <ul className="mt-2 list-inside list-disc space-y-1">
                 <li>You cannot return to the previous section once you proceed</li>
-                <li>All unanswered questions in the current section will be marked as not attempted</li>
+                <li>
+                  All unanswered questions in the current section will be marked
+                  as not attempted
+                </li>
                 <li>Make sure you have reviewed all your answers</li>
               </ul>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Stay in Current Section</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmNextSection}>
+            <AlertDialogCancel className={testUi.secondaryButton}>
+              Stay in Current Section
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmNextSection}
+              className={testUi.primaryButton}
+            >
               Proceed to Next Section
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Tab Switch Warning Modal */}
       <TabSwitchWarningModal
         open={warningModalOpen}
         onClose={() => setWarningModalOpen(false)}
-        tabSwitchCount={tabSwitchCount + 1}
+        tabSwitchCount={sessionTabSwitchCount}
         isLastWarning={isLastWarning}
         isAutoSubmitted={isAutoSubmitted}
       />
