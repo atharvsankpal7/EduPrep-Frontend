@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { TestInterface } from "@/components/test/test-interface";
 import axios from "axios";
@@ -130,6 +130,24 @@ export default function TestPage({ params }: TestPageProps) {
     }
   };
 
+  // Transform the test data into sections format for the TestInterface component
+  const sections: TestSection[] = useMemo(() => {
+    if (!testData) return [];
+
+    return testData.test.sections.map((section) => {
+      return {
+        name: section.sectionName,
+        duration: section.sectionDuration,
+        questions: section.questions.map((q) => ({
+          question: q.questionText,
+          options: q.options,
+          correctAnswer: q.answer,
+          id: q._id,
+        })),
+      };
+    });
+  }, [testData]);
+
   if (loading) {
     return <LoadingComponent />;
   }
@@ -141,20 +159,6 @@ export default function TestPage({ params }: TestPageProps) {
   if (!testData) {
     return <div className="container py-8 text-center">No test data available</div>;
   }
-
-  // Transform the test data into sections format for the TestInterface component
-  const sections: TestSection[] = testData.test.sections.map(section => {
-    return {
-      name: section.sectionName,
-      duration: section.sectionDuration,
-      questions: section.questions.map(q => ({
-        question: q.questionText,
-        options: q.options,
-        correctAnswer: q.answer,
-        id: q._id
-      }))
-    };
-  });
 
   return (
     <TestInterface
