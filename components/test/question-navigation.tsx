@@ -1,52 +1,61 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import {
+  QuestionStatus,
+  getQuestionButtonClassName,
+  questionStatusLegendOrder,
+  questionStatusMeta,
+} from "@/components/test/test-design-system";
 
 interface QuestionNavigationProps {
-  totalQuestions: number;
+  questionStatuses: QuestionStatus[];
   currentQuestion: number;
-  answeredQuestions: Record<number, number>;
   onQuestionSelect: (questionNumber: number) => void;
 }
 
 export function QuestionNavigation({
-  totalQuestions,
+  questionStatuses,
   currentQuestion,
-  answeredQuestions,
   onQuestionSelect,
 }: QuestionNavigationProps) {
+  const totalQuestions = questionStatuses.length;
+
   return (
     <div className="space-y-4">
-      <h3 className="font-medium">Question Navigation</h3>
-      
-      <div className="grid grid-cols-5 gap-2">
-        {Array.from({ length: totalQuestions }, (_, i) => i + 1).map((num) => (
-          <Button
-            key={num}
-            variant="outline"
-            size="sm"
-            className={cn(
-              "w-full h-8",
-              currentQuestion === num && "ring-2 ring-primary",
-              answeredQuestions[num] && "bg-primary/10 hover:bg-primary/20"
-            )}
-            onClick={() => onQuestionSelect(num)}
-          >
-            {num}
-          </Button>
-        ))}
+      <h3 className="font-semibold text-[hsl(var(--test-foreground))]">
+        Question Navigation
+      </h3>
+
+      <div className="grid grid-cols-5 gap-2 sm:grid-cols-6 lg:grid-cols-5">
+        {Array.from({ length: totalQuestions }, (_, index) => {
+          const questionNumber = index + 1;
+          const status = questionStatuses[index];
+
+          return (
+            <button
+              key={questionNumber}
+              className={getQuestionButtonClassName({
+                status,
+                isCurrent: currentQuestion === questionNumber,
+              })}
+              onClick={() => onQuestionSelect(questionNumber)}
+              type="button"
+            >
+              {questionNumber}
+            </button>
+          );
+        })}
       </div>
 
-      <div className="flex items-center justify-between text-sm text-muted-foreground">
-        <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 bg-primary/10 rounded" />
-          <span>Answered</span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 bg-background border rounded" />
-          <span>Unanswered</span>
-        </div>
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+        {questionStatusLegendOrder.map((status) => (
+          <div
+            key={status}
+            className={`rounded-lg border px-3 py-2 text-sm font-medium ${questionStatusMeta[status].legendCardClassName}`}
+          >
+            <span>{questionStatusMeta[status].label}</span>
+          </div>
+        ))}
       </div>
     </div>
   );

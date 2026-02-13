@@ -9,6 +9,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { AlertTriangle } from "lucide-react";
+import { testUi } from "@/components/test/test-design-system";
 
 interface TabSwitchWarningModalProps {
   open: boolean;
@@ -26,7 +27,14 @@ export function TabSwitchWarningModal({
   isAutoSubmitted,
 }: TabSwitchWarningModalProps) {
   return (
-    <AlertDialog open={open} onOpenChange={onClose}>
+    <AlertDialog
+      open={open}
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen) {
+          onClose();
+        }
+      }}
+    >
       <AlertDialogContent className="max-w-md">
         <AlertDialogHeader>
           <div className="flex flex-col items-center space-y-4">
@@ -49,14 +57,17 @@ export function TabSwitchWarningModal({
                 <>
                   Tab switch detected ({tabSwitchCount}/3). 
                   <br />
-                  Your test will be auto-submitted after 3 attempts.
+                  You have 3 warnings. After 3/3, one more switch will auto-submit your test.
                 </>
               )}
             </AlertDialogDescription>
           </div>
         </AlertDialogHeader>
-        <AlertDialogFooter className="flex justify-center">
-          <AlertDialogAction onClick={onClose}>
+        <AlertDialogFooter className="flex justify-center items-center">
+          <AlertDialogAction
+            onClick={onClose}
+            className={isAutoSubmitted ? testUi.dangerButton : testUi.warningButton}
+          >
             {isAutoSubmitted ? "View Results" : "I Understand"}
           </AlertDialogAction>
         </AlertDialogFooter>

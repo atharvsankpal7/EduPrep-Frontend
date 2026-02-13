@@ -7,6 +7,7 @@ import { CheckCircle2, XCircle, BarChart2, Clock } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Question } from "./test-interface";
 import Image from "next/image";
+import { formatCompactDurationFromSeconds } from "@/lib/time";
 
 interface TestResultDetailsProps {
   questions: Question[];
@@ -118,7 +119,7 @@ export function TestResultDetails({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{Math.floor(timeSpent / 60)}m</div>
+              <div className="text-3xl font-bold">{formatCompactDurationFromSeconds(timeSpent)}</div>
             </CardContent>
           </Card>
         </div>

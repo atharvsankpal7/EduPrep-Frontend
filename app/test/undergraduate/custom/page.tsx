@@ -43,13 +43,14 @@ export default function CustomTestPage() {
         educationLevel: EducationLevel.Undergraduate,
         topicList: selectedTopics,
         numberOfQuestions: testConfig.questionCount,
-        time: testConfig.duration * 60, // Convert minutes to seconds
+        time: testConfig.duration,
       })) as any;
 
-      if (!response.testId) {
+      const testId = response?.data?.testDetails?.testId ?? response?.testId;
+      if (!testId) {
         throw new Error("Failed to create test");
       }
-      router.push(`/test/${response.testId}`);
+      router.push(`/test/${testId}`);
     } catch (error) {
       console.error("Error creating test:", error);
       setShowError(true);

@@ -6,6 +6,7 @@ import {
   TUnderGraduateTestCategories,
   TCreateUndergraduateTestRequest,
   TCreateCustomTestRequest,
+  TCreateTestParams,
 } from "../type";
 import { BACKEND_URL } from "../constant";
 
@@ -49,25 +50,13 @@ const getCustomTest = ({
   topicList,
   educationLevel,
 }: TCreateCustomTestRequest) => {
-  // Format the request differently based on education level
-  if (educationLevel === EducationLevel.JuniorCollege) {
-    // For junior college, extract just the topic names into a flat array
-    const topicNames = topicList.subjects.flatMap(subject => subject.topics);
-    
-    return makeRequest(`${backend_url}/${educationLevel.toLowerCase()}/custom`, {
-      time,
-      numberOfQuestions,
-      topicList: topicNames,
-      educationLevel: [educationLevel] // Keep this as an array as required by the API
-    });
-  } else {
-    // For undergraduate, keep the original format
-    return makeRequest(`${backend_url}/${educationLevel.toLowerCase()}/custom`, {
-      time,
-      numberOfQuestions,
-      topicList,
-    });
-  }
+  const topicNames = topicList.subjects.flatMap((subject) => subject.topics);
+
+  return makeRequest(`${backend_url}/${educationLevel.toLowerCase()}/custom`, {
+    time,
+    numberOfQuestions,
+    topicList: topicNames,
+  });
 };
 
 const createUndergraduateTest = async ({
@@ -105,16 +94,9 @@ export const createTest = async ({
   numberOfQuestions = 30,
   company,
   topicList,
-  time = 60 * 60, // Changed from 60*60*60 to 60*60 (60 minutes in seconds)
+  time = 60,
   isCet = false,
-}: {
-  educationLevel: EducationLevel;
-  numberOfQuestions?: number;
-  company?: string;
-  topicList?: TopicList;
-  time?: number;
-  isCet?: boolean;
-}) => {
+}: TCreateTestParams) => {
   try {
     console.log("Creating test with params:", { educationLevel, numberOfQuestions, company, topicList, time, isCet });
     

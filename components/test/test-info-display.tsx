@@ -21,6 +21,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Clock, BookOpen, AlertTriangle } from "lucide-react";
+import { formatCompactDurationFromMinutes } from "@/lib/time";
 
 interface TestInfoDisplayProps {
   title: string;
@@ -66,7 +67,7 @@ export function TestInfoDisplay({
                   <Clock className="w-5 h-5 text-primary" />
                   Duration
                 </CardTitle>
-                <CardDescription>{duration} minutes</CardDescription>
+                <CardDescription>{formatCompactDurationFromMinutes(duration)}</CardDescription>
               </CardHeader>
             </Card>
 
@@ -125,7 +126,7 @@ export function TestInfoDisplay({
                       <AlertDialogTitle>Ready to begin?</AlertDialogTitle>
                       <AlertDialogDescription>
                         The test will start immediately in full-screen mode. Make
-                        sure you&apos;re ready to spend the next {duration} minutes
+                        sure you&apos;re ready to spend the next {formatCompactDurationFromMinutes(duration)}
                         uninterrupted.
                       </AlertDialogDescription>
                     </AlertDialogHeader>

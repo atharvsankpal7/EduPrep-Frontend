@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle2, XCircle, BarChart2, Clock } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { formatCompactDurationFromSeconds } from "@/lib/time";
 
 interface SectionResult {
   name: string;
@@ -82,7 +83,7 @@ export function TestResult({
 
                 <div className="flex flex-col items-center p-4 bg-blue-500/10 rounded-lg">
                   <Clock className="w-8 h-8 mb-2 text-blue-500" />
-                  <div className="text-2xl font-bold">{Math.floor(timeSpent / 60)}m {timeSpent % 60}s</div>
+                  <div className="text-2xl font-bold">{formatCompactDurationFromSeconds(timeSpent)}</div>
                   <div className="text-sm text-muted-foreground">Time Spent</div>
                 </div>
               </div>
@@ -125,7 +126,7 @@ export function TestResult({
 
                         <div className="flex flex-col items-center p-4 bg-blue-500/10 rounded-lg">
                           <Clock className="w-6 h-6 mb-2 text-blue-500" />
-                          <div className="text-xl font-bold">{Math.floor(section.timeSpent / 60)}m {section.timeSpent % 60}s</div>
+                          <div className="text-xl font-bold">{formatCompactDurationFromSeconds(section.timeSpent)}</div>
                           <div className="text-xs text-muted-foreground">Time</div>
                         </div>
                       </div>

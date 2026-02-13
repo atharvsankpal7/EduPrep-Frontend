@@ -15,7 +15,8 @@ interface TestPageProps {
 
 interface TestResponse {
   test: {
-    _id: string;
+    id?: string;
+    _id?: string;
     testName: string;
     totalDuration: number;
     totalQuestions: number;
@@ -24,7 +25,8 @@ interface TestResponse {
       sectionDuration: number;
       totalQuestions: number;
       questions: {
-        _id: string;
+        id?: string;
+        _id?: string;
         questionText: string;
         options: string[];
         answer: number;
@@ -58,13 +60,11 @@ export default function TestPage({ params }: TestPageProps) {
       try {
         setLoading(true);
         const url = `${BACKEND_URL}/test/${testId}`;
-        console.log("url", url);
         const response = await axios.get(url, {
           withCredentials: true,
         });
         
         const responseData = response.data.data;
-        console.log(responseData);
         
         if (!responseData.test) {
           throw new Error("Invalid test data received");
@@ -96,9 +96,10 @@ export default function TestPage({ params }: TestPageProps) {
       testData.test.sections.forEach(section => {
         section.questions.forEach(question => {
           const selectedOption = answers[globalQuestionIndex];
+          const questionId = question.id ?? question._id ?? "";
           
           selectedAnswers.push({
-            questionId: question._id,
+            questionId,
             selectedOption: selectedOption !== undefined ? selectedOption + 1 : -1, // Add 1 to match 1-based indexing, -1 for unanswered
             sectionName: section.sectionName
           });
@@ -106,11 +107,10 @@ export default function TestPage({ params }: TestPageProps) {
           globalQuestionIndex++;
         });
       });
-      console.log("Selected Answers:", selectedAnswers);
       // Submit test
      const response =  await axios.patch(`${BACKEND_URL}/test/${testId}/submit`, {
         selectedAnswers,
-        timeTaken: Math.floor(timeSpent / 60), // Convert to minutes
+        timeTaken: timeSpent,
         autoSubmission: {
           isAutoSubmitted: false,
           tabSwitches: 0
@@ -121,9 +121,14 @@ export default function TestPage({ params }: TestPageProps) {
           'Content-Type': 'application/json'
         }
       });
-      console.log("response from submitted result",response.data.data.testResult._id);
       // Redirect to results page
-      router.push(`/result/${response.data.data.testResult._id}`);
+      const testResultId =
+        response.data?.data?.testResult?.id ??
+        response.data?.data?.testResult?._id;
+      if (!testResultId) {
+        throw new Error("Missing test result id in response");
+      }
+      router.push(`/result/${testResultId}`);
     } catch (error) {
       console.error("Failed to submit test:", error);
       setError("Failed to submit test. Please try again.");
@@ -159,6 +164,20 @@ export default function TestPage({ params }: TestPageProps) {
   if (!testData) {
     return <div className="container py-8 text-center">No test data available</div>;
   }
+
+  // Transform the test data into sections format for the TestInterface component
+  const sections: TestSection[] = testData.test.sections.map(section => {
+    return {
+      name: section.sectionName,
+      duration: section.sectionDuration,
+      questions: section.questions.map(q => ({
+        question: q.questionText,
+        options: q.options,
+        correctAnswer: q.answer,
+        id: q.id ?? q._id ?? ""
+      }))
+    };
+  });
 
   return (
     <TestInterface
