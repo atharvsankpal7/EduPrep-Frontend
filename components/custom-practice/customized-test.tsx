@@ -18,25 +18,28 @@ export function CustomizedTest({
   subjects,
   onStartTest,
 }: TCustomizedTestProps & { onStartTest: (topics: TopicList) => void }) {
-  const [selectedTopics, setSelectedTopics] = useState<Record<string, string[]>>(
-    {}
-  );
+  const [selectedTopics, setSelectedTopics] = useState<
+    Record<string, Set<string>>
+  >({});
 
   const handleTopicToggle = (subject: string, topic: string) => {
     setSelectedTopics((prev) => {
-      const currentTopics = prev[subject] || [];
-      const updatedTopics = currentTopics.includes(topic)
-        ? currentTopics.filter((t) => t !== topic)
-        : [...currentTopics, topic];
+      const currentTopics = prev[subject] || new Set();
+      const updatedTopics = new Set(currentTopics);
+      if (updatedTopics.has(topic)) {
+        updatedTopics.delete(topic);
+      } else {
+        updatedTopics.add(topic);
+      }
       return { ...prev, [subject]: updatedTopics };
     });
   };
 
   const handleSelectAll = () => {
-    const allTopics: Record<string, string[]> = {};
+    const allTopics: Record<string, Set<string>> = {};
     subjects.forEach((domain) => {
       domain.subjects.forEach((subject) => {
-        allTopics[subject.subjectName] = subject.topics;
+        allTopics[subject.subjectName] = new Set(subject.topics);
       });
     });
     setSelectedTopics(allTopics);
@@ -46,7 +49,7 @@ export function CustomizedTest({
     const topicList: TopicList = {
       subjects: Object.entries(selectedTopics).map(([subjectName, topics]) => ({
         subjectName,
-        topics,
+        topics: Array.from(topics),
       })),
     };
     onStartTest(topicList);
@@ -66,8 +69,7 @@ export function CustomizedTest({
             onClick={handleStartTest}
             className="gap-2"
             disabled={
-              Object.values(selectedTopics).flatMap((topics) => topics).length ===
-              0
+              !Object.values(selectedTopics).some((topics) => topics.size > 0)
             }
           >
             <Dices className="w-4 h-4" /> Create Test
@@ -97,9 +99,8 @@ export function CustomizedTest({
                             <Checkbox
                               id={topic}
                               checked={
-                                selectedTopics[subject.subjectName]?.includes(
-                                  topic
-                                ) || false
+                                selectedTopics[subject.subjectName]?.has(topic) ||
+                                false
                               }
                               onCheckedChange={() =>
                                 handleTopicToggle(subject.subjectName, topic)
