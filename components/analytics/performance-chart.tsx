@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Line } from "react-chartjs-2";
+import { debounce } from "@/lib/utils";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -36,13 +37,14 @@ export function PerformanceChart({ timeRange }: PerformanceChartProps) {
   useEffect(() => {
     setWindowWidth(window.innerWidth);
 
-    const handleResize = () => {
+    const handleResize = debounce(() => {
       setWindowWidth(window.innerWidth);
-    };
+    }, 200);
 
     window.addEventListener("resize", handleResize);
-    
+
     return () => {
+      handleResize.cancel();
       window.removeEventListener("resize", handleResize);
     };
   }, []);
