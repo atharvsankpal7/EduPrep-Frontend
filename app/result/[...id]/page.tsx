@@ -55,7 +55,6 @@ export default function TestResultPage({ params }: { params: { id: string } }) {
 
         // Process the response to include section results
         const resultData = response.data.data;
-        console.log(response.data.data);
 
         // Transform section data if available
         const sectionResults =
