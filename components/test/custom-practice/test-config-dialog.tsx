@@ -11,9 +11,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
 import { Clock, AlertTriangle } from "lucide-react";
-import { formatCompactDurationFromMinutes } from "@/lib/time";
+import { TimeInput } from "@/components/ui/time-input";
 
 interface TestConfigDialogProps {
   open: boolean;
@@ -47,24 +46,14 @@ export function TestConfigDialog({
         <div className="grid gap-4 py-4">
           <div className="space-y-4">
             <div>
-              <Label htmlFor="duration" className="flex items-center gap-2">
+              <Label className="flex items-center gap-2 mb-2">
                 <Clock className="w-4 h-4" />
-                Test Duration (minutes)
+                Test Duration
               </Label>
-              <div className="mt-2 space-y-2">
-                <Slider
-                  value={[duration]}
-                  onValueChange={([value]) => setDuration(value)}
-                  min={15}
-                  max={180}
-                  step={15}
-                />
-                <div className="flex justify-between text-sm text-muted-foreground">
-                  <span>15 min</span>
-                  <span>{formatCompactDurationFromMinutes(duration)}</span>
-                  <span>180 min</span>
-                </div>
-              </div>
+              <TimeInput
+                value={duration}
+                onChange={setDuration}
+              />
             </div>
 
             <div>
@@ -74,14 +63,14 @@ export function TestConfigDialog({
                 type="number"
                 value={questionCount}
                 onChange={(e) => setQuestionCount(Number(e.target.value))}
-                min={5}
-                max={100}
+                min={10}
+                max={120}
                 className="mt-2"
               />
-              {(questionCount < 5 || questionCount > 100) && (
+              {(questionCount < 10 || questionCount > 120) && (
                 <div className="flex items-center gap-2 mt-2 text-destructive text-sm">
                   <AlertTriangle className="w-4 h-4" />
-                  <span>Please select between 5 and 100 questions</span>
+                  <span>Please select between 10 and 120 questions</span>
                 </div>
               )}
             </div>
@@ -93,7 +82,7 @@ export function TestConfigDialog({
           </Button>
           <Button
             onClick={handleConfirm}
-            disabled={questionCount < 5 || questionCount > 100}
+            disabled={questionCount < 10 || questionCount > 120 || duration <= 0}
           >
             Continue
           </Button>
