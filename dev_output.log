@@ -1,0 +1,34 @@
+
+> mock-test-platform@0.1.0 dev /app
+> next dev
+
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:3000
+  - Environments: .env
+
+ ✓ Starting...
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
+ ✓ Ready in 1860ms
+ ○ Compiling / ...
+Browserslist: browsers data (caniuse-lite) is 14 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+ ✓ Compiled / in 7.9s (902 modules)
+ GET / 200 in 9237ms
+ ✓ Compiled in 1298ms (430 modules)
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 7.3s (882 modules)
+ ○ Compiling /landing-page-glm ...
+ ✓ Compiled /landing-page-glm in 655ms (902 modules)
+ GET /landing-page-glm 200 in 759ms
+ GET /undefined/user/me 404 in 44ms
+ GET /undefined/user/me 404 in 21ms
+ ✓ Compiled in 761ms (916 modules)
+ GET /landing-page-glm 200 in 92ms
+ GET /undefined/user/me 404 in 47ms
+ GET /undefined/user/me 404 in 22ms
+ ✓ Compiled in 956ms (916 modules)

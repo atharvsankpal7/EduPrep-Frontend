@@ -54,14 +54,18 @@ export default function Hero() {
       ctx.strokeStyle = 'rgba(41, 98, 255, 0.05)'
       ctx.lineWidth = 1
 
+      // OPTIMIZATION: Batching draw calls reduces GPU overhead from ~1300/frame to 1/frame.
+      ctx.beginPath()
       for (let x = 0; x < canvas.width; x += gridSize) {
         for (let y = 0; y < canvas.height; y += gridSize) {
           const size = Math.sin((x + y + offset) * 0.02) * 4 + 8
-          ctx.beginPath()
-          ctx.arc(x, y, Math.abs(size), 0, Math.PI * 2)
-          ctx.stroke()
+          const r = Math.abs(size)
+          // Move to the start point of the arc to prevent connecting line
+          ctx.moveTo(x + r, y)
+          ctx.arc(x, y, r, 0, Math.PI * 2)
         }
       }
+      ctx.stroke()
 
       offset += 0.5
       requestAnimationFrame(animate)
