@@ -163,3 +163,9 @@ export interface ITest {
   testDuration: number;
   totalQuestions: number;
 }
+export interface Company {
+  _id: string;
+  name: string;
+  description: string;
+  syllabus?: string;
+}
