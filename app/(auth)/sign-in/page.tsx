@@ -52,7 +52,7 @@ export default function SignInPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(values),
       });
-      if(response.status === 401) {
+      if (response.status === 401) {
         setErrorMessage("Invalid credentials. Please try again.");
         setErrorDialogOpen(true);
         return;
@@ -62,7 +62,7 @@ export default function SignInPage() {
         setErrorDialogOpen(true);
         return;
       }
-      if(response.status === 500) {
+      if (response.status === 500) {
         setErrorMessage("Invalid username or password. Please try again.");
         setErrorDialogOpen(true);
         return;
@@ -92,7 +92,7 @@ export default function SignInPage() {
 
       // Get the callback URL from the search params or default to home
       const callbackUrl = searchParams.get("callbackUrl") || "/";
-      
+
       if (data.data.user.role === "admin") {
         router.push("/admin");
       } else {

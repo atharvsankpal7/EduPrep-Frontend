@@ -17,6 +17,15 @@ const nextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: '/junior-college',
+        destination: '/test/junior-college',
+        permanent: true,
+      },
+    ]
+  },
 };
 
 module.exports = nextConfig;
