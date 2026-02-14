@@ -6,6 +6,7 @@ import {
   questionStatusLegendOrder,
   questionStatusMeta,
 } from "@/components/test/test-design-system";
+import { memo } from "react";
 
 interface QuestionNavigationProps {
   questionStatuses: QuestionStatus[];
@@ -13,7 +14,7 @@ interface QuestionNavigationProps {
   onQuestionSelect: (questionNumber: number) => void;
 }
 
-export function QuestionNavigation({
+export const QuestionNavigation = memo(function QuestionNavigation({
   questionStatuses,
   currentQuestion,
   onQuestionSelect,
@@ -59,4 +60,4 @@ export function QuestionNavigation({
       </div>
     </div>
   );
-}
+});

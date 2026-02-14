@@ -147,7 +147,7 @@ export default function TestPage({ params }: TestPageProps) {
           question: q.questionText,
           options: q.options,
           correctAnswer: q.answer,
-          id: q._id,
+          id: q.id ?? q._id ?? "",
         })),
       };
     });
@@ -164,20 +164,6 @@ export default function TestPage({ params }: TestPageProps) {
   if (!testData) {
     return <div className="container py-8 text-center">No test data available</div>;
   }
-
-  // Transform the test data into sections format for the TestInterface component
-  const sections: TestSection[] = testData.test.sections.map(section => {
-    return {
-      name: section.sectionName,
-      duration: section.sectionDuration,
-      questions: section.questions.map(q => ({
-        question: q.questionText,
-        options: q.options,
-        correctAnswer: q.answer,
-        id: q.id ?? q._id ?? ""
-      }))
-    };
-  });
 
   return (
     <TestInterface

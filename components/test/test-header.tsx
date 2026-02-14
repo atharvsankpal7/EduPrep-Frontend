@@ -2,8 +2,9 @@
 
 import { ShieldCheck } from "lucide-react";
 import { testUi } from "@/components/test/test-design-system";
+import { memo } from "react";
 
-export function TestHeader({ testName }: { testName: string }) {
+export const TestHeader = memo(function TestHeader({ testName }: { testName: string }) {
   return (
     <header className={testUi.header}>
       <div className="mx-auto flex h-16 w-full max-w-[1380px] items-center justify-between px-4 lg:px-8">
@@ -18,4 +19,4 @@ export function TestHeader({ testName }: { testName: string }) {
       </div>
     </header>
   );
-}
+});
