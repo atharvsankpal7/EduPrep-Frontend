@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import { cn } from "@/lib/utils";
+import { buttonVariants } from "@/components/ui/button";
 
 export type QuestionStatus =
   | "notVisited"
@@ -20,30 +21,9 @@ export const testInterfaceTheme: CSSProperties = {
   ["--test-focus" as string]: "180 60% 37%",
 };
 
-const testButtonBaseClassName =
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md border px-4 py-2 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--test-focus))] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 !transition-none";
-
-export const testButtonVariants = {
-  primary:
-    "border-transparent bg-[hsl(var(--test-primary))] text-[hsl(var(--test-primary-foreground))] shadow-sm hover:brightness-95 active:brightness-90",
-  secondary:
-    "border-[hsl(var(--test-border-strong))] bg-[hsl(var(--test-surface-muted))] text-[hsl(var(--test-foreground))] hover:bg-[hsl(var(--test-surface-muted))]",
-  ghost:
-    "border-transparent bg-transparent text-[hsl(var(--test-foreground))] hover:bg-transparent",
-  warning:
-    "border-amber-300 bg-amber-100 text-amber-800 hover:bg-amber-100",
-  danger:
-    "border-rose-300 bg-rose-100 text-rose-800 hover:bg-rose-100",
-} as const;
-
-export type TestButtonVariant = keyof typeof testButtonVariants;
-
-export function getTestButtonClassName(
-  variant: TestButtonVariant,
-  className?: string
-) {
-  return cn(testButtonBaseClassName, testButtonVariants[variant], className);
-}
+const appPrimaryButtonClassName = buttonVariants({ variant: "default" });
+const appSecondaryButtonClassName = buttonVariants({ variant: "outline" });
+const appGhostButtonClassName = buttonVariants({ variant: "ghost" });
 
 export const testUi = {
   page: "min-h-screen bg-[hsl(var(--test-bg))] text-[hsl(var(--test-foreground))]",
@@ -58,11 +38,17 @@ export const testUi = {
   bodyText: "text-sm text-[hsl(var(--test-muted-foreground))]",
   header:
     "sticky top-0 z-50 w-full border-b border-[hsl(var(--test-border))] bg-[hsl(var(--test-surface))] backdrop-blur",
-  primaryButton: getTestButtonClassName("primary"),
-  secondaryButton: getTestButtonClassName("secondary"),
-  ghostButton: getTestButtonClassName("ghost"),
-  warningButton: getTestButtonClassName("warning"),
-  dangerButton: getTestButtonClassName("danger"),
+  primaryButton: appPrimaryButtonClassName,
+  secondaryButton: appSecondaryButtonClassName,
+  ghostButton: appGhostButtonClassName,
+  warningButton: cn(
+    appSecondaryButtonClassName,
+    "border-amber-300 bg-amber-100 text-amber-800 hover:bg-amber-200"
+  ),
+  dangerButton: cn(
+    appSecondaryButtonClassName,
+    "border-rose-300 bg-rose-100 text-rose-800 hover:bg-rose-200"
+  ),
   fixedBar:
     "fixed bottom-0 left-0 right-0 z-40 border-t border-[hsl(var(--test-border))] bg-[hsl(var(--test-surface))] px-3 py-4 backdrop-blur",
 };
