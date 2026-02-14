@@ -94,7 +94,7 @@ export default function SignInPage() {
       const callbackUrl = searchParams.get("callbackUrl") || "/";
       
       if (data.data.user.role === "admin") {
-        router.push("/admin/students");
+        router.push("/admin");
       } else {
         router.push(callbackUrl);
       }

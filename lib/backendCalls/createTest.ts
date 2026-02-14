@@ -12,7 +12,7 @@ import { BACKEND_URL } from "../constant";
 
 const backend_url = BACKEND_URL + "/test";
 
-const makeRequest = async <T>(url: string, data?: any): Promise<T> => {
+const makeRequest = async <T>(url: string, data?: unknown): Promise<T> => {
   try {
     console.log("Making request to:", url);
     const response = await axios.post<T>(url, data, {
