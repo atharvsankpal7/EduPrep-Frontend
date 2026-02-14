@@ -6,12 +6,13 @@ import {
   TUnderGraduateTestCategories,
   TCreateUndergraduateTestRequest,
   TCreateCustomTestRequest,
+  TCreateTestParams,
 } from "../type";
 import { BACKEND_URL } from "../constant";
 
 const backend_url = BACKEND_URL + "/test";
 
-const makeRequest = async <T>(url: string, data?: any): Promise<T> => {
+const makeRequest = async <T>(url: string, data?: unknown): Promise<T> => {
   try {
     console.log("Making request to:", url);
     const response = await axios.post<T>(url, data, {
@@ -95,14 +96,7 @@ export const createTest = async ({
   topicList,
   time = 60,
   isCet = false,
-}: {
-  educationLevel: EducationLevel;
-  numberOfQuestions?: number;
-  company?: string;
-  topicList?: TopicList;
-  time?: number;
-  isCet?: boolean;
-}) => {
+}: TCreateTestParams) => {
   try {
     console.log("Creating test with params:", { educationLevel, numberOfQuestions, company, topicList, time, isCet });
     

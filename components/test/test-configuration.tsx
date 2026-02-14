@@ -7,9 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Slider } from "@/components/ui/slider";
-import { Clock, Settings, AlertTriangle } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Settings, AlertTriangle } from "lucide-react";
+import { TimeInput } from "@/components/ui/time-input";
 
 interface TestConfigurationProps {
   selectedTopics: string[];
@@ -78,22 +77,13 @@ export function TestConfiguration({
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">
-                    Test Duration (minutes)
+                    Test Duration
                   </span>
-                  <span className="font-medium">{duration}</span>
                 </div>
-                <Slider
-                  value={[duration]}
-                  onValueChange={([value]) => setDuration(value)}
-                  min={15}
-                  max={180}
-                  step={15}
-                  className="w-full"
+                <TimeInput
+                  value={duration}
+                  onChange={setDuration}
                 />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>15 min</span>
-                  <span>180 min</span>
-                </div>
               </div>
             )}
           </div>
@@ -107,14 +97,14 @@ export function TestConfiguration({
               <Input
                 id="questions"
                 type="number"
-                min={5}
-                max={100}
+                min={10}
+                max={120}
                 value={numberOfQuestions}
                 onChange={(e) => setNumberOfQuestions(Number(e.target.value))}
                 className="w-24"
               />
               <span className="text-sm text-muted-foreground">
-                (5-100 questions)
+                (10-120 questions)
               </span>
             </div>
           </div>
@@ -135,10 +125,10 @@ export function TestConfiguration({
           </div>
 
           {/* Warning Messages */}
-          {(numberOfQuestions < 5 || numberOfQuestions > 100) && (
+          {(numberOfQuestions < 10 || numberOfQuestions > 120) && (
             <div className="flex items-center gap-2 text-destructive text-sm">
               <AlertTriangle className="w-4 h-4" />
-              <span>Please select between 5 and 100 questions</span>
+              <span>Please select between 10 and 120 questions</span>
             </div>
           )}
 
@@ -146,9 +136,9 @@ export function TestConfiguration({
           <Button
             onClick={handleStartTest}
             disabled={
-              numberOfQuestions < 5 ||
-              numberOfQuestions > 100 ||
-              (isTimeLimited && (duration < 15 || duration > 180))
+              numberOfQuestions < 10 ||
+              numberOfQuestions > 120 ||
+              (isTimeLimited && duration <= 0)
             }
             className="w-full"
           >
