@@ -7,7 +7,8 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { Building2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Building2, ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { createTest } from "@/lib/backendCalls/createTest";
 import { EducationLevel } from "@/lib/type";
@@ -15,27 +16,36 @@ import { useState } from "react";
 import { ErrorMessageDialog } from "@/components/test/error-message";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuthStore } from "@/lib/stores/auth-store";
+import { TestInfoDisplay } from "@/components/test/test-info-display";
 
 const companies = [
   {
     id: "microsoft",
     name: "Microsoft",
     description: "Technical and aptitude assessment pattern",
+    duration: 60,
+    questionCount: 30,
   },
   {
     id: "google",
     name: "Google",
     description: "Coding and problem-solving focused",
+    duration: 60,
+    questionCount: 30,
   },
   {
     id: "amazon",
     name: "Amazon",
     description: "Leadership principles and coding rounds",
+    duration: 60,
+    questionCount: 30,
   },
   {
     id: "accenture",
     name: "Accenture",
     description: "Aptitude and technical assessment",
+    duration: 60,
+    questionCount: 30,
   },
 ];
 
@@ -59,8 +69,9 @@ export default function CompanyTestPage() {
   const [showError, setShowError] = useState(false);
   const { toast } = useToast();
   const { isAuthenticated } = useAuthStore();
+  const [selectedCompany, setSelectedCompany] = useState<typeof companies[0] | null>(null);
 
-  const handleStartTest = async (company: string) => {
+  const handleStartTest = async (companyId: string) => {
     if (!isAuthenticated) {
       toast({
         title: "Authentication Required",
@@ -74,7 +85,7 @@ export default function CompanyTestPage() {
     try {
       const response = await createTest({
         educationLevel: EducationLevel.Undergraduate,
-        company,
+        company: companyId,
       }) as any;
       if (!response.testId) {
         throw new Error("Failed to create test");
@@ -90,6 +101,41 @@ export default function CompanyTestPage() {
       });
     }
   };
+
+  if (selectedCompany) {
+    return (
+      <>
+        <ErrorMessageDialog
+          open={showError}
+          onClose={() => setShowError(false)}
+        />
+        <div className="container pt-8 pb-0">
+          <div className="max-w-4xl mx-auto">
+            <Button
+              variant="ghost"
+              onClick={() => setSelectedCompany(null)}
+              className="mb-4 pl-0 hover:pl-2 transition-all"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" /> Back to Companies
+            </Button>
+          </div>
+        </div>
+        <TestInfoDisplay
+          title={`${selectedCompany.name} Assessment`}
+          description={selectedCompany.description}
+          duration={selectedCompany.duration}
+          questionCount={selectedCompany.questionCount}
+          onStart={() => handleStartTest(selectedCompany.id)}
+          requirements={[
+            "Stable internet connection",
+            "Latest browser version",
+            "Working webcam (if required)",
+            "Quiet environment"
+          ]}
+        />
+      </>
+    );
+  }
 
   return (
     <div className="container py-8">
@@ -116,7 +162,7 @@ export default function CompanyTestPage() {
             <motion.div
               key={company.id}
               variants={item}
-              onClick={() => handleStartTest(company.id)}
+              onClick={() => setSelectedCompany(company)}
             >
               <Card className="cursor-pointer hover:shadow-lg transition-all duration-300 card-highlight glass-effect">
                 <CardHeader>
