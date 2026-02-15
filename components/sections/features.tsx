@@ -78,7 +78,7 @@ export function Features() {
           className="grid gap-8 md:grid-cols-2 lg:grid-cols-4"
         >
           {features.map((feature) => (
-            <motion.div variants={item}>
+            <motion.div key={feature.title} variants={item}>
               <Card className={`h-full transition-all duration-300 hover:scale-105 card-highlight glass-effect ${feature.hoverEffect}`}>
                 <CardHeader>
                   <div className={`w-12 h-12 rounded-lg ${feature.gradient} flex items-center justify-center mb-4`}>
