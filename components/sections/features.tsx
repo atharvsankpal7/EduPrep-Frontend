@@ -6,6 +6,7 @@ import {
   BarChart2,
   Users,
   BookOpen,
+  Brain,
 } from "lucide-react";
 import {
   Card,
@@ -17,37 +18,34 @@ import Link from "next/link";
 
 const features = [
   {
-    icon: ClipboardList,
-    title: "Mock Tests",
-    description:
-      "Practice with our extensive collection of subject-specific mock tests",
-    href: "/test",
+    icon: BookOpen,
+    title: "Structured Learning",
+    description: "Topic-wise and level-based content with clear progression paths instead of random material.",
+    href: "/programs", // Assuming generic link or specific if available
     gradient: "bg-gradient-blue",
     hoverEffect: "hover-glow-cool",
   },
   {
-    icon: BarChart2,
-    title: "Analytics",
-    description:
-      "Track your progress with detailed performance analytics and insights",
-    href: "/analytics",
+    icon: Brain,
+    title: "Smart Practice",
+    description: "Practice questions mapped to concepts with instant feedback and detailed solutions.",
+    href: "/practice", // Placeholder link
     gradient: "bg-gradient-ginger",
     hoverEffect: "hover-glow-warm",
   },
   {
-    icon: Users,
-    title: "Study Groups",
-    description:
-      "Join or create study groups to collaborate with fellow test-takers",
-    href: "/study-groups",
+    icon: ClipboardList,
+    title: "Mock Tests",
+    description: "Full-length and sectional mock exams in an exam-like environment with auto-evaluation.",
+    href: "/test",
     gradient: "bg-gradient-cool",
     hoverEffect: "hover-glow-cool",
   },
   {
-    icon: BookOpen,
-    title: "Study Plans",
-    description: "Get personalized study plans based on your performance",
-    href: "/recommendations",
+    icon: BarChart2,
+    title: "Performance Analytics",
+    description: "Deep insights into strengths and weaknesses with personalized improvement suggestions.",
+    href: "/analytics",
     gradient: "bg-gradient-warm",
     hoverEffect: "hover-glow-warm",
   },
@@ -80,19 +78,17 @@ export function Features() {
           className="grid gap-8 md:grid-cols-2 lg:grid-cols-4"
         >
           {features.map((feature) => (
-            <Link href={feature.href} key={feature.href}>
-              <motion.div variants={item}>
-                <Card className={`h-full transition-all duration-300 hover:scale-105 card-highlight glass-effect ${feature.hoverEffect}`}>
-                  <CardHeader>
-                    <div className={`w-12 h-12 rounded-lg ${feature.gradient} flex items-center justify-center mb-4`}>
-                      <feature.icon className="w-6 h-6 text-white" />
-                    </div>
-                    <CardTitle className="mb-2">{feature.title}</CardTitle>
-                    <CardDescription>{feature.description}</CardDescription>
-                  </CardHeader>
-                </Card>
-              </motion.div>
-            </Link>
+            <motion.div variants={item}>
+              <Card className={`h-full transition-all duration-300 hover:scale-105 card-highlight glass-effect ${feature.hoverEffect}`}>
+                <CardHeader>
+                  <div className={`w-12 h-12 rounded-lg ${feature.gradient} flex items-center justify-center mb-4`}>
+                    <feature.icon className="w-6 h-6 text-white" />
+                  </div>
+                  <CardTitle className="mb-2">{feature.title}</CardTitle>
+                  <CardDescription>{feature.description}</CardDescription>
+                </CardHeader>
+              </Card>
+            </motion.div>
           ))}
         </motion.div>
       </div>

@@ -63,108 +63,108 @@ export function NavBar() {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 container flex h-16 items-center justify-between">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 container flex h-16 items-center justify-between container mx-auto">
       {/* <div className=" w-full"> */}
-        <div className="flex items-center gap-2">
-          <Sheet>
-            <SheetTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon" className="mr-2">
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle menu</span>
-              </Button>
-            </SheetTrigger>
+      <div className="flex items-center gap-2">
+        <Sheet>
+          <SheetTrigger asChild className="md:hidden">
+            <Button variant="ghost" size="icon" className="mr-2">
+              <Menu className="h-5 w-5" />
+              <span className="sr-only">Toggle menu</span>
+            </Button>
+          </SheetTrigger>
 
-            <SheetContent side="left" className="w-[240px] sm:w-[300px]">
-              <nav className="flex flex-col gap-4 mt-6">
-                {isTeacherRoute ? (
-                  <TeacherNav />
-                ) : (
-                  navRoutes.map((route) => (
-                    <Link
-                      key={route.href}
-                      href={route.href}
-                      className={cn(
-                        "text-sm font-medium transition-colors hover:text-primary",
-                        pathname === route.href
-                          ? "text-primary"
-                          : "text-muted-foreground"
-                      )}
-                    >
-                      {route.label}
-                    </Link>
-                  ))
-                )}
-                {isAuthenticated && (
-                  <Button variant="outline" onClick={handleLogout} className="mt-2">
-                    Log Out
-                  </Button>
-                )}
-              </nav>
-            </SheetContent>          </Sheet>
-
-          <Link href="/" className="flex items-center space-x-2">
-            <span className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              EduPrep
-            </span>
-          </Link>
-        </div>
-
-        <div className="hidden md:flex mx-6 flex-1">
-          {isTeacherRoute ? (
-            <TeacherNav />
-          ) : (
-            <nav className="flex items-center space-x-6">
-              {navRoutes.map((route) => (
-                <Link
-                  key={route.href}
-                  href={route.href}
-                  className={cn(
-                    "text-sm font-medium transition-colors hover:text-primary",
-                    pathname === route.href
-                      ? "text-primary"
-                      : "text-muted-foreground"
-                  )}
-                >
-                  {route.label}
-                </Link>
-              ))}
-            </nav>
-          )}
-        </div>
-
-        <div className="flex items-center gap-4 ml-auto">
-          <ThemeToggle />
-          {!isTeacherRoute && (
-            <div className="hidden sm:flex items-center gap-2">
-              {isAuthenticated ? (
-                <>
-                  <span className="text-sm text-muted-foreground">
-                    {user?.fullName}
-                  </span>
-                  {user?.role === "admin" && (
-                    <Link href="/admin/students">
-                      <Button variant="outline" size="icon" className="mr-2">
-                        <Users className="h-4 w-4" />
-                      </Button>
-                    </Link>
-                  )}
-                  <Button variant="outline" onClick={handleLogout}>
-                    Log Out
-                  </Button>
-                </>
+          <SheetContent side="left" className="w-[240px] sm:w-[300px]">
+            <nav className="flex flex-col gap-4 mt-6">
+              {isTeacherRoute ? (
+                <TeacherNav />
               ) : (
-                <>
-                  <Button variant="outline" className="hover-glow" asChild>
-                    <Link href="/sign-in">Sign In</Link>
-                  </Button>
-                  <Button className="bg-gradient-blue hover-glow" asChild>
-                    <Link href="/sign-up">Sign Up</Link>
-                  </Button>
-                </>
+                navRoutes.map((route) => (
+                  <Link
+                    key={route.href}
+                    href={route.href}
+                    className={cn(
+                      "text-sm font-medium transition-colors hover:text-primary",
+                      pathname === route.href
+                        ? "text-primary"
+                        : "text-muted-foreground"
+                    )}
+                  >
+                    {route.label}
+                  </Link>
+                ))
               )}
-            </div>
-          )}
-        </div>
+              {isAuthenticated && (
+                <Button variant="outline" onClick={handleLogout} className="mt-2">
+                  Log Out
+                </Button>
+              )}
+            </nav>
+          </SheetContent>          </Sheet>
+
+        <Link href="/" className="flex items-center space-x-2">
+          <span className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            EduPrep
+          </span>
+        </Link>
+      </div>
+
+      <div className="hidden md:flex mx-6 flex-1">
+        {isTeacherRoute ? (
+          <TeacherNav />
+        ) : (
+          <nav className="flex items-center space-x-6">
+            {navRoutes.map((route) => (
+              <Link
+                key={route.href}
+                href={route.href}
+                className={cn(
+                  "text-sm font-medium transition-colors hover:text-primary",
+                  pathname === route.href
+                    ? "text-primary"
+                    : "text-muted-foreground"
+                )}
+              >
+                {route.label}
+              </Link>
+            ))}
+          </nav>
+        )}
+      </div>
+
+      <div className="flex items-center gap-4 ml-auto">
+        <ThemeToggle />
+        {!isTeacherRoute && (
+          <div className="hidden sm:flex items-center gap-2">
+            {isAuthenticated ? (
+              <>
+                <span className="text-sm text-muted-foreground">
+                  {user?.fullName}
+                </span>
+                {user?.role === "admin" && (
+                  <Link href="/admin/students">
+                    <Button variant="outline" size="icon" className="mr-2">
+                      <Users className="h-4 w-4" />
+                    </Button>
+                  </Link>
+                )}
+                <Button variant="outline" onClick={handleLogout}>
+                  Log Out
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="outline" className="hover-glow" asChild>
+                  <Link href="/sign-in">Sign In</Link>
+                </Button>
+                <Button className="bg-gradient-blue hover-glow" asChild>
+                  <Link href="/sign-up">Sign Up</Link>
+                </Button>
+              </>
+            )}
+          </div>
+        )}
+      </div>
       {/* </div> */}
     </header>
   );
