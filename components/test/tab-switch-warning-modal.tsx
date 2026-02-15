@@ -38,7 +38,7 @@ export function TabSwitchWarningModal({
       <AlertDialogContent className="max-w-md">
         <AlertDialogHeader>
           <div className="flex flex-col items-center space-y-4">
-            <div className="bg-red-100 text-red-600 p-3 rounded-full">
+            <div className="rounded-full border border-[hsl(var(--test-status-danger-border))] bg-[hsl(var(--test-status-danger-bg))] p-3 text-[hsl(var(--test-status-danger-text))]">
               <AlertTriangle className="h-8 w-8" />
             </div>
             <AlertDialogTitle className="text-xl">

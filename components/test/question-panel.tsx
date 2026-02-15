@@ -69,7 +69,7 @@ export function QuestionPanel({
             testUi.secondaryButton,
             "shrink-0",
             isMarkedForReview &&
-              "border-violet-300 bg-violet-100 text-violet-800 hover:bg-violet-100"
+              "border-[hsl(var(--test-status-review-border))] bg-[hsl(var(--test-status-review-bg))] text-[hsl(var(--test-status-review-text))] hover:bg-[hsl(var(--test-status-review-bg))]"
           )}
         >
           {isMarkedForReview ? (
@@ -110,14 +110,15 @@ export function QuestionPanel({
                 htmlFor={optionId}
                 className={cn(
                   "flex cursor-pointer items-start gap-3 text-[hsl(var(--test-foreground))]",
-                  isSelected && "text-emerald-900"
+                  isSelected &&
+                    "text-[hsl(var(--test-status-answered-text))]"
                 )}
               >
                 <span
                   className={cn(
                     "mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-xs font-semibold",
                     isSelected
-                      ? "border-emerald-600 bg-emerald-50 text-emerald-700"
+                      ? "border-[hsl(var(--test-status-answered-border))] bg-[hsl(var(--test-status-answered-bg))] text-[hsl(var(--test-status-answered-text))]"
                       : "border-[hsl(var(--test-border-strong))] text-[hsl(var(--test-muted-foreground))]"
                   )}
                 >
@@ -125,7 +126,7 @@ export function QuestionPanel({
                 </span>
                 <div className="flex-1">{renderContent(option)}</div>
                 {isSelected && (
-                  <span className="inline-flex items-center gap-1 rounded-full border border-emerald-300 bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700">
+                  <span className="inline-flex items-center gap-1 rounded-full border border-[hsl(var(--test-status-answered-border))] bg-[hsl(var(--test-status-answered-bg))] px-2 py-0.5 text-xs font-semibold text-[hsl(var(--test-status-answered-text))]">
                     <CheckCircle2 className="h-3.5 w-3.5" />
                     Selected
                   </span>

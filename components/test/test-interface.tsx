@@ -24,7 +24,6 @@ import { cn } from "@/lib/utils";
 import { WarningModal } from "@/components/test/warning-modal";
 import {
   QuestionStatus,
-  testInterfaceTheme,
   testUi,
 } from "@/components/test/test-design-system";
 import { TestSurface } from "@/components/test/ui/test-surface";
@@ -305,7 +304,7 @@ export function TestInterface({
   }
 
   return (
-    <div className={cn(testUi.page, "py-2 lg:py-8")} style={testInterfaceTheme}>
+    <div className={cn("test-interface-theme", testUi.page, "py-2 lg:py-8")}>
       <TestHeader testName={`${testName} - ${sections[currentSection].name}`} />
 
       <div className={testUi.container}>
@@ -347,7 +346,7 @@ export function TestInterface({
                 className={cn(
                   "rounded-full border px-3 py-1.5 text-sm font-medium",
                   index === currentSection
-                    ? "border-[hsl(var(--test-primary))] bg-teal-50 text-[hsl(var(--test-primary))]"
+                    ? "border-[hsl(var(--test-primary))] bg-[hsl(var(--test-status-primary-soft-bg))] text-[hsl(var(--test-status-primary-soft-text))]"
                     : "border-[hsl(var(--test-border-strong))] bg-[hsl(var(--test-surface-muted))] text-[hsl(var(--test-muted-foreground))]",
                   sectionCompleted[index] && "opacity-65"
                 )}
@@ -462,7 +461,7 @@ export function TestInterface({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-yellow-500" />
+              <AlertTriangle className="h-5 w-5 text-[hsl(var(--test-status-warning-text))]" />
               Warning: Section Change
             </AlertDialogTitle>
             <AlertDialogDescription>

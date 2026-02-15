@@ -1,4 +1,3 @@
-import type { CSSProperties } from "react";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 
@@ -7,19 +6,6 @@ export type QuestionStatus =
   | "visitedUnanswered"
   | "answered"
   | "markedForReview";
-
-export const testInterfaceTheme: CSSProperties = {
-  ["--test-bg" as string]: "204 33% 95%",
-  ["--test-surface" as string]: "0 0% 100%",
-  ["--test-surface-muted" as string]: "204 36% 98%",
-  ["--test-foreground" as string]: "210 32% 14%",
-  ["--test-muted-foreground" as string]: "214 17% 38%",
-  ["--test-border" as string]: "212 24% 86%",
-  ["--test-border-strong" as string]: "212 20% 78%",
-  ["--test-primary" as string]: "180 56% 31%",
-  ["--test-primary-foreground" as string]: "0 0% 100%",
-  ["--test-focus" as string]: "180 60% 37%",
-};
 
 const appPrimaryButtonClassName = buttonVariants({ variant: "default" });
 const appSecondaryButtonClassName = buttonVariants({ variant: "outline" });
@@ -43,11 +29,11 @@ export const testUi = {
   ghostButton: appGhostButtonClassName,
   warningButton: cn(
     appSecondaryButtonClassName,
-    "border-amber-300 bg-amber-100 text-amber-800 hover:bg-amber-200"
+    "border-[hsl(var(--test-status-warning-border))] bg-[hsl(var(--test-status-warning-bg))] text-[hsl(var(--test-status-warning-text))] hover:bg-[hsl(var(--test-status-warning-bg))]"
   ),
   dangerButton: cn(
     appSecondaryButtonClassName,
-    "border-rose-300 bg-rose-100 text-rose-800 hover:bg-rose-200"
+    "border-[hsl(var(--test-status-danger-border))] bg-[hsl(var(--test-status-danger-bg))] text-[hsl(var(--test-status-danger-text))] hover:bg-[hsl(var(--test-status-danger-bg))]"
   ),
   fixedBar:
     "fixed bottom-0 left-0 right-0 z-40 border-t border-[hsl(var(--test-border))] bg-[hsl(var(--test-surface))] px-3 py-4 backdrop-blur",
@@ -60,19 +46,23 @@ export const questionStatusMeta: Record<
   markedForReview: {
     label: "Marked for review",
     buttonClassName:
-      "border-violet-300 bg-violet-200 text-violet-900 hover:bg-violet-200",
-    legendCardClassName: "border-violet-300 bg-violet-100 text-violet-900",
+      "border-[hsl(var(--test-status-review-border))] bg-[hsl(var(--test-status-review-bg))] text-[hsl(var(--test-status-review-text))] hover:bg-[hsl(var(--test-status-review-bg))]",
+    legendCardClassName:
+      "border-[hsl(var(--test-status-review-border))] bg-[hsl(var(--test-status-review-bg))] text-[hsl(var(--test-status-review-text))]",
   },
   visitedUnanswered: {
     label: "Visited, not answered",
-    buttonClassName: "border-rose-200 bg-rose-100 text-rose-800 hover:bg-rose-100",
-    legendCardClassName: "border-rose-200 bg-rose-100 text-rose-800",
+    buttonClassName:
+      "border-[hsl(var(--test-status-unanswered-border))] bg-[hsl(var(--test-status-unanswered-bg))] text-[hsl(var(--test-status-unanswered-text))] hover:bg-[hsl(var(--test-status-unanswered-bg))]",
+    legendCardClassName:
+      "border-[hsl(var(--test-status-unanswered-border))] bg-[hsl(var(--test-status-unanswered-bg))] text-[hsl(var(--test-status-unanswered-text))]",
   },
   answered: {
     label: "Visited, answered",
     buttonClassName:
-      "border-emerald-200 bg-emerald-100 text-emerald-800 hover:bg-emerald-100",
-    legendCardClassName: "border-emerald-200 bg-emerald-100 text-emerald-800",
+      "border-[hsl(var(--test-status-answered-border))] bg-[hsl(var(--test-status-answered-bg))] text-[hsl(var(--test-status-answered-text))] hover:bg-[hsl(var(--test-status-answered-bg))]",
+    legendCardClassName:
+      "border-[hsl(var(--test-status-answered-border))] bg-[hsl(var(--test-status-answered-bg))] text-[hsl(var(--test-status-answered-text))]",
   },
   notVisited: {
     label: "Not visited",

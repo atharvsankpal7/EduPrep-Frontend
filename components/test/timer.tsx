@@ -51,7 +51,7 @@ export function Timer({
         className={cn(
           "flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium",
           isLowTime
-            ? "border-rose-300 bg-rose-100 text-rose-700"
+            ? "border-[hsl(var(--test-status-warning-border))] bg-[hsl(var(--test-status-warning-bg))] text-[hsl(var(--test-status-warning-text))]"
             : "border-[hsl(var(--test-border-strong))] bg-[hsl(var(--test-surface-muted))] text-[hsl(var(--test-foreground))]"
         )}
       >
@@ -73,7 +73,7 @@ export function Timer({
           <Clock
             className={cn(
               "h-5 w-5 text-[hsl(var(--test-primary))]",
-              isLowTime && "text-rose-600"
+              isLowTime && "text-[hsl(var(--test-status-warning-text))]"
             )}
           />
           <span className="font-medium text-[hsl(var(--test-foreground))]">
@@ -84,7 +84,7 @@ export function Timer({
           className={cn(
             "rounded-full border px-2.5 py-1 text-xs font-medium",
             isLowTime
-              ? "border-rose-300 bg-rose-100 text-rose-700"
+              ? "border-[hsl(var(--test-status-warning-border))] bg-[hsl(var(--test-status-warning-bg))] text-[hsl(var(--test-status-warning-text))]"
               : "border-[hsl(var(--test-border-strong))] bg-[hsl(var(--test-surface-muted))] text-[hsl(var(--test-muted-foreground))]"
           )}
         >
@@ -96,19 +96,23 @@ export function Timer({
         <div
           className={cn(
             "text-3xl font-semibold tracking-tight text-[hsl(var(--test-foreground))]",
-            isLowTime && "text-rose-600"
+            isLowTime && "text-[hsl(var(--test-status-warning-text))]"
           )}
         >
           {formatDigitalDurationFromSeconds(timeLeft)}
         </div>
-        {isLowTime && <AlertTriangle className="h-5 w-5 text-rose-600" />}
+        {isLowTime && (
+          <AlertTriangle className="h-5 w-5 text-[hsl(var(--test-status-warning-text))]" />
+        )}
       </div>
 
       <div className="h-2 overflow-hidden rounded-full bg-[hsl(var(--test-border))]">
         <div
           className={cn(
             "h-full rounded-full",
-            isLowTime ? "bg-rose-500" : "bg-[hsl(var(--test-primary))]"
+            isLowTime
+              ? "bg-[hsl(var(--test-status-warning-text))]"
+              : "bg-[hsl(var(--test-primary))]"
           )}
           style={{ width: `${Math.max(0, Math.min(100, timeProgress))}%` }}
         />
