@@ -1,31 +1,39 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Clock, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDigitalDurationFromSeconds } from "@/lib/time";
 import { testUi } from "@/components/test/test-design-system";
 
 interface TimerProps {
-  timeLeft: number;
-  totalTime: number;
-  setTimeLeft: React.Dispatch<React.SetStateAction<number>>;
+  duration: number;
+  onTimeUpdate?: (timeLeft: number) => void;
   onTimeUp: () => void;
   variant?: "panel" | "inline";
 }
 
 export function Timer({
-  timeLeft,
-  totalTime,
-  setTimeLeft,
+  duration,
+  onTimeUpdate,
   onTimeUp,
   variant = "panel",
 }: TimerProps) {
+  const [timeLeft, setTimeLeft] = useState(duration);
   const onTimeUpRef = useRef(onTimeUp);
+  const onTimeUpdateRef = useRef(onTimeUpdate);
 
   useEffect(() => {
     onTimeUpRef.current = onTimeUp;
   }, [onTimeUp]);
+
+  useEffect(() => {
+    onTimeUpdateRef.current = onTimeUpdate;
+  }, [onTimeUpdate]);
+
+  useEffect(() => {
+    setTimeLeft(duration);
+  }, [duration]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -33,17 +41,24 @@ export function Timer({
         if (prev <= 1) {
           clearInterval(timer);
           onTimeUpRef.current();
+          if (onTimeUpdateRef.current) {
+            onTimeUpdateRef.current(0);
+          }
           return 0;
         }
-        return prev - 1;
+        const newTime = prev - 1;
+        if (onTimeUpdateRef.current) {
+          onTimeUpdateRef.current(newTime);
+        }
+        return newTime;
       });
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [setTimeLeft]);
+  }, []);
 
   const isLowTime = timeLeft < 300;
-  const timeProgress = totalTime > 0 ? (timeLeft / totalTime) * 100 : 0;
+  const timeProgress = duration > 0 ? (timeLeft / duration) * 100 : 0;
 
   if (variant === "inline") {
     return (
@@ -52,7 +67,7 @@ export function Timer({
           "flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium",
           isLowTime
             ? "border-rose-300 bg-rose-100 text-rose-700"
-            : "border-[hsl(var(--test-border-strong))] bg-[hsl(var(--test-surface-muted))] text-[hsl(var(--test-foreground))]"
+            : "border-[hsl(var(--test-border-strong))] bg-[hsl(var(--test-surface-muted))] text-[hsl(var(--test-foreground))]",
         )}
       >
         <Clock className="h-4 w-4" />
@@ -73,7 +88,7 @@ export function Timer({
           <Clock
             className={cn(
               "h-5 w-5 text-[hsl(var(--test-primary))]",
-              isLowTime && "text-rose-600"
+              isLowTime && "text-rose-600",
             )}
           />
           <span className="font-medium text-[hsl(var(--test-foreground))]">
@@ -85,7 +100,7 @@ export function Timer({
             "rounded-full border px-2.5 py-1 text-xs font-medium",
             isLowTime
               ? "border-rose-300 bg-rose-100 text-rose-700"
-              : "border-[hsl(var(--test-border-strong))] bg-[hsl(var(--test-surface-muted))] text-[hsl(var(--test-muted-foreground))]"
+              : "border-[hsl(var(--test-border-strong))] bg-[hsl(var(--test-surface-muted))] text-[hsl(var(--test-muted-foreground))]",
           )}
         >
           {isLowTime ? "Ending Soon" : "In Progress"}
@@ -96,7 +111,7 @@ export function Timer({
         <div
           className={cn(
             "text-3xl font-semibold tracking-tight text-[hsl(var(--test-foreground))]",
-            isLowTime && "text-rose-600"
+            isLowTime && "text-rose-600",
           )}
         >
           {formatDigitalDurationFromSeconds(timeLeft)}
@@ -108,7 +123,7 @@ export function Timer({
         <div
           className={cn(
             "h-full rounded-full",
-            isLowTime ? "bg-rose-500" : "bg-[hsl(var(--test-primary))]"
+            isLowTime ? "bg-rose-500" : "bg-[hsl(var(--test-primary))]",
           )}
           style={{ width: `${Math.max(0, Math.min(100, timeProgress))}%` }}
         />

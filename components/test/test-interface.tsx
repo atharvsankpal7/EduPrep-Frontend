@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Timer } from "@/components/test/timer";
 import { QuestionPanel } from "@/components/test/question-panel";
 import { TestHeader } from "@/components/test/test-header";
@@ -58,16 +58,19 @@ export function TestInterface({
   const [currentSection, setCurrentSection] = useState(0);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<Record<number, number>>({});
-  const [visitedQuestions, setVisitedQuestions] = useState<Record<number, boolean>>(
-    {}
-  );
+  const [visitedQuestions, setVisitedQuestions] = useState<
+    Record<number, boolean>
+  >({});
   const [markedForReview, setMarkedForReview] = useState<
     Record<number, boolean>
   >({});
-  const [timeLeft, setTimeLeft] = useState(sections[0].duration * 60);
+
+  // Refactor: Use ref for time tracking to prevent 1Hz re-renders
+  const timeLeftRef = useRef(sections[0].duration * 60);
+
   const [testStarted, setTestStarted] = useState(false);
   const [sectionCompleted, setSectionCompleted] = useState<boolean[]>(
-    new Array(sections.length).fill(false)
+    new Array(sections.length).fill(false),
   );
   const [totalTimeSpent, setTotalTimeSpent] = useState(0);
   const [sessionTabSwitchCount, setSessionTabSwitchCount] = useState(0);
@@ -85,6 +88,10 @@ export function TestInterface({
 
   const currentSectionStartIndex = getSectionStartIndex(currentSection);
   const currentGlobalQuestionIndex = currentSectionStartIndex + currentQuestion;
+
+  const handleTimeUpdate = useCallback((time: number) => {
+    timeLeftRef.current = time;
+  }, []);
 
   useEffect(() => {
     const enterFullscreen = async () => {
@@ -118,10 +125,11 @@ export function TestInterface({
   useEffect(() => {
     handleSubmitRef.current = () => {
       const finalTimeSpent =
-        totalTimeSpent + (sections[currentSection].duration * 60 - timeLeft);
+        totalTimeSpent +
+        (sections[currentSection].duration * 60 - timeLeftRef.current);
       onComplete(answers, finalTimeSpent);
     };
-  }, [answers, currentSection, onComplete, sections, timeLeft, totalTimeSpent]);
+  }, [answers, currentSection, onComplete, sections, totalTimeSpent]);
 
   const handleSubmit = () => {
     handleSubmitRef.current();
@@ -199,7 +207,8 @@ export function TestInterface({
       document.addEventListener("contextmenu", preventContextMenu);
     }
 
-    return () => document.removeEventListener("contextmenu", preventContextMenu);
+    return () =>
+      document.removeEventListener("contextmenu", preventContextMenu);
   }, [testStarted]);
 
   useEffect(() => {
@@ -210,7 +219,7 @@ export function TestInterface({
     setVisitedQuestions((previous) =>
       previous[currentGlobalQuestionIndex]
         ? previous
-        : { ...previous, [currentGlobalQuestionIndex]: true }
+        : { ...previous, [currentGlobalQuestionIndex]: true },
     );
   }, [currentGlobalQuestionIndex, testStarted]);
 
@@ -251,7 +260,7 @@ export function TestInterface({
       setSectionCompleted(updatedSectionCompleted);
 
       const sectionDialogTrigger = document.getElementById(
-        "section-warning-dialog"
+        "section-warning-dialog",
       ) as HTMLButtonElement | null;
 
       sectionDialogTrigger?.click();
@@ -262,13 +271,14 @@ export function TestInterface({
     if (currentSection < sections.length - 1) {
       setTotalTimeSpent(
         (previous) =>
-          previous + (sections[currentSection].duration * 60 - timeLeft)
+          previous +
+          (sections[currentSection].duration * 60 - timeLeftRef.current),
       );
 
       const nextSection = currentSection + 1;
       setCurrentSection(nextSection);
       setCurrentQuestion(0);
-      setTimeLeft(sections[nextSection].duration * 60);
+      timeLeftRef.current = sections[nextSection].duration * 60;
       toast({
         title: "New Section Started",
         description: `You are now in ${sections[nextSection].name}`,
@@ -297,7 +307,7 @@ export function TestInterface({
   const currentSectionQuestions = sections[currentSection].questions;
   const currentQuestionData = currentSectionQuestions[currentQuestion];
   const questionStatuses = currentSectionQuestions.map((_, index) =>
-    getQuestionStatus(currentSectionStartIndex + index)
+    getQuestionStatus(currentSectionStartIndex + index),
   );
 
   if (!testStarted) {
@@ -322,10 +332,10 @@ export function TestInterface({
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <Timer
+                key={currentSection}
                 variant="inline"
-                timeLeft={timeLeft}
-                totalTime={sections[currentSection].duration * 60}
-                setTimeLeft={setTimeLeft}
+                duration={sections[currentSection].duration * 60}
+                onTimeUpdate={handleTimeUpdate}
                 onTimeUp={handleTimeUp}
               />
               {currentSection < sections.length - 1 && (
@@ -349,7 +359,7 @@ export function TestInterface({
                   index === currentSection
                     ? "border-[hsl(var(--test-primary))] bg-teal-50 text-[hsl(var(--test-primary))]"
                     : "border-[hsl(var(--test-border-strong))] bg-[hsl(var(--test-surface-muted))] text-[hsl(var(--test-muted-foreground))]",
-                  sectionCompleted[index] && "opacity-65"
+                  sectionCompleted[index] && "opacity-65",
                 )}
               >
                 {section.name}
@@ -368,9 +378,9 @@ export function TestInterface({
                   options={currentQuestionData.options}
                   onAnswer={handleAnswer}
                   selectedAnswer={answers[currentGlobalQuestionIndex]}
-                  isMarkedForReview={
-                    Boolean(markedForReview[currentGlobalQuestionIndex])
-                  }
+                  isMarkedForReview={Boolean(
+                    markedForReview[currentGlobalQuestionIndex],
+                  )}
                   onToggleReview={handleToggleReview}
                 />
               </TestSurface>
@@ -411,7 +421,9 @@ export function TestInterface({
               currentSection === sections.length - 1 ? (
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button className={cn(testUi.primaryButton, "min-w-[110px]")}>
+                    <Button
+                      className={cn(testUi.primaryButton, "min-w-[110px]")}
+                    >
                       Submit Test
                     </Button>
                   </AlertDialogTrigger>
@@ -437,7 +449,10 @@ export function TestInterface({
                   </AlertDialogContent>
                 </AlertDialog>
               ) : (
-                <Button onClick={handleNextSection} className={testUi.primaryButton}>
+                <Button
+                  onClick={handleNextSection}
+                  className={testUi.primaryButton}
+                >
                   Next Section
                 </Button>
               )
@@ -445,7 +460,7 @@ export function TestInterface({
               <Button
                 onClick={() =>
                   setCurrentQuestion((previous) =>
-                    Math.min(currentSectionQuestions.length - 1, previous + 1)
+                    Math.min(currentSectionQuestions.length - 1, previous + 1),
                   )
                 }
                 className={cn(testUi.primaryButton, "min-w-[110px]")}
@@ -468,7 +483,9 @@ export function TestInterface({
             <AlertDialogDescription>
               You are about to move to the next section. Please note:
               <ul className="mt-2 list-inside list-disc space-y-1">
-                <li>You cannot return to the previous section once you proceed</li>
+                <li>
+                  You cannot return to the previous section once you proceed
+                </li>
                 <li>
                   All unanswered questions in the current section will be marked
                   as not attempted
