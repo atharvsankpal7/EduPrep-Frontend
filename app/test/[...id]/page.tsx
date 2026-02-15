@@ -63,9 +63,9 @@ export default function TestPage({ params }: TestPageProps) {
         const response = await axios.get(url, {
           withCredentials: true,
         });
-        
+
         const responseData = response.data.data;
-        
+
         if (!responseData.test) {
           throw new Error("Invalid test data received");
         }
@@ -85,30 +85,30 @@ export default function TestPage({ params }: TestPageProps) {
 
   const handleTestComplete = async (answers: Record<number, number>, timeSpent: number) => {
     try {
-      
+
       if (!testData) return;
-      
+
       // Create a map to track all question answers
       const selectedAnswers: { questionId: string, selectedOption: number, sectionName: string }[] = [];
-      
+
       let globalQuestionIndex = 0;
-      
+
       testData.test.sections.forEach(section => {
         section.questions.forEach(question => {
           const selectedOption = answers[globalQuestionIndex];
           const questionId = question.id ?? question._id ?? "";
-          
+
           selectedAnswers.push({
             questionId,
             selectedOption: selectedOption !== undefined ? selectedOption + 1 : -1, // Add 1 to match 1-based indexing, -1 for unanswered
             sectionName: section.sectionName
           });
-          
+
           globalQuestionIndex++;
         });
       });
       // Submit test
-     const response =  await axios.patch(`${BACKEND_URL}/test/${testId}/submit`, {
+      const response = await axios.patch(`${BACKEND_URL}/test/${testId}/submit`, {
         selectedAnswers,
         timeTaken: timeSpent,
         autoSubmission: {
@@ -135,23 +135,6 @@ export default function TestPage({ params }: TestPageProps) {
     }
   };
 
-  // Transform the test data into sections format for the TestInterface component
-  const sections: TestSection[] = useMemo(() => {
-    if (!testData) return [];
-
-    return testData.test.sections.map((section) => {
-      return {
-        name: section.sectionName,
-        duration: section.sectionDuration,
-        questions: section.questions.map((q) => ({
-          question: q.questionText,
-          options: q.options,
-          correctAnswer: q.answer,
-          id: q._id,
-        })),
-      };
-    });
-  }, [testData]);
 
   if (loading) {
     return <LoadingComponent />;
