@@ -1,21 +1,31 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Clock } from "lucide-react";
 
 interface TimerProps {
-  timeLeft: number;
-  setTimeLeft: (time: number | ((prev: number) => number)) => void; // Explicitly allow a function type
+  initialTime: number;
   onTimeUp: () => void;
 }
 
-export function Timer({ timeLeft, setTimeLeft, onTimeUp }: TimerProps) {
+export function Timer({ initialTime, onTimeUp }: TimerProps) {
+  const [timeLeft, setTimeLeft] = useState(initialTime);
+  const onTimeUpRef = useRef(onTimeUp);
+
+  useEffect(() => {
+    onTimeUpRef.current = onTimeUp;
+  }, [onTimeUp]);
+
+  useEffect(() => {
+    setTimeLeft(initialTime);
+  }, [initialTime]);
+
   useEffect(() => {
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
-          onTimeUp();
+          onTimeUpRef.current();
           return 0;
         }
         return prev - 1;
@@ -23,7 +33,7 @@ export function Timer({ timeLeft, setTimeLeft, onTimeUp }: TimerProps) {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [setTimeLeft, onTimeUp]);
+  }, [initialTime]);
 
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
