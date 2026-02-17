@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { Timer } from "@/components/test/timer";
 import { QuestionPanel } from "@/components/test/question-panel";
 import { TestHeader } from "@/components/test/test-header";
@@ -213,35 +213,26 @@ export function TestInterface({
     );
   }, [currentGlobalQuestionIndex, testStarted]);
 
-  const getQuestionStatus = (globalQuestionIndex: number): QuestionStatus => {
-    if (markedForReview[globalQuestionIndex]) {
-      return "markedForReview";
-    }
-
-    if (answers[globalQuestionIndex] !== undefined) {
-      return "answered";
-    }
-
-    if (visitedQuestions[globalQuestionIndex]) {
-      return "visitedUnanswered";
-    }
-
-    return "notVisited";
-  };
-
-  const handleAnswer = (answerId: number) => {
+  // Memoized to prevent re-creation on every render, allowing QuestionPanel to be memoized
+  const handleAnswer = useCallback((answerId: number) => {
     setAnswers((previous) => ({
       ...previous,
       [currentGlobalQuestionIndex]: answerId,
     }));
-  };
+  }, [currentGlobalQuestionIndex]);
 
-  const handleToggleReview = () => {
+  // Memoized to prevent re-creation on every render
+  const handleToggleReview = useCallback(() => {
     setMarkedForReview((previous) => ({
       ...previous,
       [currentGlobalQuestionIndex]: !previous[currentGlobalQuestionIndex],
     }));
-  };
+  }, [currentGlobalQuestionIndex]);
+
+  // Memoized to prevent re-creation on every render, allowing QuestionNavigation to be memoized
+  const handleQuestionSelect = useCallback((questionNumber: number) => {
+    setCurrentQuestion(questionNumber - 1);
+  }, []);
 
   const handleNextSection = () => {
     if (currentSection < sections.length - 1) {
@@ -295,9 +286,23 @@ export function TestInterface({
 
   const currentSectionQuestions = sections[currentSection].questions;
   const currentQuestionData = currentSectionQuestions[currentQuestion];
-  const questionStatuses = currentSectionQuestions.map((_, index) =>
-    getQuestionStatus(currentSectionStartIndex + index)
-  );
+
+  // Memoized to avoid recalculation on every timer tick
+  const questionStatuses = useMemo(() => {
+    return currentSectionQuestions.map((_, index) => {
+      const globalQuestionIndex = currentSectionStartIndex + index;
+      if (markedForReview[globalQuestionIndex]) {
+        return "markedForReview";
+      }
+      if (answers[globalQuestionIndex] !== undefined) {
+        return "answered";
+      }
+      if (visitedQuestions[globalQuestionIndex]) {
+        return "visitedUnanswered";
+      }
+      return "notVisited";
+    });
+  }, [currentSectionQuestions, currentSectionStartIndex, markedForReview, answers, visitedQuestions]);
 
   if (!testStarted) {
     return <WarningModal onStart={handleStartTest} />;
@@ -381,9 +386,7 @@ export function TestInterface({
               <QuestionNavigation
                 questionStatuses={questionStatuses}
                 currentQuestion={currentQuestion + 1}
-                onQuestionSelect={(questionNumber) =>
-                  setCurrentQuestion(questionNumber - 1)
-                }
+                onQuestionSelect={handleQuestionSelect}
               />
             </TestSurface>
           </div>

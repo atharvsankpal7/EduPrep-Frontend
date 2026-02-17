@@ -7,6 +7,7 @@ import { Bookmark, BookmarkCheck, CheckCircle2 } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { questionStatusMeta, testUi } from "@/components/test/test-design-system";
+import { memo } from "react";
 
 interface QuestionPanelProps {
   questionNumber: number;
@@ -18,7 +19,8 @@ interface QuestionPanelProps {
   onToggleReview: () => void;
 }
 
-export function QuestionPanel({
+// Memoized to prevent unnecessary re-renders when parent Timer updates
+export const QuestionPanel = memo(function QuestionPanel({
   questionNumber,
   questionText,
   options,
@@ -149,4 +151,4 @@ export function QuestionPanel({
       </div>
     </div>
   );
-}
+});
