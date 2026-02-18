@@ -1,31 +1,33 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Clock, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDigitalDurationFromSeconds } from "@/lib/time";
 import { testUi } from "@/components/test/test-design-system";
 
 interface TimerProps {
-  timeLeft: number;
-  totalTime: number;
-  setTimeLeft: React.Dispatch<React.SetStateAction<number>>;
+  duration: number;
   onTimeUp: () => void;
   variant?: "panel" | "inline";
 }
 
 export function Timer({
-  timeLeft,
-  totalTime,
-  setTimeLeft,
+  duration,
   onTimeUp,
   variant = "panel",
 }: TimerProps) {
+  const [timeLeft, setTimeLeft] = useState(duration);
   const onTimeUpRef = useRef(onTimeUp);
 
   useEffect(() => {
     onTimeUpRef.current = onTimeUp;
   }, [onTimeUp]);
+
+  // Reset timer if duration changes
+  useEffect(() => {
+    setTimeLeft(duration);
+  }, [duration]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -40,10 +42,10 @@ export function Timer({
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [setTimeLeft]);
+  }, []);
 
   const isLowTime = timeLeft < 300;
-  const timeProgress = totalTime > 0 ? (timeLeft / totalTime) * 100 : 0;
+  const timeProgress = duration > 0 ? (timeLeft / duration) * 100 : 0;
 
   if (variant === "inline") {
     return (
