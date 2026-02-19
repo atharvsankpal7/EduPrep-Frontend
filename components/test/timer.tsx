@@ -1,49 +1,54 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Clock, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDigitalDurationFromSeconds } from "@/lib/time";
 import { testUi } from "@/components/test/test-design-system";
 
 interface TimerProps {
-  timeLeft: number;
-  totalTime: number;
-  setTimeLeft: React.Dispatch<React.SetStateAction<number>>;
+  duration: number; // Duration in seconds
   onTimeUp: () => void;
   variant?: "panel" | "inline";
 }
 
 export function Timer({
-  timeLeft,
-  totalTime,
-  setTimeLeft,
+  duration,
   onTimeUp,
   variant = "panel",
 }: TimerProps) {
+  const [timeLeft, setTimeLeft] = useState(duration);
   const onTimeUpRef = useRef(onTimeUp);
+  const endTimeRef = useRef<number | null>(null);
 
   useEffect(() => {
     onTimeUpRef.current = onTimeUp;
   }, [onTimeUp]);
 
   useEffect(() => {
+    // Reset timer when duration changes
+    setTimeLeft(duration);
+    endTimeRef.current = Date.now() + duration * 1000;
+
     const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          onTimeUpRef.current();
-          return 0;
-        }
-        return prev - 1;
-      });
+      if (!endTimeRef.current) return;
+
+      const now = Date.now();
+      const remaining = Math.max(0, Math.ceil((endTimeRef.current - now) / 1000));
+
+      setTimeLeft(remaining);
+
+      if (remaining <= 0) {
+        clearInterval(timer);
+        onTimeUpRef.current();
+      }
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [setTimeLeft]);
+  }, [duration]);
 
   const isLowTime = timeLeft < 300;
-  const timeProgress = totalTime > 0 ? (timeLeft / totalTime) * 100 : 0;
+  const timeProgress = duration > 0 ? (timeLeft / duration) * 100 : 0;
 
   if (variant === "inline") {
     return (

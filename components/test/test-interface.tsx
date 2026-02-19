@@ -63,7 +63,10 @@ export function TestInterface({
   const [markedForReview, setMarkedForReview] = useState<
     Record<number, boolean>
   >({});
-  const [timeLeft, setTimeLeft] = useState(sections[0].duration * 60);
+
+  // Replaced timeLeft state with startTimeRef to prevent 1Hz re-renders
+  const startTimeRef = useRef(Date.now());
+
   const [testStarted, setTestStarted] = useState(false);
   const [sectionCompleted, setSectionCompleted] = useState<boolean[]>(
     new Array(sections.length).fill(false)
@@ -116,11 +119,11 @@ export function TestInterface({
 
   useEffect(() => {
     handleSubmitRef.current = () => {
-      const finalTimeSpent =
-        totalTimeSpent + (sections[currentSection].duration * 60 - timeLeft);
+      const timeSpentInCurrentSection = Math.max(0, (Date.now() - startTimeRef.current) / 1000);
+      const finalTimeSpent = totalTimeSpent + timeSpentInCurrentSection;
       onComplete(answers, finalTimeSpent);
     };
-  }, [answers, currentSection, onComplete, sections, timeLeft, totalTimeSpent]);
+  }, [answers, currentSection, onComplete, sections, totalTimeSpent]); // removed timeLeft
 
   const handleSubmit = () => {
     handleSubmitRef.current();
@@ -259,15 +262,16 @@ export function TestInterface({
 
   const confirmNextSection = () => {
     if (currentSection < sections.length - 1) {
+      const timeSpentInCurrentSection = Math.max(0, (Date.now() - startTimeRef.current) / 1000);
       setTotalTimeSpent(
         (previous) =>
-          previous + (sections[currentSection].duration * 60 - timeLeft)
+          previous + timeSpentInCurrentSection
       );
 
       const nextSection = currentSection + 1;
       setCurrentSection(nextSection);
       setCurrentQuestion(0);
-      setTimeLeft(sections[nextSection].duration * 60);
+      startTimeRef.current = Date.now(); // Reset start time for new section
       toast({
         title: "New Section Started",
         description: `You are now in ${sections[nextSection].name}`,
@@ -291,6 +295,7 @@ export function TestInterface({
     setIsLastWarning(false);
     setIsAutoSubmitted(false);
     setTestStarted(true);
+    startTimeRef.current = Date.now(); // Initialize start time
   };
 
   const currentSectionQuestions = sections[currentSection].questions;
@@ -321,10 +326,9 @@ export function TestInterface({
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <Timer
+                key={currentSection}
                 variant="inline"
-                timeLeft={timeLeft}
-                totalTime={sections[currentSection].duration * 60}
-                setTimeLeft={setTimeLeft}
+                duration={sections[currentSection].duration * 60}
                 onTimeUp={handleTimeUp}
               />
               {currentSection < sections.length - 1 && (
