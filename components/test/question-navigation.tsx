@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import {
   QuestionStatus,
   getQuestionButtonClassName,
@@ -13,7 +14,7 @@ interface QuestionNavigationProps {
   onQuestionSelect: (questionNumber: number) => void;
 }
 
-export function QuestionNavigation({
+export const QuestionNavigation = memo(function QuestionNavigation({
   questionStatuses,
   currentQuestion,
   onQuestionSelect,
@@ -59,4 +60,4 @@ export function QuestionNavigation({
       </div>
     </div>
   );
-}
+});

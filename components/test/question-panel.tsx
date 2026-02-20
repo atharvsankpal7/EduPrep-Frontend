@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -18,7 +19,7 @@ interface QuestionPanelProps {
   onToggleReview: () => void;
 }
 
-export function QuestionPanel({
+export const QuestionPanel = memo(function QuestionPanel({
   questionNumber,
   questionText,
   options,
@@ -149,4 +150,4 @@ export function QuestionPanel({
       </div>
     </div>
   );
-}
+});

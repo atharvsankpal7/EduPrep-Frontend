@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { Timer } from "@/components/test/timer";
 import { QuestionPanel } from "@/components/test/question-panel";
 import { TestHeader } from "@/components/test/test-header";
@@ -213,35 +213,45 @@ export function TestInterface({
     );
   }, [currentGlobalQuestionIndex, testStarted]);
 
-  const getQuestionStatus = (globalQuestionIndex: number): QuestionStatus => {
-    if (markedForReview[globalQuestionIndex]) {
-      return "markedForReview";
-    }
+  const getQuestionStatus = useCallback(
+    (globalQuestionIndex: number): QuestionStatus => {
+      if (markedForReview[globalQuestionIndex]) {
+        return "markedForReview";
+      }
 
-    if (answers[globalQuestionIndex] !== undefined) {
-      return "answered";
-    }
+      if (answers[globalQuestionIndex] !== undefined) {
+        return "answered";
+      }
 
-    if (visitedQuestions[globalQuestionIndex]) {
-      return "visitedUnanswered";
-    }
+      if (visitedQuestions[globalQuestionIndex]) {
+        return "visitedUnanswered";
+      }
 
-    return "notVisited";
-  };
+      return "notVisited";
+    },
+    [answers, markedForReview, visitedQuestions]
+  );
 
-  const handleAnswer = (answerId: number) => {
-    setAnswers((previous) => ({
-      ...previous,
-      [currentGlobalQuestionIndex]: answerId,
-    }));
-  };
+  const handleAnswer = useCallback(
+    (answerId: number) => {
+      setAnswers((previous) => ({
+        ...previous,
+        [currentGlobalQuestionIndex]: answerId,
+      }));
+    },
+    [currentGlobalQuestionIndex]
+  );
 
-  const handleToggleReview = () => {
+  const handleToggleReview = useCallback(() => {
     setMarkedForReview((previous) => ({
       ...previous,
       [currentGlobalQuestionIndex]: !previous[currentGlobalQuestionIndex],
     }));
-  };
+  }, [currentGlobalQuestionIndex]);
+
+  const handleQuestionSelect = useCallback((questionNumber: number) => {
+    setCurrentQuestion(questionNumber - 1);
+  }, []);
 
   const handleNextSection = () => {
     if (currentSection < sections.length - 1) {
@@ -295,8 +305,12 @@ export function TestInterface({
 
   const currentSectionQuestions = sections[currentSection].questions;
   const currentQuestionData = currentSectionQuestions[currentQuestion];
-  const questionStatuses = currentSectionQuestions.map((_, index) =>
-    getQuestionStatus(currentSectionStartIndex + index)
+  const questionStatuses = useMemo(
+    () =>
+      currentSectionQuestions.map((_, index) =>
+        getQuestionStatus(currentSectionStartIndex + index)
+      ),
+    [currentSectionQuestions, currentSectionStartIndex, getQuestionStatus]
   );
 
   if (!testStarted) {
@@ -381,9 +395,7 @@ export function TestInterface({
               <QuestionNavigation
                 questionStatuses={questionStatuses}
                 currentQuestion={currentQuestion + 1}
-                onQuestionSelect={(questionNumber) =>
-                  setCurrentQuestion(questionNumber - 1)
-                }
+                onQuestionSelect={handleQuestionSelect}
               />
             </TestSurface>
           </div>
