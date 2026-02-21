@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -18,7 +19,7 @@ interface QuestionPanelProps {
   onToggleReview: () => void;
 }
 
-export function QuestionPanel({
+function QuestionPanelBase({
   questionNumber,
   questionText,
   options,
@@ -150,3 +151,6 @@ export function QuestionPanel({
     </div>
   );
 }
+
+// Memoized to prevent re-renders when parent timer updates but question content hasn't changed
+export const QuestionPanel = memo(QuestionPanelBase);

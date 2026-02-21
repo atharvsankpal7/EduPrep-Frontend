@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import {
   QuestionStatus,
   getQuestionButtonClassName,
@@ -13,7 +14,7 @@ interface QuestionNavigationProps {
   onQuestionSelect: (questionNumber: number) => void;
 }
 
-export function QuestionNavigation({
+function QuestionNavigationBase({
   questionStatuses,
   currentQuestion,
   onQuestionSelect,
@@ -60,3 +61,6 @@ export function QuestionNavigation({
     </div>
   );
 }
+
+// Memoized to prevent re-renders when parent timer updates but question statuses haven't changed
+export const QuestionNavigation = memo(QuestionNavigationBase);
