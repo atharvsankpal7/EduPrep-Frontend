@@ -6,7 +6,7 @@ import { useToast } from "@/components/ui/use-toast"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { AlertCircle, CheckCircle, Upload } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { BACKEND_URL } from '@/lib/constant'
+import api from '@/lib/api/axios'
 
 const UploadPage = () => {
   const [file, setFile] = useState<File | null>(null)
@@ -18,9 +18,9 @@ const UploadPage = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0]
     if (selectedFile) {
-      if (selectedFile.type === 'text/csv' || 
-          selectedFile.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
-          selectedFile.type === 'application/vnd.ms-excel') {
+      if (selectedFile.type === 'text/csv' ||
+        selectedFile.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+        selectedFile.type === 'application/vnd.ms-excel') {
         setFile(selectedFile)
         setError(null)
       } else {
@@ -43,31 +43,18 @@ const UploadPage = () => {
     formData.append('file', file)
 
     try {
-      const response = await fetch(`${BACKEND_URL}/question/uploadExcel`, {
-        method: 'POST',
-        body: formData,
-        credentials: 'include',
+      const response = await api.post('/question/uploadExcel', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       })
 
-      switch (response.status) {
-        case 201:
-          setSuccess(true)
-          toast({
-            title: "Success",
-            description: "Questions uploaded successfully",
-          })
-          break
-        case 400:
-          setError('Invalid file format. Please check your Excel/CSV structure')
-          break
-        case 401:
-          setError('Unauthorized access. Please login again')
-          break
-        case 500:
-          setError('Internal server error. Please try again later')
-          break
-        default:
-          setError('Something went wrong. Please try again')
+      if (response.status === 201) {
+        setSuccess(true)
+        toast({
+          title: "Success",
+          description: "Questions uploaded successfully",
+        })
       }
     } catch (err) {
       setError('Failed to upload file. Please try again')

@@ -1,4 +1,5 @@
 "use client";
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -8,7 +9,6 @@ import Link from "next/link";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useAuthStore } from "@/lib/stores/auth-store";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Dialog,
@@ -18,24 +18,23 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-
-import { BACKEND_URL } from "@/lib/constant";
+import { useLogin } from "@/lib/api/hooks/useAuth";
+import { getAuthErrorMessage } from "@/lib/api/errors";
 
 const emailFormSchema = z.object({
   email: z.string().email("Please enter a valid email address").min(1, "Email is required"),
   password: z
     .string()
     .min(8, "Password must be at least 8 characters")
-    .max(64, "Password must not exceed 64 characters")
+    .max(64, "Password must not exceed 64 characters"),
 });
 
 export default function SignInPage() {
-  const [isLoading, setIsLoading] = useState(false);
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const router = useRouter();
   const searchParams = useSearchParams();
-  const login = useAuthStore((state) => state.login);
+  const loginMutation = useLogin();
 
   const emailForm = useForm({
     resolver: zodResolver(emailFormSchema),
@@ -43,67 +42,22 @@ export default function SignInPage() {
     mode: "onChange",
   });
 
-  async function onSubmit(values: { email: string; password: string }) {
-    setIsLoading(true);
-    try {
-      const response = await fetch(`${BACKEND_URL}/user/login`, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
-      });
-      if(response.status === 401) {
-        setErrorMessage("Invalid credentials. Please try again.");
-        setErrorDialogOpen(true);
-        return;
-      }
-      if (!response.ok) {
-        setErrorMessage("An unexpected error occurred. Please try again.");
-        setErrorDialogOpen(true);
-        return;
-      }
-      if(response.status === 500) {
-        setErrorMessage("Invalid username or password. Please try again.");
-        setErrorDialogOpen(true);
-        return;
-      }
-      // Check if the response is JSON
-      const contentType = response.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        setErrorMessage("An unexpected error occurred. Please try again.");
-        setErrorDialogOpen(true);
-        return;
-      }
+  function onSubmit(values: { email: string; password: string }) {
+    loginMutation.mutate(values, {
+      onSuccess: (data) => {
+        toast({
+          title: "Welcome back!",
+          description: "You have successfully signed in.",
+        });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        setErrorMessage("Invalid credentials. Please try again.");
+        const callbackUrl = searchParams.get("callbackUrl") || "/";
+        router.push(data.data.user.role === "admin" ? "/admin" : callbackUrl);
+      },
+      onError: (error) => {
+        setErrorMessage(getAuthErrorMessage(error, "login"));
         setErrorDialogOpen(true);
-        return;
-      }
-
-      login(data.data.user);
-
-      toast({
-        title: "Welcome back!",
-        description: "You have successfully signed in.",
-      });
-
-      // Get the callback URL from the search params or default to home
-      const callbackUrl = searchParams.get("callbackUrl") || "/";
-      
-      if (data.data.user.role === "admin") {
-        router.push("/admin");
-      } else {
-        router.push(callbackUrl);
-      }
-    } catch (error) {
-      setErrorMessage("An unexpected error occurred. Please try again.");
-      setErrorDialogOpen(true);
-    } finally {
-      setIsLoading(false);
-    }
+      },
+    });
   }
 
   return (
@@ -117,10 +71,7 @@ export default function SignInPage() {
         </div>
 
         <Form {...emailForm}>
-          <form
-            onSubmit={emailForm.handleSubmit(onSubmit)}
-            className="space-y-4"
-          >
+          <form onSubmit={emailForm.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={emailForm.control}
               name="email"
@@ -128,11 +79,7 @@ export default function SignInPage() {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="Enter your email"
-                      type="email"
-                      {...field}
-                    />
+                    <Input placeholder="Enter your email" type="email" autoComplete="email" {...field} />
                   </FormControl>
                   <FormMessage className="text-red-500" />
                 </FormItem>
@@ -145,11 +92,7 @@ export default function SignInPage() {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="********"
-                      type="password"
-                      {...field}
-                    />
+                    <Input placeholder="********" type="password" autoComplete="current-password" {...field} />
                   </FormControl>
                   <FormMessage className="text-red-500" />
                 </FormItem>
@@ -158,19 +101,16 @@ export default function SignInPage() {
             <Button
               className="w-full"
               type="submit"
-              disabled={isLoading || !emailForm.formState.isValid}
+              disabled={loginMutation.isPending || !emailForm.formState.isValid}
             >
-              {isLoading ? "Signing in..." : "Sign In"}
+              {loginMutation.isPending ? "Signing in..." : "Sign In"}
             </Button>
           </form>
         </Form>
 
         <div className="text-center text-sm">
           Don&apos;t have an account?{" "}
-          <Link
-            href="/sign-up"
-            className="font-medium text-primary hover:underline"
-          >
+          <Link href="/sign-up" className="font-medium text-primary hover:underline">
             Sign up
           </Link>
         </div>

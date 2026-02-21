@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Building2, ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { createTest } from "@/lib/backendCalls/createTest";
+import { useCreateTest } from "@/lib/api/hooks/useCreateTest";
 import { EducationLevel } from "@/lib/type";
 import { useState } from "react";
 import { ErrorMessageDialog } from "@/components/test/error-message";
@@ -68,10 +68,11 @@ export default function CompanyTestPage() {
   const router = useRouter();
   const [showError, setShowError] = useState(false);
   const { toast } = useToast();
-  const { isAuthenticated } = useAuthStore();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const [selectedCompany, setSelectedCompany] = useState<typeof companies[0] | null>(null);
+  const createTestMutation = useCreateTest();
 
-  const handleStartTest = async (companyId: string) => {
+  const handleStartTest = (companyId: string) => {
     if (!isAuthenticated) {
       toast({
         title: "Authentication Required",
@@ -82,24 +83,30 @@ export default function CompanyTestPage() {
       return;
     }
 
-    try {
-      const response = await createTest({
+    createTestMutation.mutate(
+      {
         educationLevel: EducationLevel.Undergraduate,
         company: companyId,
-      }) as any;
-      if (!response.testId) {
-        throw new Error("Failed to create test");
+      },
+      {
+        onSuccess: (response: any) => {
+          const testId = response?.testId;
+          if (!testId) {
+            setShowError(true);
+            return;
+          }
+          router.push(`/test/${testId}`);
+        },
+        onError: () => {
+          setShowError(true);
+          toast({
+            title: "Error",
+            description: "Failed to create test. Please try again.",
+            variant: "destructive",
+          });
+        },
       }
-      router.push(`/test/${response.testId}`);
-    } catch (error) {
-      console.error("Error creating test:", error);
-      setShowError(true);
-      toast({
-        title: "Error",
-        description: "Failed to create test. Please try again.",
-        variant: "destructive",
-      });
-    }
+    );
   };
 
   if (selectedCompany) {

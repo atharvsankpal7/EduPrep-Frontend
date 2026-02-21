@@ -4,29 +4,19 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/stores/auth-store";
 import { NavBar } from "@/components/navbar";
-import { Loader2 } from "lucide-react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { user, isAuthenticated, isLoading } = useAuthStore();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const user = useAuthStore((state) => state.user);
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading) {
-      if (!isAuthenticated) {
-        router.push("/sign-in");
-      } else if (user?.role !== "admin") {
-        router.push("/");
-      }
+    if (!isAuthenticated) {
+      router.push("/sign-in");
+    } else if (user?.role !== "admin") {
+      router.push("/");
     }
-  }, [isAuthenticated, isLoading, user, router]);
-
-  if (isLoading) {
-    return (
-      <div className="flex h-screen w-full items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
-  }
+  }, [isAuthenticated, user, router]);
 
   if (!isAuthenticated || user?.role !== "admin") {
     return null;

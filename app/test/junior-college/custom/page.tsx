@@ -1,14 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { TestInfoDisplay } from "@/components/test/test-info-display";
 import { TestConfigDialog } from "@/components/test/custom-practice/test-config-dialog";
 import { ErrorMessageDialog } from "@/components/test/error-message";
-import { createTest } from "@/lib/backendCalls/createTest";
+import { useCreateTest } from "@/lib/api/hooks/useCreateTest";
 import { EducationLevel, TopicList } from "@/lib/type";
 import { CetTopicsSelector } from "@/components/custom-practice/cet-topics-selector";
-import { fetchCetTopics, CetSubjectTopics } from "@/lib/backendCalls/fetchCetTopics";
+import { useCetTopics } from "@/lib/api/hooks/useCetTopics";
 import { useToast } from "@/components/ui/use-toast";
 import LoadingComponent from "@/components/loading";
 
@@ -20,30 +20,15 @@ export default function CustomTestPage() {
     duration: number;
     questionCount: number;
   } | null>(null);
-  const [cetTopics, setCetTopics] = useState<CetSubjectTopics[]>([]);
-  const [loading, setLoading] = useState(true);
   const router = useRouter();
   const { toast } = useToast();
 
-  useEffect(() => {
-    const loadTopics = async () => {
-      try {
-        setLoading(true);
-        const response = await fetchCetTopics();
-        setCetTopics(response.topicsBySubject);
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: "Failed to load topics. Please try again.",
-          variant: "destructive",
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
+  // TanStack Query for fetching CET topics
+  const { data: cetTopicsData, isLoading: loading } = useCetTopics();
+  const cetTopics = cetTopicsData?.topicsBySubject ?? [];
 
-    loadTopics();
-  }, [toast]);
+  // TanStack mutation for creating tests
+  const createTestMutation = useCreateTest();
 
   const handleTopicsSelected = (topics: TopicList) => {
     setSelectedTopics(topics);
@@ -61,29 +46,32 @@ export default function CustomTestPage() {
   const startTest = async () => {
     if (!selectedTopics || !testConfig) return;
 
-    
-
-    try {
-      const response = await createTest({
+    createTestMutation.mutate(
+      {
         educationLevel: EducationLevel.JuniorCollege,
         topicList: selectedTopics,
         numberOfQuestions: testConfig.questionCount,
         time: testConfig.duration,
-      }) as any;
-      const testId = response?.data?.testDetails?.testId;
-      if (!testId) {
-        throw new Error("Failed to create test");
+      },
+      {
+        onSuccess: (response: any) => {
+          const testId = response?.data?.testDetails?.testId;
+          if (!testId) {
+            setShowError(true);
+            return;
+          }
+          router.push(`/test/${testId}`);
+        },
+        onError: () => {
+          setShowError(true);
+          toast({
+            title: "Error",
+            description: "Failed to create test. Please try again.",
+            variant: "destructive",
+          });
+        },
       }
-      router.push(`/test/${testId}`);
-    } catch (error) {
-      console.error("Error creating test:", error);
-      setShowError(true);
-      toast({
-        title: "Error",
-        description: "Failed to create test. Please try again.",
-        variant: "destructive",
-      });
-    }
+    );
   };
 
   const handleBack = () => {

@@ -5,7 +5,7 @@ import { CustomizedTest } from "@/components/custom-practice/customized-test";
 import { TestInfoDisplay } from "@/components/test/test-info-display";
 import { TestConfigDialog } from "@/components/test/custom-practice/test-config-dialog";
 import { ErrorMessageDialog } from "@/components/test/error-message";
-import { createTest } from "@/lib/backendCalls/createTest";
+import { useCreateTest } from "@/lib/api/hooks/useCreateTest";
 import { EducationLevel, TopicList } from "@/lib/type";
 import { undergraduateSubjects } from "@/lib/data/undergraduate-subjects";
 import { useRouter } from "next/navigation";
@@ -21,6 +21,7 @@ export default function CustomTestPage() {
   } | null>(null);
   const router = useRouter();
   const { toast } = useToast();
+  const createTestMutation = useCreateTest();
 
   const handleTopicsSelected = (topics: TopicList) => {
     setSelectedTopics(topics);
@@ -35,31 +36,35 @@ export default function CustomTestPage() {
     setShowConfig(false);
   };
 
-  const startTest = async () => {
+  const startTest = () => {
     if (!selectedTopics || !testConfig) return;
 
-    try {
-      const response = (await createTest({
+    createTestMutation.mutate(
+      {
         educationLevel: EducationLevel.Undergraduate,
         topicList: selectedTopics,
         numberOfQuestions: testConfig.questionCount,
         time: testConfig.duration,
-      })) as any;
-
-      const testId = response?.data?.testDetails?.testId ?? response?.testId;
-      if (!testId) {
-        throw new Error("Failed to create test");
+      },
+      {
+        onSuccess: (response: any) => {
+          const testId = response?.data?.testDetails?.testId ?? response?.testId;
+          if (!testId) {
+            setShowError(true);
+            return;
+          }
+          router.push(`/test/${testId}`);
+        },
+        onError: () => {
+          setShowError(true);
+          toast({
+            title: "Error",
+            description: "Failed to create test. Please try again.",
+            variant: "destructive",
+          });
+        },
       }
-      router.push(`/test/${testId}`);
-    } catch (error) {
-      console.error("Error creating test:", error);
-      setShowError(true);
-      toast({
-        title: "Error",
-        description: "Failed to create test. Please try again.",
-        variant: "destructive",
-      });
-    }
+    );
   };
 
   if (testConfig && selectedTopics) {
