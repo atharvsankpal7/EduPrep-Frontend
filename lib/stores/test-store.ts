@@ -1,6 +1,4 @@
-"use client";
-
-import { create } from 'zustand';
+import { create } from "zustand";
 
 interface TestState {
   tabSwitchCount: number;
@@ -11,21 +9,26 @@ interface TestState {
   incrementTabSwitches: () => void;
   submitTest: () => void;
   setAnswers: (answers: Record<number, number>) => void;
-  calculateScore: (correctAnswers: Record<number, number>) => void;
-  calculateSectionScore: (sectionName: string, sectionAnswers: Record<number, number>, correctAnswers: Record<number, number>) => void;
+  setScore: (score: number) => void;
+  setSectionScore: (sectionName: string, score: number) => void;
+  reset: () => void;
 }
 
-export const useTestStore = create<TestState>((set, get) => ({
+const initialState = {
   tabSwitchCount: 0,
   answers: {},
   isSubmitted: false,
   score: null,
   sectionScores: {},
+};
+
+export const useTestStore = create<TestState>((set) => ({
+  ...initialState,
 
   incrementTabSwitches: () => {
-    set((state) => ({ 
+    set((state) => ({
       tabSwitchCount: state.tabSwitchCount + 1,
-      isSubmitted: state.tabSwitchCount >= 2
+      isSubmitted: state.tabSwitchCount >= 2,
     }));
   },
 
@@ -37,38 +40,20 @@ export const useTestStore = create<TestState>((set, get) => ({
     set({ answers });
   },
 
-  calculateScore: (correctAnswers) => {
-    const { answers } = get();
-    const totalQuestions = Object.keys(correctAnswers).length;
-    let correct = 0;
-
-    Object.entries(answers).forEach(([questionId, answer]) => {
-      if (correctAnswers[parseInt(questionId)] === answer) {
-        correct++;
-      }
-    });
-
-    const percentage = (correct / totalQuestions) * 100;
-    set({ score: percentage });
+  setScore: (score) => {
+    set({ score });
   },
 
-  calculateSectionScore: (sectionName, sectionAnswers, correctAnswers) => {
-    const totalQuestions = Object.keys(sectionAnswers).length;
-    let correct = 0;
-
-    Object.entries(sectionAnswers).forEach(([questionId, answer]) => {
-      if (correctAnswers[parseInt(questionId)] === answer) {
-        correct++;
-      }
-    });
-
-    const percentage = totalQuestions > 0 ? (correct / totalQuestions) * 100 : 0;
-    
+  setSectionScore: (sectionName, score) => {
     set((state) => ({
       sectionScores: {
         ...state.sectionScores,
-        [sectionName]: percentage
-      }
+        [sectionName]: score,
+      },
     }));
-  }
+  },
+
+  reset: () => {
+    set(initialState);
+  },
 }));

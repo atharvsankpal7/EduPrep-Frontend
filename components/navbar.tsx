@@ -5,12 +5,11 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Menu, Users, Loader2 } from "lucide-react";
+import { Menu, Users } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { TeacherNav } from "@/components/navbar/teacher-nav";
 import { useAuthStore } from "@/lib/stores/auth-store";
-import { BACKEND_URL } from "@/lib/constant";
-import { useRouter } from "next/navigation";
+import { useLogout } from "@/lib/api/hooks/useAuth";
 
 const studentRoutes = [
   { href: "/", label: "Home" },
@@ -26,41 +25,17 @@ export function NavBar() {
   const pathname = usePathname();
   const isTeacherRoute = pathname.startsWith("/teacher");
   const isAdminRoute = pathname.startsWith("/admin");
-  const { isAuthenticated, user, logout, isLoading } = useAuthStore();
-  const router = useRouter();
 
-  const handleLogout = async () => {
-    try {
-      const response = await fetch(`${BACKEND_URL}/user/logout`, {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ id: user?.id }),
-      });
+  // Use selectors to avoid unnecessary re-renders
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const user = useAuthStore((state) => state.user);
+  const logoutMutation = useLogout();
 
-      if (response.ok) {
-        logout();
-      }
-      if (response.status === 401) {
-        logout();
-      }
-      router.push("/sign-up");
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
+  const handleLogout = () => {
+    logoutMutation.mutate();
   };
 
   const navRoutes = isAdminRoute ? adminRoutes : studentRoutes;
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-16 border-b">
-        <Loader2 className="h-6 w-6 animate-spin" />
-      </div>
-    );
-  }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 container flex h-16 items-center justify-between container mx-auto">
@@ -100,7 +75,8 @@ export function NavBar() {
                 </Button>
               )}
             </nav>
-          </SheetContent>          </Sheet>
+          </SheetContent>
+        </Sheet>
 
         <Link href="/" className="flex items-center space-x-2">
           <span className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">

@@ -9,7 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, Dices, Search, BookOpen, Calculator, Atom } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { CetSubjectTopics } from "@/lib/backendCalls/fetchCetTopics";
+import { CetSubjectTopics } from "@/lib/api/hooks/useCetTopics";
 import { TopicList } from "@/lib/type";
 
 interface CetTopicsSelectorProps {
@@ -42,7 +42,7 @@ export function CetTopicsSelector({
     const query = searchQuery.toLowerCase();
     return cetTopics.map(subjectGroup => ({
       ...subjectGroup,
-      topics: subjectGroup.topics.filter(topic => 
+      topics: subjectGroup.topics.filter(topic =>
         topic.topicName.toLowerCase().includes(query)
       )
     })).filter(subjectGroup => subjectGroup.topics.length > 0);
@@ -52,7 +52,7 @@ export function CetTopicsSelector({
     if (activeTab === "all") {
       return filteredTopics;
     }
-    return filteredTopics.filter(subjectGroup => 
+    return filteredTopics.filter(subjectGroup =>
       subjectGroup.standard === parseInt(activeTab)
     );
   }, [filteredTopics, activeTab]);
@@ -61,11 +61,11 @@ export function CetTopicsSelector({
     setSelectedTopics(prev => {
       const currentTopics = prev[subject] || [];
       const topicKey = `${topicId}:${topicName}`;
-      
+
       const updatedTopics = currentTopics.includes(topicKey)
         ? currentTopics.filter(t => t !== topicKey)
         : [...currentTopics, topicKey];
-      
+
       return { ...prev, [subject]: updatedTopics };
     });
   };
@@ -74,21 +74,21 @@ export function CetTopicsSelector({
     setSelectedTopics(prev => {
       const currentTopics = prev[subject] || [];
       const allTopicKeys = topics.map(t => `${t.topicId}:${t.topicName}`);
-      
+
       // If all topics are already selected, deselect all
       if (allTopicKeys.every(key => currentTopics.includes(key))) {
         return { ...prev, [subject]: [] };
       }
-      
+
       // Otherwise, select all
       return { ...prev, [subject]: allTopicKeys };
     });
   };
 
   const toggleExpandSubject = (subject: string) => {
-    setExpandedSubjects(prev => 
-      prev.includes(subject) 
-        ? prev.filter(s => s !== subject) 
+    setExpandedSubjects(prev =>
+      prev.includes(subject)
+        ? prev.filter(s => s !== subject)
         : [...prev, subject]
     );
   };
@@ -112,7 +112,7 @@ export function CetTopicsSelector({
           };
         }),
     };
-    
+
     onStartTest(topicList);
   };
 
@@ -139,7 +139,7 @@ export function CetTopicsSelector({
         <Button variant="ghost" onClick={onBack} className="gap-2 self-start">
           <ChevronLeft className="w-4 h-4" /> Back
         </Button>
-        
+
         <div className="flex flex-1 md:max-w-md relative">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
@@ -149,13 +149,13 @@ export function CetTopicsSelector({
             className="pl-10"
           />
         </div>
-        
+
         <Button
           onClick={handleStartTest}
           className="gap-2"
           disabled={totalSelectedTopics === 0}
         >
-          <Dices className="w-4 h-4" /> 
+          <Dices className="w-4 h-4" />
           Create Test
           {totalSelectedTopics > 0 && (
             <Badge variant="secondary" className="ml-2">
@@ -187,22 +187,22 @@ export function CetTopicsSelector({
                       <div className="flex items-center gap-3">
                         {subjectIcons[subjectGroup.subject as keyof typeof subjectIcons] || <BookOpen className="h-5 w-5" />}
                         <CardTitle className="text-xl">
-                          {subjectGroup.subject} 
+                          {subjectGroup.subject}
                           <Badge variant="outline" className="ml-2 text-xs">
                             {subjectGroup.standard}th Standard
                           </Badge>
                         </CardTitle>
                       </div>
-                      <Button 
-                        variant="ghost" 
+                      <Button
+                        variant="ghost"
                         size="sm"
                         onClick={() => handleSelectAllInSubject(
-                          `${subjectGroup.subject}-${subjectGroup.standard}`, 
+                          `${subjectGroup.subject}-${subjectGroup.standard}`,
                           subjectGroup.topics
                         )}
                       >
-                        {selectedTopics[`${subjectGroup.subject}-${subjectGroup.standard}`]?.length === subjectGroup.topics.length 
-                          ? "Deselect All" 
+                        {selectedTopics[`${subjectGroup.subject}-${subjectGroup.standard}`]?.length === subjectGroup.topics.length
+                          ? "Deselect All"
                           : "Select All"}
                       </Button>
                     </div>
@@ -210,20 +210,19 @@ export function CetTopicsSelector({
                   <CardContent className="p-0">
                     <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                       {subjectGroup.topics.map((topic) => (
-                        <div 
-                          key={topic.topicId} 
-                          className={`flex items-center gap-2 p-3 rounded-md transition-colors ${
-                            selectedTopics[`${subjectGroup.subject}-${subjectGroup.standard}`]?.includes(`${topic.topicId}:${topic.topicName}`) 
-                              ? 'bg-primary/10 border border-primary/20' 
+                        <div
+                          key={topic.topicId}
+                          className={`flex items-center gap-2 p-3 rounded-md transition-colors ${selectedTopics[`${subjectGroup.subject}-${subjectGroup.standard}`]?.includes(`${topic.topicId}:${topic.topicName}`)
+                              ? 'bg-primary/10 border border-primary/20'
                               : 'hover:bg-muted border border-transparent'
-                          }`}
+                            }`}
                         >
                           <Checkbox
                             id={topic.topicId}
                             checked={selectedTopics[`${subjectGroup.subject}-${subjectGroup.standard}`]?.includes(`${topic.topicId}:${topic.topicName}`) || false}
                             onCheckedChange={() => handleTopicToggle(
-                              `${subjectGroup.subject}-${subjectGroup.standard}`, 
-                              topic.topicId, 
+                              `${subjectGroup.subject}-${subjectGroup.standard}`,
+                              topic.topicId,
                               topic.topicName
                             )}
                           />

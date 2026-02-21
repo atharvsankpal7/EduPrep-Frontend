@@ -5,15 +5,15 @@ import { useRouter, usePathname } from "next/navigation";
 import { useEffect } from "react";
 
 export function useRequireAuth() {
-  const { isAuthenticated, isLoading } = useAuthStore();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    if (!isAuthenticated) {
       router.push(`/sign-up?callbackUrl=${encodeURIComponent(pathname)}`);
     }
-  }, [isLoading, isAuthenticated, pathname, router]);
+  }, [isAuthenticated, pathname, router]);
 
-  return { isAuthenticated, isLoading };
+  return { isAuthenticated };
 }

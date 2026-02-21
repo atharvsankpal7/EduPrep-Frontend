@@ -5,9 +5,8 @@ import { useRouter } from "next/navigation";
 import { TestResult } from "@/components/test/test-result";
 import InvalidResult from "@/components/test/result/invalid-result";
 import QuestionAnalysis from "@/components/test/result/question-analysis";
-import axios from "axios";
+import api from "@/lib/api/axios";
 import LoadingComponent from "@/components/loading";
-import { BACKEND_URL } from "@/lib/constant";
 
 interface SectionResult {
   name: string;
@@ -48,9 +47,8 @@ export default function TestResultPage({ params }: { params: { id: string } }) {
     const fetchResult = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(
-          `${BACKEND_URL}/test/${params.id}/result`,
-          { withCredentials: true }
+        const response = await api.get(
+          `/test/${params.id}/result`
         );
 
         // Process the response to include section results
@@ -107,7 +105,7 @@ export default function TestResultPage({ params }: { params: { id: string } }) {
       <div className="space-y-8">
         <div className="flex flex-col items-center text-center">
           <h1 className="text-4xl font-bold ">Test Results</h1>
-          
+
         </div>
 
         <div className="bg-card rounded-xl shadow-lg p-6">

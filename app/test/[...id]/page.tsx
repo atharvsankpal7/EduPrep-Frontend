@@ -3,10 +3,8 @@
 import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { TestInterface } from "@/components/test/test-interface";
-import axios from "axios";
+import api from "@/lib/api/axios";
 import LoadingComponent from "@/components/loading";
-import { BACKEND_URL } from "@/lib/constant";
-import { checkAuthStatus } from "@/lib/auth";
 
 interface TestPageProps {
   params: { id: string };
@@ -59,10 +57,8 @@ export default function TestPage({ params }: TestPageProps) {
     const fetchTestConfig = async () => {
       try {
         setLoading(true);
-        const url = `${BACKEND_URL}/test/${testId}`;
-        const response = await axios.get(url, {
-          withCredentials: true,
-        });
+        const url = `/test/${testId}`;
+        const response = await api.get(url);
 
         const responseData = response.data.data;
 
@@ -108,17 +104,12 @@ export default function TestPage({ params }: TestPageProps) {
         });
       });
       // Submit test
-      const response = await axios.patch(`${BACKEND_URL}/test/${testId}/submit`, {
+      const response = await api.patch(`/test/${testId}/submit`, {
         selectedAnswers,
         timeTaken: timeSpent,
         autoSubmission: {
           isAutoSubmitted: false,
           tabSwitches: 0
-        }
-      }, {
-        withCredentials: true,
-        headers: {
-          'Content-Type': 'application/json'
         }
       });
       // Redirect to results page

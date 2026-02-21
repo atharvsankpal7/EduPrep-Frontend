@@ -17,14 +17,16 @@ import {
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/lib/stores/auth-store";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
-import { BACKEND_URL } from "@/lib/constant";
+import { useRegister } from "@/lib/api/hooks/useAuth";
+import { getAuthErrorMessage } from "@/lib/api/errors";
 
 const formSchema = z.object({
   fullName: z
@@ -54,10 +56,9 @@ const formSchema = z.object({
 
 export default function SignUpPage() {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorModal, setErrorModal] = useState(false);
+  const [errorDialogOpen, setErrorDialogOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const register = useAuthStore((state) => state.login);
+  const registerMutation = useRegister();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -71,39 +72,20 @@ export default function SignUpPage() {
     mode: "onChange",
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true);
-
-    try {
-      const response = await fetch(`${BACKEND_URL}/user/register`, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setErrorMessage(data.message || "Registration failed");
-        setErrorModal(true);
-        throw new Error(data.message);
-      }
-
-      register(data.data.user);
-      router.push("/");
-      toast({
-        title: "Account created successfully!",
-        description: "Please check your email to verify your account.",
-      });
-    } catch (error: any) {
-      setErrorMessage(
-        error.message || "Something went wrong. Please try again."
-      );
-      setErrorModal(true);
-    } finally {
-      setIsLoading(false);
-    }
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    registerMutation.mutate(values, {
+      onSuccess: () => {
+        router.push("/");
+        toast({
+          title: "Account created successfully!",
+          description: "Welcome to EduPrep.",
+        });
+      },
+      onError: (error) => {
+        setErrorMessage(getAuthErrorMessage(error, "register"));
+        setErrorDialogOpen(true);
+      },
+    });
   }
 
   return (
@@ -124,7 +106,7 @@ export default function SignUpPage() {
                 <FormItem>
                   <FormLabel>Full Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="John Doe" {...field} />
+                    <Input placeholder="John Doe" autoComplete="name" {...field} />
                   </FormControl>
                   <FormMessage className="text-red-500" />
                 </FormItem>
@@ -137,11 +119,7 @@ export default function SignUpPage() {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="john@example.com"
-                      type="email"
-                      {...field}
-                    />
+                    <Input placeholder="john@example.com" type="email" autoComplete="email" {...field} />
                   </FormControl>
                   <FormMessage className="text-red-500" />
                 </FormItem>
@@ -154,7 +132,7 @@ export default function SignUpPage() {
                 <FormItem>
                   <FormLabel>Contact Number</FormLabel>
                   <FormControl>
-                    <Input placeholder="9876543210" {...field} />
+                    <Input placeholder="9876543210" autoComplete="tel" {...field} />
                   </FormControl>
                   <FormMessage className="text-red-500" />
                 </FormItem>
@@ -167,7 +145,7 @@ export default function SignUpPage() {
                 <FormItem>
                   <FormLabel>City</FormLabel>
                   <FormControl>
-                    <Input placeholder="Mumbai" {...field} />
+                    <Input placeholder="Mumbai" autoComplete="address-level2" {...field} />
                   </FormControl>
                   <FormMessage className="text-red-500" />
                 </FormItem>
@@ -180,33 +158,37 @@ export default function SignUpPage() {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input placeholder="********" type="password" {...field} />
+                    <Input placeholder="********" type="password" autoComplete="new-password" {...field} />
                   </FormControl>
                   <FormMessage className="text-red-500" />
                 </FormItem>
               )}
             />
-            <Button className="w-full" type="submit" disabled={isLoading}>
-              {isLoading ? "Creating account..." : "Sign Up"}
+            <Button className="w-full" type="submit" disabled={registerMutation.isPending}>
+              {registerMutation.isPending ? "Creating account..." : "Sign Up"}
             </Button>
           </form>
         </Form>
         <div className="text-center text-sm">
           Already have an account?{" "}
-          <Link
-            href="/sign-in"
-            className="font-medium text-primary hover:underline"
-          >
+          <Link href="/sign-in" className="font-medium text-primary hover:underline">
             Sign in
           </Link>
         </div>
 
-        <Dialog open={errorModal} onOpenChange={setErrorModal}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Error</DialogTitle>
-              <p className="text-red-500">{errorMessage}</p>
+        <Dialog open={errorDialogOpen} onOpenChange={setErrorDialogOpen}>
+          <DialogContent className="sm:max-w-[425px] p-6">
+            <DialogHeader className="space-y-4">
+              <DialogTitle className="text-2xl font-bold text-red-600">Registration Failed</DialogTitle>
+              <DialogDescription className="text-base text-red-500">
+                {errorMessage}
+              </DialogDescription>
             </DialogHeader>
+            <DialogFooter className="mt-6">
+              <Button variant="default" onClick={() => setErrorDialogOpen(false)} className="w-full">
+                Try Again
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>

@@ -31,7 +31,7 @@ import {
 import { DatePicker } from "@/components/ui/date-picker";
 import { Pagination } from "@/components/ui/pagination";
 import { useToast } from "@/components/ui/use-toast";
-import { BACKEND_URL } from "@/lib/constant";
+import api from "@/lib/api/axios";
 
 import { Loader2, Search, Filter, RefreshCw, Download } from "lucide-react";
 
@@ -96,22 +96,11 @@ export default function StudentsPage() {
         queryParams.append("search", searchQuery);
       }
 
-      const response = await fetch(
-        `${BACKEND_URL}/admin/students?${queryParams}`,
-        {
-          method: "GET",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
+      const response = await api.get(
+        `/admin/students?${queryParams}`
       );
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch students");
-      }
-
-      const data = await response.json();
+      const data = response.data;
 
       setStudents(data.data.students);
       setPagination(data.data.pagination);
