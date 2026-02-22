@@ -1,0 +1,29 @@
+
+> mock-test-platform@0.1.0 dev /app
+> next dev
+
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:3000
+  - Environments: .env
+
+ ✓ Starting...
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
+ ✓ Ready in 2.4s
+ ○ Compiling /landing-page-codex ...
+Browserslist: browsers data (caniuse-lite) is 14 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+ ✓ Compiled /landing-page-codex in 6.9s (700 modules)
+ ✓ Compiled in 1229ms (352 modules)
+ GET /landing-page-codex 200 in 8187ms
+ GET /landing-page-codex 200 in 96ms
+ GET /landing-page-codex 200 in 41ms
+ ✓ Compiled in 1133ms (691 modules)
+ GET /landing-page-codex 200 in 190ms
+ GET /landing-page-codex 200 in 52ms
+ GET /landing-page-codex 200 in 42ms
+ GET /landing-page-codex 200 in 35ms

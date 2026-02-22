@@ -22,9 +22,20 @@ export default function LandingPageCodex() {
       });
     };
 
+    let rafMove = 0;
+    let mx = 0;
+    let my = 0;
+
     const onMove = (e: MouseEvent) => {
-      root.style.setProperty("--mx", `${e.clientX}`);
-      root.style.setProperty("--my", `${e.clientY}`);
+      mx = e.clientX;
+      my = e.clientY;
+
+      if (rafMove) return;
+      rafMove = window.requestAnimationFrame(() => {
+        root.style.setProperty("--mx", `${mx}`);
+        root.style.setProperty("--my", `${my}`);
+        rafMove = 0;
+      });
     };
 
     const observer = new IntersectionObserver(
