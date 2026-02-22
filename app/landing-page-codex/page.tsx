@@ -12,19 +12,29 @@ import Footer from "./_components/Footer";
 export default function LandingPageCodex() {
   useEffect(() => {
     const root = document.documentElement;
-    let raf = 0;
+    let rafScroll = 0;
+    let rafMove = 0;
+    let mouseX = 0;
+    let mouseY = 0;
 
     const onScroll = () => {
-      if (raf) return;
-      raf = window.requestAnimationFrame(() => {
+      if (rafScroll) return;
+      rafScroll = window.requestAnimationFrame(() => {
         root.style.setProperty("--scrollY", `${window.scrollY}`);
-        raf = 0;
+        rafScroll = 0;
       });
     };
 
     const onMove = (e: MouseEvent) => {
-      root.style.setProperty("--mx", `${e.clientX}`);
-      root.style.setProperty("--my", `${e.clientY}`);
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+
+      if (rafMove) return;
+      rafMove = window.requestAnimationFrame(() => {
+        root.style.setProperty("--mx", `${mouseX}`);
+        root.style.setProperty("--my", `${mouseY}`);
+        rafMove = 0;
+      });
     };
 
     const observer = new IntersectionObserver(
@@ -48,6 +58,8 @@ export default function LandingPageCodex() {
     return () => {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("mousemove", onMove);
+      if (rafScroll) cancelAnimationFrame(rafScroll);
+      if (rafMove) cancelAnimationFrame(rafMove);
       observer.disconnect();
       document.body.classList.remove("page-ready");
     };
