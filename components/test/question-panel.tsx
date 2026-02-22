@@ -19,6 +19,32 @@ interface QuestionPanelProps {
   onToggleReview: () => void;
 }
 
+const isImageUrl = (str: string) => {
+  return (
+    str.match(/\.(jpeg|jpg|gif|png)$/i) !== null ||
+    (str.startsWith("http") &&
+      (str.includes("/images/") || str.includes("/img/")))
+  );
+};
+
+const renderContent = (content: string) => {
+  if (isImageUrl(content)) {
+    return (
+      <div className="flex justify-center my-2">
+        <Image
+          src={content}
+          alt="Question content"
+          width={500}
+          height={300}
+          className="max-w-full object-contain rounded-md"
+          unoptimized
+        />
+      </div>
+    );
+  }
+  return <span>{content}</span>;
+};
+
 function QuestionPanelBase({
   questionNumber,
   questionText,
@@ -28,32 +54,6 @@ function QuestionPanelBase({
   isMarkedForReview,
   onToggleReview,
 }: QuestionPanelProps) {
-  const isImageUrl = (str: string) => {
-    return (
-      str.match(/\.(jpeg|jpg|gif|png)$/i) !== null ||
-      (str.startsWith("http") &&
-        (str.includes("/images/") || str.includes("/img/")))
-    );
-  };
-
-  const renderContent = (content: string) => {
-    if (isImageUrl(content)) {
-      return (
-        <div className="flex justify-center my-2">
-          <Image
-            src={content}
-            alt="Question content"
-            width={500}
-            height={300}
-            className="max-w-full object-contain rounded-md"
-            unoptimized
-          />
-        </div>
-      );
-    }
-    return <span>{content}</span>;
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 border-b border-[hsl(var(--test-border))] pb-4 sm:flex-row sm:items-start sm:justify-between">
