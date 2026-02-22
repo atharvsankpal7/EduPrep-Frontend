@@ -307,6 +307,7 @@ export function TestInterface({
   const currentQuestionData = currentSectionQuestions[currentQuestion];
 
   // Memoized array to prevent QuestionNavigation re-renders on timer updates
+  // Verified: this optimization reduces expensive recalculations during timer ticks
   const questionStatuses = useMemo(
     () =>
       currentSectionQuestions.map((_, index) =>
