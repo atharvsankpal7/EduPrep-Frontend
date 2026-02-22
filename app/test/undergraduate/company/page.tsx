@@ -11,11 +11,10 @@ import { Button } from "@/components/ui/button";
 import { Building2, ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCreateTest } from "@/lib/api/hooks/useCreateTest";
-import { EducationLevel } from "@/lib/type";
+import { EducationLevel } from "@/types/global/interface/test.apiInterface";
 import { useState } from "react";
 import { ErrorMessageDialog } from "@/components/test/error-message";
 import { useToast } from "@/components/ui/use-toast";
-import { useAuthStore } from "@/lib/stores/auth-store";
 import { TestInfoDisplay } from "@/components/test/test-info-display";
 
 const companies = [
@@ -68,21 +67,10 @@ export default function CompanyTestPage() {
   const router = useRouter();
   const [showError, setShowError] = useState(false);
   const { toast } = useToast();
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const [selectedCompany, setSelectedCompany] = useState<typeof companies[0] | null>(null);
   const createTestMutation = useCreateTest();
 
   const handleStartTest = (companyId: string) => {
-    if (!isAuthenticated) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to take a company test",
-        variant: "destructive",
-      });
-      router.push("/sign-in");
-      return;
-    }
-
     createTestMutation.mutate(
       {
         educationLevel: EducationLevel.Undergraduate,

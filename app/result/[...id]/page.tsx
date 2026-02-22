@@ -1,92 +1,52 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
 import { TestResult } from "@/components/test/test-result";
 import InvalidResult from "@/components/test/result/invalid-result";
 import QuestionAnalysis from "@/components/test/result/question-analysis";
-import api from "@/lib/api/axios";
 import LoadingComponent from "@/components/loading";
-
-interface SectionResult {
-  name: string;
-  totalQuestions: number;
-  correctAnswers: number;
-  score: number;
-  timeSpent: number;
-}
-
-interface QuestionAnalysisItem {
-  questionText: string;
-  options: string[];
-  correctOption: number;
-  selectedOption: number;
-  isCorrect: boolean;
-}
-
-interface TestResultData {
-  id: string;
-  totalQuestions: number;
-  correctAnswers: number;
-  timeSpent: number;
-  invalid: boolean;
-  tabSwitches: number;
-  autoSubmitted: boolean;
-  sectionResults?: SectionResult[];
-  questionAnalysis?: QuestionAnalysisItem[];
-}
+import { fetchTestResultById } from "@/lib/api/services/test.api";
+import { TestResultData } from "@/types/global/interface/test.apiInterface";
 
 export default function TestResultPage({ params }: { params: { id: string } }) {
   const router = useRouter();
-  const [result, setResult] = useState<TestResultData | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("summary");
 
-  useEffect(() => {
-    const fetchResult = async () => {
-      try {
-        setLoading(true);
-        const response = await api.get(
-          `/test/${params.id}/result`
-        );
+  const { data: rawResult, error, isLoading } = useQuery({
+    queryKey: ["testResult", params.id],
+    queryFn: () => fetchTestResultById(params.id),
+  });
 
-        // Process the response to include section results
-        const resultData = response.data.data;
+  // Derive the processed result from raw data
+  const result = useMemo<TestResultData | null>(() => {
+    if (!rawResult) return null;
 
-        // Transform section data if available
-        const sectionResults =
-          resultData.sectionResults?.map((section: any) => ({
-            name: section.sectionName,
-            totalQuestions: section.totalQuestions,
-            correctAnswers: section.correctAnswers,
-            score: (section.correctAnswers / section.totalQuestions) * 100,
-            timeSpent: section.timeSpent,
-          })) || [];
+    const sectionResults =
+      rawResult.sectionResults?.map((section: any) => ({
+        name: section.sectionName,
+        totalQuestions: section.totalQuestions,
+        correctAnswers: section.correctAnswers,
+        score: (section.correctAnswers / section.totalQuestions) * 100,
+        timeSpent: section.timeSpent,
+      })) || [];
 
-        setResult({
-          ...resultData,
-          sectionResults,
-          questionAnalysis: resultData.questionAnalysis || [],
-        });
-      } catch (error) {
-        console.error("Failed to fetch test result:", error);
-        setError("Failed to load test result");
-      } finally {
-        setLoading(false);
-      }
+    return {
+      ...rawResult,
+      sectionResults,
+      questionAnalysis: rawResult.questionAnalysis || [],
     };
+  }, [rawResult]);
 
-    fetchResult();
-  }, [params.id]);
-
-  if (loading) {
+  if (isLoading) {
     return <LoadingComponent />;
   }
 
   if (error) {
     return (
-      <div className="container py-8 text-center text-destructive">{error}</div>
+      <div className="container py-8 text-center text-destructive">
+        {error instanceof Error ? error.message : "Failed to load test result"}
+      </div>
     );
   }
 
@@ -105,7 +65,6 @@ export default function TestResultPage({ params }: { params: { id: string } }) {
       <div className="space-y-8">
         <div className="flex flex-col items-center text-center">
           <h1 className="text-4xl font-bold ">Test Results</h1>
-
         </div>
 
         <div className="bg-card rounded-xl shadow-lg p-6">

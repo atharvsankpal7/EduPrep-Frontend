@@ -1,4 +1,4 @@
-import {  TSubjectList } from "../type";
+import { TSubjectList } from "@/types/global/interface/test.apiInterface";
 
 export const juniorCollegeSubjects: TSubjectList[] = [
   {

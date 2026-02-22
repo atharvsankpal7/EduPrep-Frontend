@@ -6,7 +6,7 @@ import { useToast } from "@/components/ui/use-toast"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { AlertCircle, CheckCircle, Upload } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import api from '@/lib/api/axios'
+import { uploadQuestionFile } from "@/lib/api/services/question.api"
 
 const UploadPage = () => {
   const [file, setFile] = useState<File | null>(null)
@@ -39,17 +39,10 @@ const UploadPage = () => {
     setError(null)
     setSuccess(false)
 
-    const formData = new FormData()
-    formData.append('file', file)
-
     try {
-      const response = await api.post('/question/uploadExcel', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      })
+      const status = await uploadQuestionFile(file)
 
-      if (response.status === 201) {
+      if (status === 201) {
         setSuccess(true)
         toast({
           title: "Success",

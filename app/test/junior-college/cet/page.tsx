@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { TestInfoDisplay } from "@/components/test/test-info-display";
 import { ErrorMessageDialog } from "@/components/test/error-message";
 import { useCreateTest } from "@/lib/api/hooks/useCreateTest";
-import { EducationLevel } from "@/lib/type";
+import { EducationLevel } from "@/types/global/interface/test.apiInterface";
 import { useToast } from "@/components/ui/use-toast";
 import LoadingComponent from "@/components/loading";
 

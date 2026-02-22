@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/accordion";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ChevronLeft, Dices } from "lucide-react";
-import { TCustomizedTestProps, TopicList } from "@/lib/type";
+import { TCustomizedTestProps, TopicList } from "@/types/global/interface/test.apiInterface";
 
 export function CustomizedTest({
   onBack,

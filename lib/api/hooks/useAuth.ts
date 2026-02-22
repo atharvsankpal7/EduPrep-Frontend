@@ -1,48 +1,11 @@
 import { useMutation } from "@tanstack/react-query";
-import api from "../axios";
-import { useAuthStore, User } from "../../stores/auth-store";
+import { useAuthStore } from "../../stores/auth-store";
 import { useRouter } from "next/navigation";
-
-// ---- Types ----
-
-interface LoginRequest {
-  email: string;
-  password: string;
-}
-
-interface RegisterRequest {
-  fullName: string;
-  email: string;
-  password: string;
-  city: string;
-  contactNumber: string;
-}
-
-interface AuthResponse {
-  statusCode: number;
-  data: {
-    user: User;
-  };
-  message: string;
-}
-
-// ---- API functions ----
-
-const loginApi = async (credentials: LoginRequest): Promise<AuthResponse> => {
-  const response = await api.post<AuthResponse>("/user/login", credentials);
-  return response.data;
-};
-
-const registerApi = async (data: RegisterRequest): Promise<AuthResponse> => {
-  const response = await api.post<AuthResponse>("/user/register", data);
-  return response.data;
-};
-
-const logoutApi = async (): Promise<void> => {
-  await api.post("/user/logout");
-};
-
-// ---- Hooks ----
+import {
+  login as loginApi,
+  logout as logoutApi,
+  register as registerApi,
+} from "@/lib/api/services/auth.api";
 
 export const useLogin = () => {
   const login = useAuthStore((state) => state.login);
