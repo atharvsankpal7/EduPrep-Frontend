@@ -6,7 +6,7 @@ import { TestInfoDisplay } from "@/components/test/test-info-display";
 import { TestConfigDialog } from "@/components/test/custom-practice/test-config-dialog";
 import { ErrorMessageDialog } from "@/components/test/error-message";
 import { useCreateTest } from "@/lib/api/hooks/useCreateTest";
-import { EducationLevel, TopicList } from "@/lib/type";
+import { EducationLevel, TopicList } from "@/types/global/interface/test.apiInterface";
 import { undergraduateSubjects } from "@/lib/data/undergraduate-subjects";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";

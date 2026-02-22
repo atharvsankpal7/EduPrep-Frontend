@@ -1,9 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { format } from "date-fns";
-import * as XLSX from "xlsx";
 import {
   Table,
   TableBody,
@@ -31,27 +29,13 @@ import {
 import { DatePicker } from "@/components/ui/date-picker";
 import { Pagination } from "@/components/ui/pagination";
 import { useToast } from "@/components/ui/use-toast";
-import api from "@/lib/api/axios";
+import {
+  fetchAdminStudents,
+  PaginationInfo,
+  Student,
+} from "@/lib/api/services/admin.api";
 
 import { Loader2, Search, Filter, RefreshCw, Download } from "lucide-react";
-
-interface Student {
-  _id: string;
-  email: string;
-  fullName: string;
-  role: string;
-  city?: string;
-  contactNumber?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface PaginationInfo {
-  total: number;
-  page: number;
-  limit: number;
-  pages: number;
-}
 
 export default function StudentsPage() {
   const [students, setStudents] = useState<Student[]>([]);
@@ -69,7 +53,6 @@ export default function StudentsPage() {
   const [cities, setCities] = useState<string[]>([]);
 
   const { toast } = useToast();
-  const router = useRouter();
 
   useEffect(() => {
     fetchStudents();
@@ -78,37 +61,22 @@ export default function StudentsPage() {
   const fetchStudents = async () => {
     setLoading(true);
     try {
-      const queryParams = new URLSearchParams({
-        page: pagination.page.toString(),
-        limit: pagination.limit.toString(),
+      const data = await fetchAdminStudents({
+        page: pagination.page,
+        limit: pagination.limit,
+        city: cityFilter,
+        startDate,
+        endDate,
+        search: searchQuery,
       });
 
-      if (cityFilter && cityFilter !== "all") {
-        queryParams.append("city", cityFilter);
-      }
-      if (startDate) {
-        queryParams.append("startDate", startDate.toISOString());
-      }
-      if (endDate) {
-        queryParams.append("endDate", endDate.toISOString());
-      }
-      if (searchQuery) {
-        queryParams.append("search", searchQuery);
-      }
-
-      const response = await api.get(
-        `/admin/students?${queryParams}`
-      );
-
-      const data = response.data;
-
-      setStudents(data.data.students);
-      setPagination(data.data.pagination);
+      setStudents(data.students);
+      setPagination(data.pagination);
 
       if (!cities.length) {
         const uniqueCities = Array.from(
           new Set(
-            data.data.students
+            data.students
               .map((student: Student) => student.city?.toLowerCase())
               .filter(Boolean)
           )
@@ -127,7 +95,8 @@ export default function StudentsPage() {
     }
   };
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
+    const XLSX = await import("xlsx");
     const studentsToExport = students.map((student) => ({
       Name: student.fullName,
       Email: student.email,

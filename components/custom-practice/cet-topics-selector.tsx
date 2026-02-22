@@ -9,8 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, Dices, Search, BookOpen, Calculator, Atom } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { CetSubjectTopics } from "@/lib/api/hooks/useCetTopics";
-import { TopicList } from "@/lib/type";
+import { CetSubjectTopics, TopicList } from "@/types/global/interface/test.apiInterface";
 
 interface CetTopicsSelectorProps {
   cetTopics: CetSubjectTopics[];

@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Building2, ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCreateTest } from "@/lib/api/hooks/useCreateTest";
-import { EducationLevel } from "@/lib/type";
+import { EducationLevel } from "@/types/global/interface/test.apiInterface";
 import { useState } from "react";
 import { ErrorMessageDialog } from "@/components/test/error-message";
 import { useToast } from "@/components/ui/use-toast";

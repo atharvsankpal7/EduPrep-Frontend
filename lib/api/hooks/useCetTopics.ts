@@ -1,30 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import api from "../axios";
-
-// ---- Types ----
-
-export interface CetTopic {
-  topicName: string;
-  questionCount: number;
-  topicId: string;
-}
-
-export interface CetSubjectTopics {
-  subject: string;
-  standard: number;
-  topics: CetTopic[];
-}
-
-export interface CetTopicsResponse {
-  topicsBySubject: CetSubjectTopics[];
-}
-
-// ---- API function ----
-
-const fetchCetTopics = async (): Promise<CetTopicsResponse> => {
-  const response = await api.get("/topic/cet");
-  return response.data.data;
-};
+import { fetchCetTopics } from "@/lib/api/services/topic.api";
 
 // ---- Hook ----
 
