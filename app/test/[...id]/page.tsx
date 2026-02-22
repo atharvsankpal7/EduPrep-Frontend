@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { TestInterface } from "@/components/test/test-interface";
 import api from "@/lib/api/axios";
@@ -79,7 +79,7 @@ export default function TestPage({ params }: TestPageProps) {
     fetchTestConfig();
   }, [testId]);
 
-  const handleTestComplete = async (answers: Record<number, number>, timeSpent: number) => {
+  const handleTestComplete = useCallback(async (answers: Record<number, number>, timeSpent: number) => {
     try {
 
       if (!testData) return;
@@ -124,7 +124,7 @@ export default function TestPage({ params }: TestPageProps) {
       console.error("Failed to submit test:", error);
       setError("Failed to submit test. Please try again.");
     }
-  };
+  }, [testData, testId, router]);
 
 
   if (loading) {
