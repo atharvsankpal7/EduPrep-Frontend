@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Bookmark, BookmarkCheck, CheckCircle2 } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { questionStatusMeta, testUi } from "@/components/test/test-design-system";
+import { questionStatusMeta } from "@/components/test/question-status";
 
 interface QuestionPanelProps {
   questionNumber: number;
@@ -56,10 +56,10 @@ function QuestionPanelBase({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 border-b border-[hsl(var(--test-border))] pb-4 sm:flex-row sm:items-start sm:justify-between">
+      <div className="flex flex-col gap-4 border-b border-border pb-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-2">
-          <h2 className={testUi.bodyText}>Question {questionNumber}</h2>
-          <div className="text-lg font-medium text-[hsl(var(--test-foreground))]">
+          <div className="text-sm text-muted-foreground">Question {questionNumber}</div>
+          <div className="text-lg font-medium text-foreground">
             {renderContent(questionText)}
           </div>
         </div>
@@ -67,10 +67,8 @@ function QuestionPanelBase({
           variant="outline"
           onClick={onToggleReview}
           className={cn(
-            testUi.secondaryButton,
             "shrink-0",
-            isMarkedForReview &&
-              "border-[hsl(var(--test-status-review-border))] bg-[hsl(var(--test-status-review-bg))] text-[hsl(var(--test-status-review-text))] hover:bg-[hsl(var(--test-status-review-bg))]"
+            isMarkedForReview && questionStatusMeta.markedForReview.className
           )}
         >
           {isMarkedForReview ? (
@@ -98,8 +96,8 @@ function QuestionPanelBase({
               className={cn(
                 "cursor-pointer rounded-xl border p-4",
                 isSelected
-                  ? questionStatusMeta.answered.buttonClassName
-                  : "border-[hsl(var(--test-border))] hover:bg-[hsl(var(--test-surface-muted))]"
+                  ? questionStatusMeta.answered.className
+                  : "border-border hover:bg-muted"
               )}
             >
               <RadioGroupItem
@@ -110,24 +108,24 @@ function QuestionPanelBase({
               <Label
                 htmlFor={optionId}
                 className={cn(
-                  "flex cursor-pointer items-start gap-3 text-[hsl(var(--test-foreground))]",
+                  "flex cursor-pointer items-start gap-3 text-foreground",
                   isSelected &&
-                    "text-[hsl(var(--test-status-answered-text))]"
+                  "text-[hsl(var(--status-answered-text))]"
                 )}
               >
                 <span
                   className={cn(
                     "mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-xs font-semibold",
                     isSelected
-                      ? "border-[hsl(var(--test-status-answered-border))] bg-[hsl(var(--test-status-answered-bg))] text-[hsl(var(--test-status-answered-text))]"
-                      : "border-[hsl(var(--test-border-strong))] text-[hsl(var(--test-muted-foreground))]"
+                      ? "border-[hsl(var(--status-answered-border))] bg-[hsl(var(--status-answered-bg))] text-[hsl(var(--status-answered-text))]"
+                      : "border-border text-muted-foreground"
                   )}
                 >
                   {String.fromCharCode(65 + idx)}
                 </span>
                 <div className="flex-1">{renderContent(option)}</div>
                 {isSelected && (
-                  <span className="inline-flex items-center gap-1 rounded-full border border-[hsl(var(--test-status-answered-border))] bg-[hsl(var(--test-status-answered-bg))] px-2 py-0.5 text-xs font-semibold text-[hsl(var(--test-status-answered-text))]">
+                  <span className="inline-flex items-center gap-1 rounded-full border border-[hsl(var(--status-answered-border))] bg-[hsl(var(--status-answered-bg))] px-2 py-0.5 text-xs font-semibold text-[hsl(var(--status-answered-text))]">
                     <CheckCircle2 className="h-3.5 w-3.5" />
                     Selected
                   </span>
@@ -138,7 +136,7 @@ function QuestionPanelBase({
         })}
       </RadioGroup>
 
-      <div className={`flex items-center justify-between ${testUi.bodyText}`}>
+      <div className="flex items-center justify-between text-sm text-muted-foreground">
         <span>
           {selectedAnswer === undefined
             ? "Select one option to continue."

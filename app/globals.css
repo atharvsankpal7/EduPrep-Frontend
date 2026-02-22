@@ -44,6 +44,23 @@
     --ring: var(--blue-primary);
     --radius: 0.5rem;
 
+    /* Question Status Colors */
+    --status-review-bg: 267 100% 96%;
+    --status-review-border: 265 76% 82%;
+    --status-review-text: 266 56% 35%;
+    --status-unanswered-bg: 357 100% 96%;
+    --status-unanswered-border: 357 85% 87%;
+    --status-unanswered-text: 356 56% 40%;
+    --status-answered-bg: 151 55% 94%;
+    --status-answered-border: 152 49% 77%;
+    --status-answered-text: 155 58% 28%;
+    --status-warning-bg: 44 100% 94%;
+    --status-warning-border: 40 94% 83%;
+    --status-warning-text: 31 92% 30%;
+    --status-danger-bg: 357 100% 95%;
+    --status-danger-border: 357 85% 84%;
+    --status-danger-text: 356 64% 36%;
+
     /* Chart Colors - Analogous Harmony */
     --chart-1: var(--blue-primary);
     --chart-2: var(--ginger-primary);
@@ -94,6 +111,23 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: var(--blue-light);
+
+    /* Question Status Colors — Dark */
+    --status-review-bg: 268 48% 20%;
+    --status-review-border: 267 50% 34%;
+    --status-review-text: 268 100% 88%;
+    --status-unanswered-bg: 355 44% 20%;
+    --status-unanswered-border: 356 45% 33%;
+    --status-unanswered-text: 356 100% 88%;
+    --status-answered-bg: 155 40% 20%;
+    --status-answered-border: 155 35% 33%;
+    --status-answered-text: 152 72% 85%;
+    --status-warning-bg: 40 42% 20%;
+    --status-warning-border: 40 46% 35%;
+    --status-warning-text: 46 100% 86%;
+    --status-danger-bg: 356 44% 20%;
+    --status-danger-border: 356 50% 35%;
+    --status-danger-text: 356 100% 88%;
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -326,64 +360,4 @@
   transform: translateY(0);
 }
 
-@layer base {
-  .test-interface-theme {
-    --test-bg: 204 33% 95%;
-    --test-surface: 0 0% 100%;
-    --test-surface-muted: 204 36% 98%;
-    --test-foreground: 210 32% 14%;
-    --test-muted-foreground: 214 17% 38%;
-    --test-border: 212 24% 86%;
-    --test-border-strong: 212 20% 78%;
-    --test-primary: 180 56% 31%;
-    --test-primary-foreground: 0 0% 100%;
-    --test-focus: 180 60% 37%;
-    --test-status-review-bg: 267 100% 96%;
-    --test-status-review-border: 265 76% 82%;
-    --test-status-review-text: 266 56% 35%;
-    --test-status-unanswered-bg: 357 100% 96%;
-    --test-status-unanswered-border: 357 85% 87%;
-    --test-status-unanswered-text: 356 56% 40%;
-    --test-status-answered-bg: 151 55% 94%;
-    --test-status-answered-border: 152 49% 77%;
-    --test-status-answered-text: 155 58% 28%;
-    --test-status-warning-bg: 44 100% 94%;
-    --test-status-warning-border: 40 94% 83%;
-    --test-status-warning-text: 31 92% 30%;
-    --test-status-danger-bg: 357 100% 95%;
-    --test-status-danger-border: 357 85% 84%;
-    --test-status-danger-text: 356 64% 36%;
-    --test-status-primary-soft-bg: 180 45% 90%;
-    --test-status-primary-soft-text: 180 56% 31%;
-  }
 
-  .dark .test-interface-theme {
-    --test-bg: 224 33% 8%;
-    --test-surface: 222 24% 12%;
-    --test-surface-muted: 222 22% 16%;
-    --test-foreground: 210 40% 96%;
-    --test-muted-foreground: 214 20% 72%;
-    --test-border: 220 16% 22%;
-    --test-border-strong: 220 18% 32%;
-    --test-primary: 183 73% 45%;
-    --test-primary-foreground: 210 40% 98%;
-    --test-focus: 183 73% 52%;
-    --test-status-review-bg: 268 48% 20%;
-    --test-status-review-border: 267 50% 34%;
-    --test-status-review-text: 268 100% 88%;
-    --test-status-unanswered-bg: 355 44% 20%;
-    --test-status-unanswered-border: 356 45% 33%;
-    --test-status-unanswered-text: 356 100% 88%;
-    --test-status-answered-bg: 155 40% 20%;
-    --test-status-answered-border: 155 35% 33%;
-    --test-status-answered-text: 152 72% 85%;
-    --test-status-warning-bg: 40 42% 20%;
-    --test-status-warning-border: 40 46% 35%;
-    --test-status-warning-text: 46 100% 86%;
-    --test-status-danger-bg: 356 44% 20%;
-    --test-status-danger-border: 356 50% 35%;
-    --test-status-danger-text: 356 100% 88%;
-    --test-status-primary-soft-bg: 183 36% 22%;
-    --test-status-primary-soft-text: 183 73% 74%;
-  }
-}

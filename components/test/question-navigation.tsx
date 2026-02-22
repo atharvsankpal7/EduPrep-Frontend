@@ -6,7 +6,7 @@ import {
   getQuestionButtonClassName,
   questionStatusLegendOrder,
   questionStatusMeta,
-} from "@/components/test/test-design-system";
+} from "@/components/test/question-status";
 
 interface QuestionNavigationProps {
   questionStatuses: QuestionStatus[];
@@ -23,7 +23,7 @@ function QuestionNavigationBase({
 
   return (
     <div className="space-y-4">
-      <h3 className="font-semibold text-[hsl(var(--test-foreground))]">
+      <h3 className="font-semibold text-foreground">
         Question Navigation
       </h3>
 
@@ -52,7 +52,7 @@ function QuestionNavigationBase({
         {questionStatusLegendOrder.map((status) => (
           <div
             key={status}
-            className={`rounded-lg border px-3 py-2 text-sm font-medium ${questionStatusMeta[status].legendCardClassName}`}
+            className={`rounded-lg border px-3 py-2 text-sm font-medium ${questionStatusMeta[status].className}`}
           >
             <span>{questionStatusMeta[status].label}</span>
           </div>

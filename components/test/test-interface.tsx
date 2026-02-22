@@ -22,11 +22,11 @@ import { AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { WarningModal } from "@/components/test/warning-modal";
-import {
-  QuestionStatus,
-  testUi,
-} from "@/components/test/test-design-system";
-import { TestSurface } from "@/components/test/ui/test-surface";
+import { PageWrapper } from "@/components/common/page-wrapper";
+import { Surface } from "@/components/common/surface";
+import { Typography } from "@/components/common/typography";
+import { StickyBar } from "@/components/common/sticky-bar";
+import type { QuestionStatus } from "@/components/test/question-status";
 
 export interface Question {
   question: string;
@@ -215,7 +215,6 @@ export function TestInterface({
   }, [currentGlobalQuestionIndex, testStarted]);
 
   // Memoized to prevent re-creation on every render (especially timer ticks)
-  // ensuring QuestionStatuses array remains stable
   const getQuestionStatus = useCallback(
     (globalQuestionIndex: number): QuestionStatus => {
       if (markedForReview[globalQuestionIndex]) {
@@ -324,20 +323,20 @@ export function TestInterface({
   }
 
   return (
-    <div className={cn("test-interface-theme", testUi.page, "py-2 lg:py-8")}>
+    <div className="min-h-screen bg-background py-2 lg:py-8">
       <TestHeader testName={`${testName} - ${sections[currentSection].name}`} />
 
-      <div className={testUi.container}>
-        <TestSurface className="mb-6 p-4 lg:p-5">
+      <PageWrapper>
+        <Surface className="mb-6 p-4 lg:p-5">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div className="space-y-1">
-              <h2 className={testUi.sectionTitle}>
+              <Typography variant="sectionTitle">
                 Section: {sections[currentSection].name}
-              </h2>
-              <p className={testUi.bodyText}>
+              </Typography>
+              <Typography variant="body">
                 Attempt questions, flag uncertain ones, and review before
                 submission.
-              </p>
+              </Typography>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <Timer
@@ -351,7 +350,6 @@ export function TestInterface({
                 <Button
                   onClick={handleNextSection}
                   variant="outline"
-                  className={testUi.secondaryButton}
                 >
                   Next Section
                 </Button>
@@ -366,8 +364,8 @@ export function TestInterface({
                 className={cn(
                   "rounded-full border px-3 py-1.5 text-sm font-medium",
                   index === currentSection
-                    ? "border-[hsl(var(--test-primary))] bg-[hsl(var(--test-status-primary-soft-bg))] text-[hsl(var(--test-status-primary-soft-text))]"
-                    : "border-[hsl(var(--test-border-strong))] bg-[hsl(var(--test-surface-muted))] text-[hsl(var(--test-muted-foreground))]",
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border bg-muted text-muted-foreground",
                   sectionCompleted[index] && "opacity-65"
                 )}
               >
@@ -375,12 +373,12 @@ export function TestInterface({
               </span>
             ))}
           </div>
-        </TestSurface>
+        </Surface>
 
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
           <div className="lg:col-span-9">
             <div key={currentGlobalQuestionIndex}>
-              <TestSurface className="p-5 lg:p-6">
+              <Surface className="p-5 lg:p-6">
                 <QuestionPanel
                   questionNumber={currentQuestion + 1}
                   questionText={currentQuestionData.question}
@@ -392,22 +390,22 @@ export function TestInterface({
                   }
                   onToggleReview={handleToggleReview}
                 />
-              </TestSurface>
+              </Surface>
             </div>
           </div>
 
           <div className="space-y-4 lg:col-span-3">
-            <TestSurface className="p-4">
+            <Surface className="p-4">
               <QuestionNavigation
                 questionStatuses={questionStatuses}
                 currentQuestion={currentQuestion + 1}
                 onQuestionSelect={handleQuestionSelect}
               />
-            </TestSurface>
+            </Surface>
           </div>
         </div>
 
-        <div className={testUi.fixedBar}>
+        <StickyBar position="bottom">
           <div className="mx-auto flex w-full max-w-[1380px] items-center justify-between gap-3 px-1 lg:px-6">
             <Button
               onClick={() =>
@@ -415,12 +413,12 @@ export function TestInterface({
               }
               disabled={currentQuestion === 0}
               variant="outline"
-              className={cn(testUi.secondaryButton, "min-w-[110px]")}
+              className="min-w-[110px]"
             >
               Previous
             </Button>
 
-            <span className={`hidden sm:block ${testUi.bodyText}`}>
+            <span className="hidden sm:block text-sm text-muted-foreground">
               Question {currentQuestion + 1} of {currentSectionQuestions.length}
             </span>
 
@@ -428,7 +426,7 @@ export function TestInterface({
               currentSection === sections.length - 1 ? (
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button className={cn(testUi.primaryButton, "min-w-[110px]")}>
+                    <Button className="min-w-[110px]">
                       Submit Test
                     </Button>
                   </AlertDialogTrigger>
@@ -441,20 +439,17 @@ export function TestInterface({
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                      <AlertDialogCancel className={testUi.secondaryButton}>
+                      <AlertDialogCancel>
                         Cancel
                       </AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={handleSubmit}
-                        className={testUi.primaryButton}
-                      >
+                      <AlertDialogAction onClick={handleSubmit}>
                         Submit
                       </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
               ) : (
-                <Button onClick={handleNextSection} className={testUi.primaryButton}>
+                <Button onClick={handleNextSection}>
                   Next Section
                 </Button>
               )
@@ -465,21 +460,21 @@ export function TestInterface({
                     Math.min(currentSectionQuestions.length - 1, previous + 1)
                   )
                 }
-                className={cn(testUi.primaryButton, "min-w-[110px]")}
+                className="min-w-[110px]"
               >
                 Next
               </Button>
             )}
           </div>
-        </div>
-      </div>
+        </StickyBar>
+      </PageWrapper>
 
       <AlertDialog>
         <AlertDialogTrigger id="section-warning-dialog" className="hidden" />
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-[hsl(var(--test-status-warning-text))]" />
+              <AlertTriangle className="h-5 w-5 text-[hsl(var(--status-warning-text))]" />
               Warning: Section Change
             </AlertDialogTitle>
             <AlertDialogDescription>
@@ -495,13 +490,10 @@ export function TestInterface({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className={testUi.secondaryButton}>
+            <AlertDialogCancel>
               Stay in Current Section
             </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmNextSection}
-              className={testUi.primaryButton}
-            >
+            <AlertDialogAction onClick={confirmNextSection}>
               Proceed to Next Section
             </AlertDialogAction>
           </AlertDialogFooter>

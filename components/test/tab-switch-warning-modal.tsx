@@ -9,7 +9,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { AlertTriangle } from "lucide-react";
-import { testUi } from "@/components/test/test-design-system";
 
 interface TabSwitchWarningModalProps {
   open: boolean;
@@ -38,14 +37,14 @@ export function TabSwitchWarningModal({
       <AlertDialogContent className="max-w-md">
         <AlertDialogHeader>
           <div className="flex flex-col items-center space-y-4">
-            <div className="rounded-full border border-[hsl(var(--test-status-danger-border))] bg-[hsl(var(--test-status-danger-bg))] p-3 text-[hsl(var(--test-status-danger-text))]">
+            <div className="rounded-full border border-[hsl(var(--status-danger-border))] bg-[hsl(var(--status-danger-bg))] p-3 text-[hsl(var(--status-danger-text))]">
               <AlertTriangle className="h-8 w-8" />
             </div>
             <AlertDialogTitle className="text-xl">
-              {isAutoSubmitted 
-                ? "Test Automatically Submitted" 
-                : isLastWarning 
-                  ? "Final Warning" 
+              {isAutoSubmitted
+                ? "Test Automatically Submitted"
+                : isLastWarning
+                  ? "Final Warning"
                   : "Tab Switch Detected"}
             </AlertDialogTitle>
             <AlertDialogDescription className="text-center">
@@ -55,7 +54,7 @@ export function TabSwitchWarningModal({
                 "This is your last warning. The next tab switch will automatically submit your test."
               ) : (
                 <>
-                  Tab switch detected ({tabSwitchCount}/3). 
+                  Tab switch detected ({tabSwitchCount}/3).
                   <br />
                   You have 3 warnings. After 3/3, one more switch will auto-submit your test.
                 </>
@@ -66,7 +65,11 @@ export function TabSwitchWarningModal({
         <AlertDialogFooter className="flex justify-center items-center">
           <AlertDialogAction
             onClick={onClose}
-            className={isAutoSubmitted ? testUi.dangerButton : testUi.warningButton}
+            className={
+              isAutoSubmitted
+                ? "border-[hsl(var(--status-danger-border))] bg-[hsl(var(--status-danger-bg))] text-[hsl(var(--status-danger-text))] hover:bg-[hsl(var(--status-danger-bg))]"
+                : "border-[hsl(var(--status-warning-border))] bg-[hsl(var(--status-warning-bg))] text-[hsl(var(--status-warning-text))] hover:bg-[hsl(var(--status-warning-bg))]"
+            }
           >
             {isAutoSubmitted ? "View Results" : "I Understand"}
           </AlertDialogAction>

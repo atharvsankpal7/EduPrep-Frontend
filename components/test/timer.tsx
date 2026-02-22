@@ -4,7 +4,6 @@ import { useEffect, useRef } from "react";
 import { Clock, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDigitalDurationFromSeconds } from "@/lib/time";
-import { testUi } from "@/components/test/test-design-system";
 
 interface TimerProps {
   timeLeft: number;
@@ -51,15 +50,15 @@ export function Timer({
         className={cn(
           "flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium",
           isLowTime
-            ? "border-[hsl(var(--test-status-warning-border))] bg-[hsl(var(--test-status-warning-bg))] text-[hsl(var(--test-status-warning-text))]"
-            : "border-[hsl(var(--test-border-strong))] bg-[hsl(var(--test-surface-muted))] text-[hsl(var(--test-foreground))]"
+            ? "border-[hsl(var(--status-warning-border))] bg-[hsl(var(--status-warning-bg))] text-[hsl(var(--status-warning-text))]"
+            : "border-border bg-muted text-foreground"
         )}
       >
         <Clock className="h-4 w-4" />
-        <span className="text-xs uppercase tracking-wide text-[hsl(var(--test-muted-foreground))]">
+        <span className="text-xs uppercase tracking-wide text-muted-foreground">
           Time
         </span>
-        <span className="font-semibold text-[hsl(var(--test-foreground))]">
+        <span className="font-semibold text-foreground">
           {formatDigitalDurationFromSeconds(timeLeft)}
         </span>
       </div>
@@ -72,11 +71,11 @@ export function Timer({
         <div className="flex items-center space-x-2">
           <Clock
             className={cn(
-              "h-5 w-5 text-[hsl(var(--test-primary))]",
-              isLowTime && "text-[hsl(var(--test-status-warning-text))]"
+              "h-5 w-5 text-primary",
+              isLowTime && "text-[hsl(var(--status-warning-text))]"
             )}
           />
-          <span className="font-medium text-[hsl(var(--test-foreground))]">
+          <span className="font-medium text-foreground">
             Time Remaining
           </span>
         </div>
@@ -84,8 +83,8 @@ export function Timer({
           className={cn(
             "rounded-full border px-2.5 py-1 text-xs font-medium",
             isLowTime
-              ? "border-[hsl(var(--test-status-warning-border))] bg-[hsl(var(--test-status-warning-bg))] text-[hsl(var(--test-status-warning-text))]"
-              : "border-[hsl(var(--test-border-strong))] bg-[hsl(var(--test-surface-muted))] text-[hsl(var(--test-muted-foreground))]"
+              ? "border-[hsl(var(--status-warning-border))] bg-[hsl(var(--status-warning-bg))] text-[hsl(var(--status-warning-text))]"
+              : "border-border bg-muted text-muted-foreground"
           )}
         >
           {isLowTime ? "Ending Soon" : "In Progress"}
@@ -95,32 +94,32 @@ export function Timer({
       <div className="flex items-center justify-between">
         <div
           className={cn(
-            "text-3xl font-semibold tracking-tight text-[hsl(var(--test-foreground))]",
-            isLowTime && "text-[hsl(var(--test-status-warning-text))]"
+            "text-3xl font-semibold tracking-tight text-foreground",
+            isLowTime && "text-[hsl(var(--status-warning-text))]"
           )}
         >
           {formatDigitalDurationFromSeconds(timeLeft)}
         </div>
         {isLowTime && (
-          <AlertTriangle className="h-5 w-5 text-[hsl(var(--test-status-warning-text))]" />
+          <AlertTriangle className="h-5 w-5 text-[hsl(var(--status-warning-text))]" />
         )}
       </div>
 
-      <div className="h-2 overflow-hidden rounded-full bg-[hsl(var(--test-border))]">
+      <div className="h-2 overflow-hidden rounded-full bg-border">
         <div
           className={cn(
             "h-full rounded-full",
             isLowTime
-              ? "bg-[hsl(var(--test-status-warning-text))]"
-              : "bg-[hsl(var(--test-primary))]"
+              ? "bg-[hsl(var(--status-warning-text))]"
+              : "bg-primary"
           )}
           style={{ width: `${Math.max(0, Math.min(100, timeProgress))}%` }}
         />
       </div>
 
-      <p className={testUi.bodyText}>
+      <div className="text-sm text-muted-foreground">
         Keep a steady pace. Review marked questions before submission.
-      </p>
+      </div>
     </div>
   );
 }
