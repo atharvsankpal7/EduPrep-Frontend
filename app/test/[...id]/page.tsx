@@ -1,67 +1,89 @@
 "use client";
 
+import { useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { TestInterface } from "@/components/test/test-interface";
 import LoadingComponent from "@/components/loading";
-import { fetchTestById, submitTestById } from "@/lib/api/services/test.api";
+import { queryKeys } from "@/lib/api/query-keys";
 import {
+  buildSubmissionPayload,
+  transformTestSections,
+} from "@/lib/api/transformers/test.transformer";
+import { fetchTestById, submitTestById } from "@/lib/api/services/test.api";
+import type { AutoSubmissionMeta } from "@/hooks/use-test-engine";
+import type {
   TestPageProps,
   TestResponse,
-  TestSection,
 } from "@/types/global/interface/test.apiInterface";
 
-export default function TestPage({ params }: TestPageProps) {
-  const testId = params.id;
-  const router = useRouter();
+const TEST_STALE_TIME = 2 * 60 * 1000;
+const TEST_GC_TIME = 30 * 60 * 1000;
 
-  const { data: testData, error, isLoading } = useQuery<TestResponse>({
-    queryKey: ["test", testId],
+export default function TestPage({ params }: TestPageProps) {
+  const rawId = Array.isArray(params.id) ? params.id[0] : params.id;
+  const testId = (rawId || "").trim();
+  const router = useRouter();
+  const isValidTestId = testId.length > 0;
+
+  const {
+    data: testData,
+    error,
+    isLoading,
+  } = useQuery<TestResponse>({
+    queryKey: queryKeys.tests.detail(isValidTestId ? testId : "pending"),
     queryFn: () => fetchTestById(testId),
+    enabled: isValidTestId,
+    staleTime: TEST_STALE_TIME,
+    gcTime: TEST_GC_TIME,
   });
 
-  const handleTestComplete = async (answers: Record<number, number>, timeSpent: number) => {
-    try {
-      if (!testData) return;
+  const handleTestComplete = useCallback(
+    async (
+      answers: Record<number, number>,
+      timeSpent: number,
+      autoSubmission: AutoSubmissionMeta
+    ) => {
+      try {
+        if (!testData) {
+          return;
+        }
 
-      const selectedAnswers: { questionId: string; selectedOption: number; sectionName: string }[] = [];
-      let globalQuestionIndex = 0;
+        const payload = buildSubmissionPayload(
+          testData,
+          answers,
+          timeSpent,
+          autoSubmission
+        );
+        const response = await submitTestById(testId, payload);
+        const testResultId =
+          response?.data?.testResult?.id ??
+          response?.data?.testResult?._id;
 
-      testData.test.sections.forEach((section) => {
-        section.questions.forEach((question) => {
-          const selectedOption = answers[globalQuestionIndex];
-          const questionId = question.id ?? question._id ?? "";
+        if (!testResultId) {
+          throw new Error("Missing test result id in response");
+        }
 
-          selectedAnswers.push({
-            questionId,
-            selectedOption: selectedOption !== undefined ? selectedOption + 1 : -1,
-            sectionName: section.sectionName,
-          });
-
-          globalQuestionIndex++;
-        });
-      });
-
-      const response = await submitTestById(testId, {
-        selectedAnswers,
-        timeTaken: timeSpent,
-        autoSubmission: {
-          isAutoSubmitted: false,
-          tabSwitches: 0,
-        },
-      });
-
-      const testResultId =
-        response?.data?.testResult?.id ??
-        response?.data?.testResult?._id;
-      if (!testResultId) {
-        throw new Error("Missing test result id in response");
+        router.push(`/result/${testResultId}`);
+      } catch (submissionError) {
+        console.error("Failed to submit test:", submissionError);
       }
-      router.push(`/result/${testResultId}`);
-    } catch (error) {
-      console.error("Failed to submit test:", error);
-    }
-  };
+    },
+    [router, testData, testId]
+  );
+
+  const sections = useMemo(
+    () => (testData ? transformTestSections(testData) : []),
+    [testData]
+  );
+
+  if (!isValidTestId) {
+    return (
+      <div className="container py-8 text-center text-destructive">
+        Invalid test id
+      </div>
+    );
+  }
 
   if (isLoading) {
     return <LoadingComponent />;
@@ -70,26 +92,20 @@ export default function TestPage({ params }: TestPageProps) {
   if (error) {
     return (
       <div className="container py-8 text-center text-destructive">
-        {error instanceof Error ? error.message : "Failed to load test. Please try again later."}
+        {error instanceof Error
+          ? error.message
+          : "Failed to load test. Please try again later."}
       </div>
     );
   }
 
   if (!testData) {
-    return <div className="container py-8 text-center">No test data available</div>;
+    return (
+      <div className="container py-8 text-center">
+        No test data available
+      </div>
+    );
   }
-
-  // Memoize sections transformation to avoid re-computing on every render
-  const sections: TestSection[] = testData.test.sections.map((section) => ({
-    name: section.sectionName,
-    duration: section.sectionDuration,
-    questions: section.questions.map((q) => ({
-      question: q.questionText,
-      options: q.options,
-      correctAnswer: q.answer,
-      id: q.id ?? q._id ?? "",
-    })),
-  }));
 
   return (
     <TestInterface
@@ -100,4 +116,3 @@ export default function TestPage({ params }: TestPageProps) {
     />
   );
 }
-

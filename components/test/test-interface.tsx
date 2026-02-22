@@ -1,32 +1,19 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Timer } from "@/components/test/timer";
 import { QuestionPanel } from "@/components/test/question-panel";
 import { TestHeader } from "@/components/test/test-header";
 import { QuestionNavigation } from "@/components/test/question-navigation";
 import { TabSwitchWarningModal } from "@/components/test/tab-switch-warning-modal";
 import { useToast } from "@/components/ui/use-toast";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { AlertTriangle } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { WarningModal } from "@/components/test/warning-modal";
 import { PageWrapper } from "@/components/common/page-wrapper";
 import { Surface } from "@/components/common/surface";
-import { Typography } from "@/components/common/typography";
-import { StickyBar } from "@/components/common/sticky-bar";
-import type { QuestionStatus } from "@/components/test/question-status";
+import { useTestEngine, type AutoSubmissionMeta } from "@/hooks/use-test-engine";
+import { useProctoring } from "@/hooks/use-proctoring";
+import { SectionInfoBar } from "@/components/test/section-info-bar";
+import { TestFooter } from "@/components/test/test-footer";
+import { SectionChangeDialog } from "@/components/test/section-change-dialog";
+import type { TestSection } from "@/types/global/interface/test.apiInterface";
 
 export interface Question {
   question: string;
@@ -35,17 +22,15 @@ export interface Question {
   id?: string;
 }
 
-interface Section {
-  name: string;
-  duration: number;
-  questions: Question[];
-}
-
 export interface TestInterfaceProps {
   testId: string;
   testName: string;
-  sections: Section[];
-  onComplete: (answers: Record<number, number>, timeSpent: number) => void;
+  sections: TestSection[];
+  onComplete: (
+    answers: Record<number, number>,
+    timeSpent: number,
+    autoSubmission: AutoSubmissionMeta
+  ) => void;
 }
 
 export function TestInterface({
@@ -54,341 +39,90 @@ export function TestInterface({
   sections,
   onComplete,
 }: TestInterfaceProps) {
-  const [currentSection, setCurrentSection] = useState(0);
-  const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [answers, setAnswers] = useState<Record<number, number>>({});
-  const [visitedQuestions, setVisitedQuestions] = useState<Record<number, boolean>>(
-    {}
-  );
-  const [markedForReview, setMarkedForReview] = useState<
-    Record<number, boolean>
-  >({});
-  const [timeLeft, setTimeLeft] = useState(sections[0].duration * 60);
-  const [testStarted, setTestStarted] = useState(false);
-  const [sectionCompleted, setSectionCompleted] = useState<boolean[]>(
-    new Array(sections.length).fill(false)
-  );
-  const [totalTimeSpent, setTotalTimeSpent] = useState(0);
-  const [sessionTabSwitchCount, setSessionTabSwitchCount] = useState(0);
-  const [warningModalOpen, setWarningModalOpen] = useState(false);
-  const [isLastWarning, setIsLastWarning] = useState(false);
-  const [isAutoSubmitted, setIsAutoSubmitted] = useState(false);
-  const hasAutoSubmittedRef = useRef(false);
-  const handleSubmitRef = useRef<() => void>(() => undefined);
   const { toast } = useToast();
-
-  // Helper to calculate start index, used synchronously
-  const getSectionStartIndex = (sectionIndex: number) =>
-    sections
-      .slice(0, sectionIndex)
-      .reduce((total, section) => total + section.questions.length, 0);
-
-  const currentSectionStartIndex = getSectionStartIndex(currentSection);
-  const currentGlobalQuestionIndex = currentSectionStartIndex + currentQuestion;
-
-  useEffect(() => {
-    const enterFullscreen = async () => {
-      try {
-        const element = document.documentElement;
-        if (element.requestFullscreen) {
-          await element.requestFullscreen();
-        } else if ((element as any).webkitRequestFullscreen) {
-          await (element as any).webkitRequestFullscreen();
-        } else if ((element as any).msRequestFullscreen) {
-          await (element as any).msRequestFullscreen();
-        }
-      } catch (error) {
-        console.error("Failed to enter fullscreen:", error);
-      }
-    };
-
-    if (testStarted) {
-      enterFullscreen();
-      document.body.classList.add("test-mode");
-    }
-
-    return () => {
-      if (document.exitFullscreen && document.fullscreenElement) {
-        document.exitFullscreen();
-      }
-      document.body.classList.remove("test-mode");
-    };
-  }, [testStarted]);
-
-  useEffect(() => {
-    handleSubmitRef.current = () => {
-      const finalTimeSpent =
-        totalTimeSpent + (sections[currentSection].duration * 60 - timeLeft);
-      onComplete(answers, finalTimeSpent);
-    };
-  }, [answers, currentSection, onComplete, sections, timeLeft, totalTimeSpent]);
-
-  const handleSubmit = () => {
-    handleSubmitRef.current();
-  };
-
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.hidden && testStarted && !hasAutoSubmittedRef.current) {
-        setSessionTabSwitchCount((previous) => previous + 1);
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () =>
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-  }, [testStarted]);
-
-  useEffect(() => {
-    if (!testStarted || sessionTabSwitchCount === 0) {
-      return;
-    }
-
-    if (sessionTabSwitchCount <= 2) {
-      setWarningModalOpen(true);
-      setIsLastWarning(false);
-      setIsAutoSubmitted(false);
-      return;
-    }
-
-    if (sessionTabSwitchCount === 3) {
-      setWarningModalOpen(true);
-      setIsLastWarning(true);
-      setIsAutoSubmitted(false);
-      return;
-    }
-
-    if (!hasAutoSubmittedRef.current) {
-      hasAutoSubmittedRef.current = true;
-      setWarningModalOpen(true);
-      setIsLastWarning(false);
-      setIsAutoSubmitted(true);
-      handleSubmitRef.current();
-    }
-  }, [sessionTabSwitchCount, testStarted]);
-
-  useEffect(() => {
-    const preventCopyPaste = (event: ClipboardEvent) => {
-      event.preventDefault();
-      toast({
-        title: "Action not allowed",
-        description: "Copy and paste are disabled during the test",
-        variant: "destructive",
+  const engine = useTestEngine({ sections, onComplete });
+  const proctoring = useProctoring({
+    enabled: engine.testStarted,
+    onAutoSubmit: ({ tabSwitchCount }) => {
+      engine.submitTest({
+        isAutoSubmitted: true,
+        tabSwitches: tabSwitchCount,
       });
-    };
+    },
+    onViolation: (type) => {
+      if (type === "clipboard") {
+        toast({
+          title: "Action not allowed",
+          description: "Copy and paste are disabled during the test",
+          variant: "destructive",
+        });
+      }
+    },
+  });
 
-    if (testStarted) {
-      document.addEventListener("copy", preventCopyPaste);
-      document.addEventListener("paste", preventCopyPaste);
-      document.addEventListener("cut", preventCopyPaste);
-    }
+  const currentSectionName = sections[engine.currentSection]?.name ?? "Section";
+  const currentSectionDuration = (sections[engine.currentSection]?.duration ?? 0) * 60;
 
-    return () => {
-      document.removeEventListener("copy", preventCopyPaste);
-      document.removeEventListener("paste", preventCopyPaste);
-      document.removeEventListener("cut", preventCopyPaste);
-    };
-  }, [testStarted, toast]);
-
-  useEffect(() => {
-    const preventContextMenu = (event: MouseEvent) => {
-      event.preventDefault();
-    };
-
-    if (testStarted) {
-      document.addEventListener("contextmenu", preventContextMenu);
-    }
-
-    return () => document.removeEventListener("contextmenu", preventContextMenu);
-  }, [testStarted]);
-
-  useEffect(() => {
-    if (!testStarted) {
+  const handleSectionChangeConfirm = () => {
+    const nextSectionIndex = engine.confirmNextSection();
+    if (nextSectionIndex === null) {
       return;
     }
 
-    setVisitedQuestions((previous) =>
-      previous[currentGlobalQuestionIndex]
-        ? previous
-        : { ...previous, [currentGlobalQuestionIndex]: true }
-    );
-  }, [currentGlobalQuestionIndex, testStarted]);
-
-  // Memoized to prevent re-creation on every render (especially timer ticks)
-  const getQuestionStatus = useCallback(
-    (globalQuestionIndex: number): QuestionStatus => {
-      if (markedForReview[globalQuestionIndex]) {
-        return "markedForReview";
-      }
-
-      if (answers[globalQuestionIndex] !== undefined) {
-        return "answered";
-      }
-
-      if (visitedQuestions[globalQuestionIndex]) {
-        return "visitedUnanswered";
-      }
-
-      return "notVisited";
-    },
-    [answers, markedForReview, visitedQuestions]
-  );
-
-  // Memoized handlers to prevent child component re-renders
-  const handleAnswer = useCallback(
-    (answerId: number) => {
-      setAnswers((previous) => ({
-        ...previous,
-        [currentGlobalQuestionIndex]: answerId,
-      }));
-    },
-    [currentGlobalQuestionIndex]
-  );
-
-  const handleToggleReview = useCallback(() => {
-    setMarkedForReview((previous) => ({
-      ...previous,
-      [currentGlobalQuestionIndex]: !previous[currentGlobalQuestionIndex],
-    }));
-  }, [currentGlobalQuestionIndex]);
-
-  const handleNextSection = () => {
-    if (currentSection < sections.length - 1) {
-      const updatedSectionCompleted = [...sectionCompleted];
-      updatedSectionCompleted[currentSection] = true;
-      setSectionCompleted(updatedSectionCompleted);
-
-      const sectionDialogTrigger = document.getElementById(
-        "section-warning-dialog"
-      ) as HTMLButtonElement | null;
-
-      sectionDialogTrigger?.click();
-    }
-  };
-
-  const confirmNextSection = () => {
-    if (currentSection < sections.length - 1) {
-      setTotalTimeSpent(
-        (previous) =>
-          previous + (sections[currentSection].duration * 60 - timeLeft)
-      );
-
-      const nextSection = currentSection + 1;
-      setCurrentSection(nextSection);
-      setCurrentQuestion(0);
-      setTimeLeft(sections[nextSection].duration * 60);
+    const nextSectionName = sections[nextSectionIndex]?.name;
+    if (nextSectionName) {
       toast({
         title: "New Section Started",
-        description: `You are now in ${sections[nextSection].name}`,
+        description: `You are now in ${nextSectionName}`,
       });
     }
   };
 
-  const handleTimeUp = () => {
-    if (currentSection < sections.length - 1) {
-      handleNextSection();
-      return;
-    }
-
-    handleSubmit();
+  const handleManualSubmit = () => {
+    engine.submitTest({
+      isAutoSubmitted: false,
+      tabSwitches: proctoring.tabSwitchCount,
+    });
   };
 
-  const handleStartTest = () => {
-    hasAutoSubmittedRef.current = false;
-    setSessionTabSwitchCount(0);
-    setWarningModalOpen(false);
-    setIsLastWarning(false);
-    setIsAutoSubmitted(false);
-    setTestStarted(true);
-  };
-
-  const currentSectionQuestions = sections[currentSection].questions;
-  const currentQuestionData = currentSectionQuestions[currentQuestion];
-
-  // Memoized array to prevent QuestionNavigation re-renders on timer updates
-  const questionStatuses = useMemo(
-    () =>
-      currentSectionQuestions.map((_, index) =>
-        getQuestionStatus(currentSectionStartIndex + index)
-      ),
-    [currentSectionQuestions, currentSectionStartIndex, getQuestionStatus]
-  );
-
-  const handleQuestionSelect = useCallback((questionNumber: number) => {
-    setCurrentQuestion(questionNumber - 1);
-  }, []);
-
-  if (!testStarted) {
-    return <WarningModal onStart={handleStartTest} />;
+  if (!engine.testStarted) {
+    return <WarningModal onStart={engine.startTest} />;
   }
 
   return (
     <div className="min-h-screen bg-background py-2 lg:py-8">
-      <TestHeader testName={`${testName} - ${sections[currentSection].name}`} />
+      <TestHeader testName={`${testName} - ${currentSectionName}`} />
 
       <PageWrapper>
-        <Surface className="mb-6 p-4 lg:p-5">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-            <div className="space-y-1">
-              <Typography variant="sectionTitle">
-                Section: {sections[currentSection].name}
-              </Typography>
-              <Typography variant="body">
-                Attempt questions, flag uncertain ones, and review before
-                submission.
-              </Typography>
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <Timer
-                variant="inline"
-                timeLeft={timeLeft}
-                totalTime={sections[currentSection].duration * 60}
-                setTimeLeft={setTimeLeft}
-                onTimeUp={handleTimeUp}
-              />
-              {currentSection < sections.length - 1 && (
-                <Button
-                  onClick={handleNextSection}
-                  variant="outline"
-                >
-                  Next Section
-                </Button>
-              )}
-            </div>
-          </div>
-
-          <div className="mt-4 flex flex-wrap gap-2">
-            {sections.map((section, index) => (
-              <span
-                key={section.name}
-                className={cn(
-                  "rounded-full border px-3 py-1.5 text-sm font-medium",
-                  index === currentSection
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border bg-muted text-muted-foreground",
-                  sectionCompleted[index] && "opacity-65"
-                )}
-              >
-                {section.name}
-              </span>
-            ))}
-          </div>
-        </Surface>
+        <SectionInfoBar
+          sectionName={currentSectionName}
+          sections={sections}
+          currentSectionIndex={engine.currentSection}
+          sectionCompleted={engine.sectionCompleted}
+          totalTime={currentSectionDuration}
+          onTimeUp={() =>
+            engine.handleTimeUp({
+              isAutoSubmitted: false,
+              tabSwitches: proctoring.tabSwitchCount,
+            })
+          }
+          onTimeChange={engine.updateTimeLeft}
+          showNextSection={!engine.isLastSection}
+          onNextSection={engine.requestNextSection}
+        />
 
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
           <div className="lg:col-span-9">
-            <div key={currentGlobalQuestionIndex}>
+            <div key={engine.currentGlobalQuestionIndex}>
               <Surface className="p-5 lg:p-6">
                 <QuestionPanel
-                  questionNumber={currentQuestion + 1}
-                  questionText={currentQuestionData.question}
-                  options={currentQuestionData.options}
-                  onAnswer={handleAnswer}
-                  selectedAnswer={answers[currentGlobalQuestionIndex]}
-                  isMarkedForReview={
-                    Boolean(markedForReview[currentGlobalQuestionIndex])
-                  }
-                  onToggleReview={handleToggleReview}
+                  questionNumber={engine.currentQuestion + 1}
+                  questionText={engine.currentQuestionData.question}
+                  options={engine.currentQuestionData.options}
+                  onAnswer={engine.selectAnswer}
+                  selectedAnswer={engine.selectedAnswer}
+                  isMarkedForReview={engine.isCurrentMarkedForReview}
+                  onToggleReview={engine.toggleReview}
                 />
               </Surface>
             </div>
@@ -397,115 +131,43 @@ export function TestInterface({
           <div className="space-y-4 lg:col-span-3">
             <Surface className="p-4">
               <QuestionNavigation
-                questionStatuses={questionStatuses}
-                currentQuestion={currentQuestion + 1}
-                onQuestionSelect={handleQuestionSelect}
+                questionStatuses={engine.questionStatuses}
+                currentQuestion={engine.currentQuestion + 1}
+                onQuestionSelect={engine.navigateToQuestion}
               />
             </Surface>
           </div>
         </div>
 
-        <StickyBar position="bottom">
-          <div className="mx-auto flex w-full max-w-[1380px] items-center justify-between gap-3 px-1 lg:px-6">
-            <Button
-              onClick={() =>
-                setCurrentQuestion((previous) => Math.max(0, previous - 1))
-              }
-              disabled={currentQuestion === 0}
-              variant="outline"
-              className="min-w-[110px]"
-            >
-              Previous
-            </Button>
-
-            <span className="hidden sm:block text-sm text-muted-foreground">
-              Question {currentQuestion + 1} of {currentSectionQuestions.length}
-            </span>
-
-            {currentQuestion === currentSectionQuestions.length - 1 ? (
-              currentSection === sections.length - 1 ? (
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button className="min-w-[110px]">
-                      Submit Test
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Submit Test?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Are you sure you want to submit the test? This action
-                        cannot be undone.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>
-                        Cancel
-                      </AlertDialogCancel>
-                      <AlertDialogAction onClick={handleSubmit}>
-                        Submit
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              ) : (
-                <Button onClick={handleNextSection}>
-                  Next Section
-                </Button>
-              )
-            ) : (
-              <Button
-                onClick={() =>
-                  setCurrentQuestion((previous) =>
-                    Math.min(currentSectionQuestions.length - 1, previous + 1)
-                  )
-                }
-                className="min-w-[110px]"
-              >
-                Next
-              </Button>
-            )}
-          </div>
-        </StickyBar>
+        <TestFooter
+          currentQuestion={engine.currentQuestion}
+          totalQuestions={engine.currentSectionQuestions.length}
+          isFirstQuestion={engine.isFirstQuestion}
+          isLastQuestionInSection={engine.isLastQuestionInSection}
+          isLastSection={engine.isLastSection}
+          onPrevious={engine.previousQuestion}
+          onNext={engine.nextQuestion}
+          onNextSection={engine.requestNextSection}
+          onSubmit={handleManualSubmit}
+        />
       </PageWrapper>
 
-      <AlertDialog>
-        <AlertDialogTrigger id="section-warning-dialog" className="hidden" />
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-[hsl(var(--status-warning-text))]" />
-              Warning: Section Change
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              You are about to move to the next section. Please note:
-              <ul className="mt-2 list-inside list-disc space-y-1">
-                <li>You cannot return to the previous section once you proceed</li>
-                <li>
-                  All unanswered questions in the current section will be marked
-                  as not attempted
-                </li>
-                <li>Make sure you have reviewed all your answers</li>
-              </ul>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>
-              Stay in Current Section
-            </AlertDialogCancel>
-            <AlertDialogAction onClick={confirmNextSection}>
-              Proceed to Next Section
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <SectionChangeDialog
+        open={engine.sectionChangeRequested}
+        onOpenChange={(open) => {
+          if (!open) {
+            engine.cancelSectionChange();
+          }
+        }}
+        onConfirm={handleSectionChangeConfirm}
+      />
 
       <TabSwitchWarningModal
-        open={warningModalOpen}
-        onClose={() => setWarningModalOpen(false)}
-        tabSwitchCount={sessionTabSwitchCount}
-        isLastWarning={isLastWarning}
-        isAutoSubmitted={isAutoSubmitted}
+        open={proctoring.warningModalOpen}
+        onClose={proctoring.dismissWarning}
+        tabSwitchCount={proctoring.tabSwitchCount}
+        isLastWarning={proctoring.isLastWarning}
+        isAutoSubmitted={proctoring.isAutoSubmitted}
       />
     </div>
   );

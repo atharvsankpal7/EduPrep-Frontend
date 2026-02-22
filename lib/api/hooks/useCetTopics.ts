@@ -1,12 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetchCetTopics } from "@/lib/api/services/topic.api";
-
-// ---- Hook ----
+import { topicKeys } from "@/lib/api/query-keys";
 
 export const useCetTopics = () => {
   return useQuery({
-    queryKey: ["cetTopics"],
+    queryKey: topicKeys.cet(),
     queryFn: fetchCetTopics,
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes — topics don't change often
+    staleTime: 5 * 60 * 1000,
   });
 };
