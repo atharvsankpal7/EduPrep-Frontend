@@ -63,7 +63,7 @@ export function TestInterface({
   const [markedForReview, setMarkedForReview] = useState<
     Record<number, boolean>
   >({});
-  const [timeLeft, setTimeLeft] = useState(sections[0].duration * 60);
+  const timeLeftRef = useRef(sections[0].duration * 60);
   const [testStarted, setTestStarted] = useState(false);
   const [sectionCompleted, setSectionCompleted] = useState<boolean[]>(
     new Array(sections.length).fill(false)
@@ -118,10 +118,10 @@ export function TestInterface({
   useEffect(() => {
     handleSubmitRef.current = () => {
       const finalTimeSpent =
-        totalTimeSpent + (sections[currentSection].duration * 60 - timeLeft);
+        totalTimeSpent + (sections[currentSection].duration * 60 - timeLeftRef.current);
       onComplete(answers, finalTimeSpent);
     };
-  }, [answers, currentSection, onComplete, sections, timeLeft, totalTimeSpent]);
+  }, [answers, currentSection, onComplete, sections, totalTimeSpent]);
 
   const handleSubmit = () => {
     handleSubmitRef.current();
@@ -271,13 +271,13 @@ export function TestInterface({
     if (currentSection < sections.length - 1) {
       setTotalTimeSpent(
         (previous) =>
-          previous + (sections[currentSection].duration * 60 - timeLeft)
+          previous + (sections[currentSection].duration * 60 - timeLeftRef.current)
       );
 
       const nextSection = currentSection + 1;
       setCurrentSection(nextSection);
       setCurrentQuestion(0);
-      setTimeLeft(sections[nextSection].duration * 60);
+      timeLeftRef.current = sections[nextSection].duration * 60;
       toast({
         title: "New Section Started",
         description: `You are now in ${sections[nextSection].name}`,
@@ -319,6 +319,10 @@ export function TestInterface({
     setCurrentQuestion(questionNumber - 1);
   }, []);
 
+  const handleTimeUpdate = useCallback((newTime: number) => {
+    timeLeftRef.current = newTime;
+  }, []);
+
   if (!testStarted) {
     return <WarningModal onStart={handleStartTest} />;
   }
@@ -341,10 +345,11 @@ export function TestInterface({
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <Timer
+                key={currentSection}
                 variant="inline"
-                timeLeft={timeLeft}
+                initialTime={sections[currentSection].duration * 60}
                 totalTime={sections[currentSection].duration * 60}
-                setTimeLeft={setTimeLeft}
+                onTimeUpdate={handleTimeUpdate}
                 onTimeUp={handleTimeUp}
               />
               {currentSection < sections.length - 1 && (

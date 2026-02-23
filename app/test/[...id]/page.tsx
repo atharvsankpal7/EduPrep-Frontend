@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { TestInterface } from "@/components/test/test-interface";
 import LoadingComponent from "@/components/loading";
@@ -63,6 +64,22 @@ export default function TestPage({ params }: TestPageProps) {
     }
   };
 
+  // Memoize sections transformation to avoid re-computing on every render
+  const sections: TestSection[] = useMemo(
+    () =>
+      testData?.test.sections.map((section) => ({
+        name: section.sectionName,
+        duration: section.sectionDuration,
+        questions: section.questions.map((q) => ({
+          question: q.questionText,
+          options: q.options,
+          correctAnswer: q.answer,
+          id: q.id ?? q._id ?? "",
+        })),
+      })) ?? [],
+    [testData]
+  );
+
   if (isLoading) {
     return <LoadingComponent />;
   }
@@ -78,18 +95,6 @@ export default function TestPage({ params }: TestPageProps) {
   if (!testData) {
     return <div className="container py-8 text-center">No test data available</div>;
   }
-
-  // Memoize sections transformation to avoid re-computing on every render
-  const sections: TestSection[] = testData.test.sections.map((section) => ({
-    name: section.sectionName,
-    duration: section.sectionDuration,
-    questions: section.questions.map((q) => ({
-      question: q.questionText,
-      options: q.options,
-      correctAnswer: q.answer,
-      id: q.id ?? q._id ?? "",
-    })),
-  }));
 
   return (
     <TestInterface

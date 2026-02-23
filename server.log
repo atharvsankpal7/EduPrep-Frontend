@@ -1,0 +1,24 @@
+
+> mock-test-platform@0.1.0 dev /app
+> next dev
+
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:3000
+  - Environments: .env
+
+ ✓ Starting...
+ ✓ Ready in 1785ms
+ ○ Compiling /test/[...id] ...
+Browserslist: browsers data (caniuse-lite) is 14 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+ ✓ Compiled /test/[...id] in 9.1s (1094 modules)
+ ✓ Compiled in 1027ms (525 modules)
+ GET /test/123 200 in 11067ms
+ ○ Compiling /sign-in ...
+ ✓ Compiled /sign-in in 9.2s (1096 modules)
+ ✓ Compiled in 541ms (536 modules)
+ ○ Compiling / ...
+ ✓ Compiled / in 533ms (1102 modules)
+ GET / 200 in 718ms
+ ✓ Compiled in 6.3s (1817 modules)

@@ -1,38 +1,57 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Clock, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDigitalDurationFromSeconds } from "@/lib/time";
 import { testUi } from "@/components/test/test-design-system";
 
 interface TimerProps {
-  timeLeft: number;
+  initialTime: number;
   totalTime: number;
-  setTimeLeft: React.Dispatch<React.SetStateAction<number>>;
+  onTimeUpdate?: (timeLeft: number) => void;
   onTimeUp: () => void;
   variant?: "panel" | "inline";
 }
 
 export function Timer({
-  timeLeft,
+  initialTime,
   totalTime,
-  setTimeLeft,
+  onTimeUpdate,
   onTimeUp,
   variant = "panel",
 }: TimerProps) {
+  const [timeLeft, setTimeLeft] = useState(initialTime);
   const onTimeUpRef = useRef(onTimeUp);
+  const onTimeUpdateRef = useRef(onTimeUpdate);
 
   useEffect(() => {
     onTimeUpRef.current = onTimeUp;
   }, [onTimeUp]);
 
   useEffect(() => {
+    onTimeUpdateRef.current = onTimeUpdate;
+  }, [onTimeUpdate]);
+
+  // Reset timer when initialTime changes (e.g. section change)
+  useEffect(() => {
+    setTimeLeft(initialTime);
+  }, [initialTime]);
+
+  // Report time updates to parent
+  useEffect(() => {
+    onTimeUpdateRef.current?.(timeLeft);
+  }, [timeLeft]);
+
+  useEffect(() => {
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
-          onTimeUpRef.current();
+          // Only trigger onTimeUp once when reaching zero
+          if (prev === 1) {
+             onTimeUpRef.current();
+          }
           return 0;
         }
         return prev - 1;
@@ -40,7 +59,7 @@ export function Timer({
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [setTimeLeft]);
+  }, []); // Empty dependency array ensures interval is set once per mount (or reset by key)
 
   const isLowTime = timeLeft < 300;
   const timeProgress = totalTime > 0 ? (timeLeft / totalTime) * 100 : 0;
