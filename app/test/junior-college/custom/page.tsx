@@ -54,7 +54,7 @@ export default function CustomTestPage() {
     router.back();
   };
 
-  if (loading || isPending) {
+  if (loading) {
     return <LoadingComponent />;
   }
 
@@ -68,8 +68,9 @@ export default function CustomTestPage() {
           duration={testConfig.duration}
           questionCount={testConfig.questionCount}
           onStart={startTest}
-          startButtonLabel={isPending ? "Creating Test..." : "Start Test"}
+          startButtonLabel={isPending ? "Starting Test..." : "Start Test"}
           isStartDisabled={isPending}
+          isStartLoading={isPending}
           requirements={[
             "Working webcam and microphone",
             "Stable internet connection",

@@ -24,8 +24,9 @@ export default function GateTestPage() {
         duration={180}
         questionCount={65}
         onStart={handleStart}
-        startButtonLabel={isPending ? "Creating Test..." : "Start Test"}
+        startButtonLabel={isPending ? "Starting Test..." : "Start Test"}
         isStartDisabled={isPending}
+        isStartLoading={isPending}
         requirements={[
           "Stable internet connection",
           "Fullscreen capable browser",

@@ -94,8 +94,9 @@ export default function CompanyTestPage() {
           duration={selectedCompany.duration}
           questionCount={selectedCompany.questionCount}
           onStart={() => handleStartTest(selectedCompany.id)}
-          startButtonLabel={isPending ? "Creating Test..." : "Start Test"}
+          startButtonLabel={isPending ? "Starting Test..." : "Start Test"}
           isStartDisabled={isPending}
+          isStartLoading={isPending}
           requirements={[
             "Stable internet connection",
             "Latest browser version",

@@ -290,7 +290,7 @@ export function TestEngineShell({
         onContextMenuViolation={handleContextMenuViolation}
       />
 
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 py-4 md:py-6">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 py-4 pb-28 md:py-6 md:pb-32">
         <header className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4 md:flex-row md:items-center md:justify-between">
           <div className="space-y-1">
             <h1 className="text-xl font-semibold text-balance">{test.testName}</h1>

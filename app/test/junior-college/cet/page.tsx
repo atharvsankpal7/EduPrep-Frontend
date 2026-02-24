@@ -3,7 +3,6 @@
 import { TestInfoDisplay } from "@/components/test-engine/pre-test/test-info-display";
 import { ErrorMessageDialog } from "@/components/test-engine/pre-test/error-message-dialog";
 import { EducationLevel } from "@/types/global/interface/test.apiInterface";
-import LoadingComponent from "@/components/loading";
 import { useCreateAndNavigate } from "../use-create-and-navigate";
 
 export default function CetTestPage() {
@@ -17,10 +16,6 @@ export default function CetTestPage() {
     });
   };
 
-  if (isPending) {
-    return <LoadingComponent />;
-  }
-
   return (
     <>
       <ErrorMessageDialog open={hasError} onClose={clearError} />
@@ -30,8 +25,9 @@ export default function CetTestPage() {
         duration={180}
         questionCount={100}
         onStart={startTest}
-        startButtonLabel={isPending ? "Creating Test..." : "Start Test"}
+        startButtonLabel={isPending ? "Starting Test..." : "Start Test"}
         isStartDisabled={isPending}
+        isStartLoading={isPending}
         requirements={[
           "Enough time for the test",
           "Stable internet connection",

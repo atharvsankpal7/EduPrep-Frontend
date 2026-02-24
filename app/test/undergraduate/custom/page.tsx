@@ -53,8 +53,9 @@ export default function CustomTestPage() {
           duration={testConfig.duration}
           questionCount={testConfig.questionCount}
           onStart={startTest}
-          startButtonLabel={isPending ? "Creating Test..." : "Start Test"}
+          startButtonLabel={isPending ? "Starting Test..." : "Start Test"}
           isStartDisabled={isPending}
+          isStartLoading={isPending}
           requirements={[
             "Working webcam and microphone",
             "Stable internet connection",
@@ -62,14 +63,6 @@ export default function CustomTestPage() {
           ]}
         />
       </>
-    );
-  }
-
-  if (isPending) {
-    return (
-      <div className="container py-8 text-center text-muted-foreground">
-        Creating your test...
-      </div>
     );
   }
 

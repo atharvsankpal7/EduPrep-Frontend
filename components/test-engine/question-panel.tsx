@@ -27,6 +27,8 @@ function QuestionPanelComponent({
   onSelectOption,
 }: QuestionPanelProps) {
   const questionTextMode = getRenderableContent(question.questionText).kind;
+  const selectedValue =
+    selectedOption === undefined ? "" : selectedOption.toString();
 
   return (
     <Card className="border-border">
@@ -57,7 +59,8 @@ function QuestionPanelComponent({
         ) : null}
 
         <RadioGroup
-          value={selectedOption === undefined ? undefined : selectedOption.toString()}
+          key={question.id}
+          value={selectedValue}
           onValueChange={(value) => onSelectOption(Number(value))}
           className="space-y-3"
         >

@@ -1,6 +1,6 @@
 "use client";
 
-import { Clock3, ListChecks } from "lucide-react";
+import { Clock3, ListChecks, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -13,6 +13,7 @@ interface TestInfoDisplayProps {
   onStart: () => void;
   startButtonLabel?: string;
   isStartDisabled?: boolean;
+  isStartLoading?: boolean;
 }
 
 export function TestInfoDisplay({
@@ -24,6 +25,7 @@ export function TestInfoDisplay({
   onStart,
   startButtonLabel = "Start Test",
   isStartDisabled = false,
+  isStartLoading = false,
 }: TestInfoDisplayProps) {
   return (
     <div className="container py-8">
@@ -60,7 +62,14 @@ export function TestInfoDisplay({
               className="w-full"
               disabled={isStartDisabled}
             >
-              {startButtonLabel}
+              {isStartLoading ? (
+                <span className="inline-flex items-center gap-2">
+                  <Loader2 className="size-4 animate-spin" />
+                  {startButtonLabel}
+                </span>
+              ) : (
+                startButtonLabel
+              )}
             </Button>
           </CardContent>
         </Card>

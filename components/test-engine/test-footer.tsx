@@ -33,7 +33,7 @@ export function TestFooter({
   onSubmit,
 }: TestFooterProps) {
   return (
-    <div className="sticky bottom-0 z-30 border-t border-border bg-background/95 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/90">
+    <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-background/95 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/90">
       <div className="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-between gap-3 pb-[env(safe-area-inset-bottom)]">
         <div className="flex items-center gap-3">
           <Badge variant="outline" className="tabular-nums">
