@@ -116,6 +116,7 @@ export interface TestResponse {
         explanation: string;
       }[];
     }[];
+    proctoringEnabled?: boolean;
   };
 }
 
@@ -149,6 +150,7 @@ export interface EngineTest {
   testName: string;
   totalDuration: number;
   totalQuestions: number;
+  proctoringEnabled: boolean;
   sections: EngineSection[];
 }
 

@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AlertTriangle, Clock3 } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 interface SectionTimerProps {
   sectionKey: string;
@@ -12,14 +11,30 @@ interface SectionTimerProps {
   onExpire: () => void;
 }
 
-const LOW_TIME_WARNING_SECONDS = 300;
+const WARNING_SECONDS = 600; // 10 min
+const CRITICAL_SECONDS = 300; // 5 min
 
 const formatTime = (seconds: number) => {
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = seconds % 60;
-  return `${minutes.toString().padStart(2, "0")}:${remainingSeconds
+  const hrs = Math.floor(seconds / 3600);
+  const mins = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+
+  if (hrs > 0) {
+    return `${hrs.toString().padStart(2, "0")}:${mins
+      .toString()
+      .padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+  }
+
+  return `${mins.toString().padStart(2, "0")}:${secs
     .toString()
     .padStart(2, "0")}`;
+};
+
+const getUrgency = (seconds: number): "normal" | "warning" | "critical" => {
+  if (seconds <= 0) return "critical";
+  if (seconds <= CRITICAL_SECONDS) return "critical";
+  if (seconds <= WARNING_SECONDS) return "warning";
+  return "normal";
 };
 
 export function SectionTimer({
@@ -80,20 +95,27 @@ export function SectionTimer({
     () => formatTime(remainingSeconds),
     [remainingSeconds]
   );
-  const isLowTime = remainingSeconds > 0 && remainingSeconds < LOW_TIME_WARNING_SECONDS;
+  const urgency = getUrgency(remainingSeconds);
 
   return (
     <div
-      className={cn(
-        "inline-flex items-center gap-2 rounded-md border px-3 py-2 tabular-nums",
-        isLowTime
-          ? "border-destructive/60 text-destructive"
-          : "border-border text-foreground"
-      )}
+      className="te-timer"
+      data-urgency={urgency}
+      role="timer"
       aria-live="polite"
+      aria-label={`Time remaining: ${formattedTime}`}
     >
-      {isLowTime ? <AlertTriangle className="size-4" /> : <Clock3 className="size-4" />}
-      <span className="text-sm font-semibold">{formattedTime}</span>
+      {urgency === "critical" ? (
+        <AlertTriangle className="size-4" />
+      ) : (
+        <Clock3 className="size-4" />
+      )}
+
+      <span className="font-semibold">{formattedTime}</span>
+
+      {urgency === "warning" && (
+        <span className="text-[0.625rem] font-medium opacity-70">LOW</span>
+      )}
     </div>
   );
 }

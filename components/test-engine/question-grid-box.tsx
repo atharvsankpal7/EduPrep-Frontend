@@ -1,8 +1,7 @@
 "use client";
 
 import { memo } from "react";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import type { QuestionVisualState } from "@/hooks/use-test-engine";
 
 interface QuestionGridBoxProps {
@@ -13,15 +12,15 @@ interface QuestionGridBoxProps {
   onSelectQuestion: (questionIndex: number) => void;
 }
 
-const statusClassMap: Record<QuestionVisualState, string> = {
-  "not-visited": "bg-muted text-muted-foreground border-border",
-  "visited-unanswered":
-    "bg-orange-500/15 text-orange-700 border-orange-300 dark:text-orange-200 dark:border-orange-700",
-  answered:
-    "bg-green-500/15 text-green-700 border-green-300 dark:text-green-200 dark:border-green-700",
-  "marked-for-review":
-    "bg-blue-500/15 text-blue-700 border-blue-300 dark:text-blue-200 dark:border-blue-700",
-};
+const LEGEND: {
+  label: string;
+  status: QuestionVisualState;
+}[] = [
+    { label: "Not Visited", status: "not-visited" },
+    { label: "Unanswered", status: "visited-unanswered" },
+    { label: "Answered", status: "answered" },
+    { label: "Review", status: "marked-for-review" },
+  ];
 
 function QuestionGridBoxComponent({
   totalQuestions,
@@ -31,56 +30,72 @@ function QuestionGridBoxComponent({
   onSelectQuestion,
 }: QuestionGridBoxProps) {
   return (
-    <aside className="space-y-4 rounded-lg border border-border bg-card p-4">
-      <div>
-        <h3 className="text-sm font-semibold text-balance">Section Question Map</h3>
-        <p className="text-xs text-muted-foreground">
-          Jump to any question in this section.
+    <aside
+      className="flex flex-col rounded-xl border border-border bg-card"
+      aria-label="Question navigation palette"
+    >
+      {/* Header */}
+      <div className="border-b border-border px-4 py-3">
+        <h3 className="text-sm font-semibold text-foreground">
+          Question Palette
+        </h3>
+        <p className="mt-0.5 text-[0.6875rem] text-muted-foreground">
+          Jump to any question in this section
         </p>
       </div>
 
-      <div className="grid grid-cols-5 gap-2">
-        {Array.from({ length: totalQuestions }).map((_, index) => {
-          const status = questionStatuses[index] ?? "not-visited";
-          const isCurrent = index === currentQuestionIndex;
+      {/* Grid */}
+      <ScrollArea className="flex-1 px-4 py-3">
+        <div
+          className="grid grid-cols-5 gap-2.5"
+          role="group"
+          aria-label="Question grid"
+        >
+          {Array.from({ length: totalQuestions }).map((_, index) => {
+            const status = questionStatuses[index] ?? "not-visited";
+            const isCurrent = index === currentQuestionIndex;
 
-          return (
-            <Button
-              key={`question-grid-${index + 1}`}
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={disabled}
-              onClick={() => onSelectQuestion(index)}
-              className={cn(
-                "h-9 w-9 p-0 text-xs tabular-nums",
-                statusClassMap[status],
-                isCurrent && "ring-2 ring-ring ring-offset-2 ring-offset-background"
-              )}
-            >
-              {index + 1}
-            </Button>
-          );
-        })}
-      </div>
+            return (
+              <button
+                key={`qg-${index}`}
+                type="button"
+                disabled={disabled}
+                onClick={() => onSelectQuestion(index)}
+                className="te-grid-btn"
+                data-status={status}
+                data-current={isCurrent}
+                aria-label={`Question ${index + 1}, ${status.replaceAll(
+                  "-",
+                  " "
+                )}${isCurrent ? ", current" : ""}`}
+                aria-current={isCurrent ? "true" : undefined}
+              >
+                {index + 1}
+              </button>
+            );
+          })}
+        </div>
+      </ScrollArea>
 
-      <div className="grid grid-cols-2 gap-2 text-xs">
-        <p className="flex items-center gap-2">
-          <span className="size-3 rounded border border-border bg-muted" />
-          Not visited
-        </p>
-        <p className="flex items-center gap-2">
-          <span className="size-3 rounded border border-orange-300 bg-orange-500/15" />
-          Visited
-        </p>
-        <p className="flex items-center gap-2">
-          <span className="size-3 rounded border border-green-300 bg-green-500/15" />
-          Answered
-        </p>
-        <p className="flex items-center gap-2">
-          <span className="size-3 rounded border border-blue-300 bg-blue-500/15" />
-          Review
-        </p>
+      {/* Legend */}
+      <div className="border-t border-border px-4 py-3">
+        <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
+          {LEGEND.map((item) => (
+            <div key={item.status} className="te-legend-item">
+              <span
+                className="te-legend-swatch te-grid-btn"
+                data-status={item.status}
+                style={{
+                  width: "0.875rem",
+                  height: "0.875rem",
+                  fontSize: "0px",
+                }}
+                aria-hidden="true"
+              />
+              {item.label}
+            </div>
+          ))}
+        </div>
       </div>
     </aside>
   );

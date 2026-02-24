@@ -1,15 +1,37 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { AlertTriangle } from "lucide-react";
+import {
+  AlertTriangle,
+  LayoutGrid,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Send,
+} from "lucide-react";
+import { shallow } from "zustand/shallow";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useToast } from "@/components/ui/use-toast";
+import {
+  ResizablePanelGroup,
+  ResizablePanel,
+  ResizableHandle,
+} from "@/components/ui/resizable";
 import { useTestEngine } from "@/hooks/use-test-engine";
+import { useTestHotkeys } from "@/hooks/use-test-hotkeys";
+import { useTestEngineStore } from "@/lib/stores/test-engine-store";
 import { QuestionGridBox } from "@/components/test-engine/question-grid-box";
 import { QuestionPanel } from "@/components/test-engine/question-panel";
 import { TestFooter } from "@/components/test-engine/test-footer";
 import { SectionTimer } from "@/components/test-engine/section-timer";
 import { ProctoringManager } from "@/components/test-engine/proctoring-manager";
+import { TestOverviewDrawer } from "@/components/test-engine/test-overview-drawer";
 import {
   ConsentRulesDialog,
   SectionLockDialog,
@@ -49,11 +71,22 @@ export function TestEngineShell({
   const [isConsentOpen, setIsConsentOpen] = useState(true);
   const [isSectionLockDialogOpen, setIsSectionLockDialogOpen] = useState(false);
   const [isSubmitDialogOpen, setIsSubmitDialogOpen] = useState(false);
+  const [isOverviewOpen, setIsOverviewOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [strikeDialogState, setStrikeDialogState] = useState({
     open: false,
     strikeCount: 0,
     isFinalWarning: false,
   });
+
+  const { answers, visited, markedForReview } = useTestEngineStore(
+    (state) => ({
+      answers: state.answers,
+      visited: state.visited,
+      markedForReview: state.markedForReview,
+    }),
+    shallow
+  );
 
   const {
     started,
@@ -87,17 +120,43 @@ export function TestEngineShell({
   });
 
   const currentSection = test.sections[currentSectionIndex];
-  const sectionKey = currentSection?.id ?? `section-${currentSectionIndex + 1}`;
+  const sectionKey =
+    currentSection?.id ?? `section-${currentSectionIndex + 1}`;
   const sectionDurationSeconds = Math.max(
     0,
     (currentSection?.sectionDuration ?? 0) * 60
   );
-  const controlsDisabled = !started || submitted || controlsLocked || isSubmitting;
+  const controlsDisabled =
+    !started || submitted || controlsLocked || isSubmitting;
+
+  // Total progress across all sections
+  const totalProgress = useMemo(() => {
+    const totalQuestions = test.sections.reduce(
+      (sum, s) => sum + s.questions.length,
+      0
+    );
+    const totalAnswered = Object.keys(answers).length;
+    if (totalQuestions === 0) return 0;
+    return Math.round((totalAnswered / totalQuestions) * 100);
+  }, [answers, test.sections]);
 
   const questionCountText = useMemo(
-    () => `${currentQuestionIndex + 1}/${Math.max(currentSectionQuestions.length, 0)}`,
+    () =>
+      `${currentQuestionIndex + 1}/${Math.max(
+        currentSectionQuestions.length,
+        0
+      )}`,
     [currentQuestionIndex, currentSectionQuestions.length]
   );
+
+  // Clear response handler
+  const clearResponse = useCallback(() => {
+    if (controlsDisabled || !currentQuestion) return;
+    const store = useTestEngineStore.getState();
+    const newAnswers = { ...store.answers };
+    delete newAnswers[currentQuestion.id];
+    useTestEngineStore.setState({ answers: newAnswers });
+  }, [controlsDisabled, currentQuestion]);
 
   useEffect(() => {
     if (!submitted || !document.fullscreenElement) {
@@ -208,7 +267,8 @@ export function TestEngineShell({
       return;
     }
 
-    const nextSectionName = test.sections[currentSectionIndex + 1]?.sectionName;
+    const nextSectionName =
+      test.sections[currentSectionIndex + 1]?.sectionName;
     toast({
       title: "Section Started",
       description: nextSectionName
@@ -250,6 +310,18 @@ export function TestEngineShell({
     [toast]
   );
 
+  // Keyboard shortcuts
+  useTestHotkeys({
+    enabled: started && !submitted && !controlsLocked && !isSubmitting,
+    optionCount: currentQuestion?.options.length ?? 4,
+    onSelectOption: selectOption,
+    onNext: goNextQuestion,
+    onPrevious: goPreviousQuestion,
+    onToggleReview: toggleReview,
+    onSaveAndNext: goNextQuestion,
+  });
+
+  // ─── Pre-start state ─────────────────────────────────────
   if (!started) {
     return (
       <>
@@ -269,6 +341,7 @@ export function TestEngineShell({
     );
   }
 
+  // ─── Empty section state ──────────────────────────────────
   if (!currentQuestion) {
     return (
       <div className="mx-auto w-full max-w-3xl px-4 py-8">
@@ -281,28 +354,120 @@ export function TestEngineShell({
     );
   }
 
+  // ─── Shared question panel instance ───────────────────────
+  const questionPanel = (
+    <QuestionPanel
+      question={currentQuestion}
+      questionNumber={currentQuestionIndex + 1}
+      selectedOption={selectedOption}
+      isMarkedForReview={isCurrentMarkedForReview}
+      onSelectOption={selectOption}
+      onToggleReview={toggleReview}
+      onClearResponse={clearResponse}
+      disabled={controlsDisabled}
+    />
+  );
+
+  const questionGrid = (
+    <QuestionGridBox
+      totalQuestions={currentSectionQuestions.length}
+      currentQuestionIndex={currentQuestionIndex}
+      questionStatuses={questionStatuses}
+      onSelectQuestion={jumpToQuestion}
+      disabled={controlsDisabled}
+    />
+  );
+
+  // ─── Main test interface ──────────────────────────────────
   return (
     <>
       <ProctoringManager
-        enabled={started && !submitted}
+        enabled={test.proctoringEnabled && started && !submitted}
         onStrikeViolation={handleViolation}
         onClipboardViolation={handleClipboardViolation}
         onContextMenuViolation={handleContextMenuViolation}
       />
 
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 py-4 pb-28 md:py-6 md:pb-32">
-        <header className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4 md:flex-row md:items-center md:justify-between">
-          <div className="space-y-1">
-            <h1 className="text-xl font-semibold text-balance">{test.testName}</h1>
-            <p className="text-sm text-muted-foreground">
-              Section {currentSectionIndex + 1} of {test.sections.length}:{" "}
+      {/* ── Glass header ── */}
+      <header className="te-header">
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-3">
+          {/* Left: Test info */}
+          <div className="min-w-0 flex-1">
+            <h1 className="truncate text-sm font-semibold text-foreground md:text-base">
+              {test.testName}
+            </h1>
+            <p className="text-xs text-muted-foreground">
+              Section {currentSectionIndex + 1} of {test.sections.length}
+              {" · "}
               {currentSectionName}
-            </p>
-            <p className="text-xs text-muted-foreground tabular-nums">
-              Question {questionCountText}
+              {" · "}
+              <span className="tabular-nums">Q {questionCountText}</span>
             </p>
           </div>
 
+          {/* Center: Actions */}
+          <div className="flex justify-between gap-2">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="gap-1.5 text-xs"
+              onClick={() => setIsOverviewOpen(true)}
+              aria-label="Open test overview"
+            >
+              <LayoutGrid className="size-3.5" />
+              <span className="hidden md:inline">Overview</span>
+            </Button>
+
+            <Button
+              type="button"
+              variant={"destructive"}
+              size="sm"
+              className="h-8 gap-1.5 text-xs font-semibold"
+              onClick={() => {
+                if (isLastSection) {
+                  setIsSubmitDialogOpen(true);
+                } else {
+                  setIsSectionLockDialogOpen(true);
+                }
+              }}
+              disabled={controlsDisabled}
+            >
+              <Send className="size-3" />
+              <span className="hidden sm:inline">
+                {isLastSection ? "Submit Test" : "Submit Section"}
+              </span>
+              <span className="sm:hidden">Submit</span>
+            </Button>
+
+            <TooltipProvider delayDuration={300}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="hidden lg:inline-flex size-8"
+                    onClick={() => setIsSidebarCollapsed((prev) => !prev)}
+                    aria-label={
+                      isSidebarCollapsed ? "Show sidebar" : "Hide sidebar"
+                    }
+                  >
+                    {isSidebarCollapsed ? (
+                      <PanelLeftOpen className="size-4" />
+                    ) : (
+                      <PanelLeftClose className="size-4" />
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  {isSidebarCollapsed ? "Show palette" : "Hide palette"}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+
+          {/* Right: Timer */}
           <SectionTimer
             sectionKey={sectionKey}
             initialSeconds={sectionDurationSeconds}
@@ -312,43 +477,85 @@ export function TestEngineShell({
               void handleTimerExpired().catch(handleAutoSubmitFailure);
             }}
           />
-        </header>
+        </div>
 
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
-          <QuestionPanel
-            question={currentQuestion}
-            questionNumber={currentQuestionIndex + 1}
-            selectedOption={selectedOption}
-            isMarkedForReview={isCurrentMarkedForReview}
-            onSelectOption={selectOption}
-            disabled={controlsDisabled}
+        {/* Progress bar */}
+        <div className="te-progress-track">
+          <div
+            className="te-progress-fill"
+            style={{ width: `${totalProgress}%` }}
+            role="progressbar"
+            aria-valuenow={totalProgress}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label={`${totalProgress}% of questions answered`}
           />
+        </div>
+      </header>
 
-          <QuestionGridBox
-            totalQuestions={currentSectionQuestions.length}
-            currentQuestionIndex={currentQuestionIndex}
-            questionStatuses={questionStatuses}
-            onSelectQuestion={jumpToQuestion}
-            disabled={controlsDisabled}
-          />
+      {/* ── Content area ── */}
+      <div className="mx-auto w-full max-w-7xl px-4 py-4 pb-28 md:py-6 md:pb-32">
+        {/* Desktop: resizable split pane */}
+        <div className="hidden lg:block">
+          <ResizablePanelGroup
+            direction="horizontal"
+            className="min-h-[60vh] rounded-xl"
+          >
+            <ResizablePanel
+              defaultSize={isSidebarCollapsed ? 100 : 72}
+              minSize={55}
+            >
+              {questionPanel}
+            </ResizablePanel>
+
+            {!isSidebarCollapsed && (
+              <>
+                <ResizableHandle withHandle className="mx-2" />
+                <ResizablePanel
+                  defaultSize={28}
+                  minSize={20}
+                  maxSize={40}
+                >
+                  {questionGrid}
+                </ResizablePanel>
+              </>
+            )}
+          </ResizablePanelGroup>
+        </div>
+
+        {/* Mobile: stacked layout */}
+        <div className="grid grid-cols-1 gap-4 lg:hidden">
+          {questionPanel}
+          {questionGrid}
         </div>
       </div>
 
+      {/* ── Footer (navigation only) ── */}
       <TestFooter
         currentQuestionIndex={currentQuestionIndex}
         totalQuestions={currentSectionQuestions.length}
         isFirstQuestion={isFirstQuestion}
         isLastQuestionInSection={isLastQuestionInSection}
         isLastSection={isLastSection}
-        isMarkedForReview={isCurrentMarkedForReview}
         disabled={controlsDisabled}
         onPrevious={goPreviousQuestion}
         onNext={goNextQuestion}
         onNextSection={() => setIsSectionLockDialogOpen(true)}
-        onToggleReview={toggleReview}
         onSubmit={() => setIsSubmitDialogOpen(true)}
       />
 
+      {/* ── Overview drawer ── */}
+      <TestOverviewDrawer
+        open={isOverviewOpen}
+        onOpenChange={setIsOverviewOpen}
+        test={test}
+        currentSectionIndex={currentSectionIndex}
+        answers={answers}
+        visited={visited}
+        markedForReview={markedForReview}
+      />
+
+      {/* ── Dialogs ── */}
       <StrikeWarningDialog
         open={strikeDialogState.open}
         strikeCount={strikeDialogState.strikeCount}

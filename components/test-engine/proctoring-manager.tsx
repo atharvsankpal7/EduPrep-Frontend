@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 
 interface ProctoringManagerProps {
   enabled: boolean;
@@ -9,12 +9,17 @@ interface ProctoringManagerProps {
   onContextMenuViolation: () => void;
 }
 
+const ALERT_DISPLAY_MS = 6000;
+
 export function ProctoringManager({
   enabled,
   onStrikeViolation,
   onClipboardViolation,
   onContextMenuViolation,
 }: ProctoringManagerProps) {
+  const [alertActive, setAlertActive] = useState(false);
+  const alertTimerRef = useRef<ReturnType<typeof setTimeout>>();
+
   const onStrikeViolationRef = useRef(onStrikeViolation);
   const onClipboardViolationRef = useRef(onClipboardViolation);
   const onContextMenuViolationRef = useRef(onContextMenuViolation);
@@ -31,6 +36,21 @@ export function ProctoringManager({
     onContextMenuViolationRef.current = onContextMenuViolation;
   }, [onContextMenuViolation]);
 
+  const triggerAlert = useCallback(() => {
+    setAlertActive(true);
+    if (alertTimerRef.current) clearTimeout(alertTimerRef.current);
+    alertTimerRef.current = setTimeout(
+      () => setAlertActive(false),
+      ALERT_DISPLAY_MS
+    );
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (alertTimerRef.current) clearTimeout(alertTimerRef.current);
+    };
+  }, []);
+
   useEffect(() => {
     if (!enabled) {
       return;
@@ -39,16 +59,19 @@ export function ProctoringManager({
     const handleVisibilityChange = () => {
       if (document.hidden) {
         onStrikeViolationRef.current("tab_switch");
+        triggerAlert();
       }
     };
 
     const handleBlur = () => {
       onStrikeViolationRef.current("tab_switch");
+      triggerAlert();
     };
 
     const handleFullscreenChange = () => {
       if (!document.fullscreenElement) {
         onStrikeViolationRef.current("fullscreen_exit");
+        triggerAlert();
       }
     };
 
@@ -73,13 +96,22 @@ export function ProctoringManager({
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("blur", handleBlur);
-      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      document.removeEventListener(
+        "fullscreenchange",
+        handleFullscreenChange
+      );
       document.removeEventListener("copy", handleClipboard);
       document.removeEventListener("cut", handleClipboard);
       document.removeEventListener("paste", handleClipboard);
       document.removeEventListener("contextmenu", handleContextMenu);
     };
-  }, [enabled]);
+  }, [enabled, triggerAlert]);
 
-  return null;
+  return (
+    <div
+      className="te-proctor-alert"
+      data-active={alertActive}
+      aria-hidden="true"
+    />
+  );
 }

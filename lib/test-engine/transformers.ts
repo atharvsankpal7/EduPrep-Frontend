@@ -19,6 +19,7 @@ export const normalizeEngineTest = (
     testName: rawTest.testName,
     totalDuration: rawTest.totalDuration,
     totalQuestions: rawTest.totalQuestions,
+    proctoringEnabled: rawTest.proctoringEnabled === true,
     sections: rawTest.sections.map((section, sectionIndex) => ({
       id: `${testId}-section-${sectionIndex + 1}`,
       sectionName: section.sectionName,
