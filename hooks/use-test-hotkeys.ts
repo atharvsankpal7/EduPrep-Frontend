@@ -17,6 +17,8 @@ interface UseTestHotkeysOptions {
  * - 1/2/3/4 or A/B/C/D  → select option
  * - ArrowRight            → next question
  * - ArrowLeft             → previous question
+ * - ArrowDown             → focus next option card
+ * - ArrowUp               → focus previous option card
  * - Space or M            → toggle review
  * - Enter                 → save & next
  */
@@ -56,6 +58,20 @@ export function useTestHotkeys({
             return null;
         };
 
+        const getFocusedOptionIndex = (): number => {
+            const focused = document.activeElement;
+            if (!focused || !focused.classList.contains("te-option-card")) return -1;
+            const allCards = Array.from(document.querySelectorAll(".te-option-card"));
+            return allCards.indexOf(focused);
+        };
+
+        const focusOption = (index: number) => {
+            const allCards = document.querySelectorAll<HTMLElement>(".te-option-card");
+            if (index >= 0 && index < allCards.length) {
+                allCards[index]?.focus();
+            }
+        };
+
         const handleKeyDown = (event: KeyboardEvent) => {
             // Don't capture when typing in inputs
             const target = event.target as HTMLElement;
@@ -92,6 +108,30 @@ export function useTestHotkeys({
                     event.preventDefault();
                     onPreviousRef.current();
                     break;
+                case "ArrowDown": {
+                    event.preventDefault();
+                    const currentIdx = getFocusedOptionIndex();
+                    const nextIdx = currentIdx + 1;
+                    if (nextIdx < optionCount) {
+                        focusOption(nextIdx);
+                    } else {
+                        // Wrap to first option
+                        focusOption(0);
+                    }
+                    break;
+                }
+                case "ArrowUp": {
+                    event.preventDefault();
+                    const currentIdx = getFocusedOptionIndex();
+                    const prevIdx = currentIdx - 1;
+                    if (prevIdx >= 0) {
+                        focusOption(prevIdx);
+                    } else {
+                        // Wrap to last option
+                        focusOption(optionCount - 1);
+                    }
+                    break;
+                }
                 case " ":
                     event.preventDefault();
                     onToggleReviewRef.current();

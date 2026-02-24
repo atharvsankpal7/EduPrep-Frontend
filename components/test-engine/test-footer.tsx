@@ -52,13 +52,6 @@ export function TestFooter({
           <span className="hidden sm:inline">Previous</span>
         </Button>
 
-        {/* Center: Question counter */}
-        <Badge
-          variant="outline"
-          className="tabular-nums text-[0.75rem] px-3 py-1.5 font-medium"
-        >
-          {currentQuestionIndex + 1} / {totalQuestions}
-        </Badge>
 
         {/* Right: Action buttons */}
         <div className="flex items-center gap-2 sm:gap-3">

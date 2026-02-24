@@ -44,22 +44,22 @@
     --ring: var(--blue-primary);
     --radius: 0.5rem;
 
-    /* Question Status Colors */
+    /* Question Status Colors — WCAG AA compliant against --card */
     --status-review-bg: 267 100% 96%;
     --status-review-border: 265 76% 82%;
-    --status-review-text: 266 56% 35%;
+    --status-review-text: 270 60% 30%;
     --status-unanswered-bg: 357 100% 96%;
     --status-unanswered-border: 357 85% 87%;
-    --status-unanswered-text: 356 56% 40%;
+    --status-unanswered-text: 356 62% 34%;
     --status-answered-bg: 151 55% 94%;
     --status-answered-border: 152 49% 77%;
-    --status-answered-text: 155 58% 28%;
+    --status-answered-text: 155 64% 22%;
     --status-warning-bg: 44 100% 94%;
     --status-warning-border: 40 94% 83%;
-    --status-warning-text: 31 92% 30%;
+    --status-warning-text: 35 88% 26%;
     --status-danger-bg: 357 100% 95%;
     --status-danger-border: 357 85% 84%;
-    --status-danger-text: 356 64% 36%;
+    --status-danger-text: 356 70% 32%;
 
     /* Chart Colors - Analogous Harmony */
     --chart-1: var(--blue-primary);
@@ -112,22 +112,22 @@
     --input: 217.2 32.6% 17.5%;
     --ring: var(--blue-light);
 
-    /* Question Status Colors — Dark */
+    /* Question Status Colors — Dark — WCAG AA compliant against dark --card */
     --status-review-bg: 268 48% 20%;
     --status-review-border: 267 50% 34%;
-    --status-review-text: 268 100% 88%;
+    --status-review-text: 270 90% 85%;
     --status-unanswered-bg: 355 44% 20%;
     --status-unanswered-border: 356 45% 33%;
-    --status-unanswered-text: 356 100% 88%;
+    --status-unanswered-text: 358 90% 85%;
     --status-answered-bg: 155 40% 20%;
     --status-answered-border: 155 35% 33%;
-    --status-answered-text: 152 72% 85%;
+    --status-answered-text: 152 72% 82%;
     --status-warning-bg: 40 42% 20%;
     --status-warning-border: 40 46% 35%;
-    --status-warning-text: 46 100% 86%;
+    --status-warning-text: 46 90% 82%;
     --status-danger-bg: 356 44% 20%;
     --status-danger-border: 356 50% 35%;
-    --status-danger-text: 356 100% 88%;
+    --status-danger-text: 358 90% 85%;
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -489,13 +489,19 @@
   transition:
     border-color 0.15s ease,
     background 0.15s ease,
-    box-shadow 0.15s ease;
+    box-shadow 0.15s ease,
+    transform 0.1s ease;
   user-select: none;
 }
 
 .te-option-card:hover:not([data-disabled="true"]):not([data-selected="true"]) {
   border-color: hsl(var(--blue-primary) / 0.35);
   background: hsl(var(--blue-primary) / 0.04);
+}
+
+/* Physical button-press feel */
+.te-option-card:active:not([data-disabled="true"]) {
+  transform: scale(0.98);
 }
 
 .te-option-card[data-selected="true"] {
@@ -511,6 +517,25 @@
 .te-option-card[data-disabled="true"] {
   opacity: 0.55;
   pointer-events: none;
+}
+
+/* Hotkey selection ripple flash */
+@keyframes te-hotkey-flash {
+  0% {
+    box-shadow: 0 0 0 0 hsl(var(--blue-primary) / 0.4);
+  }
+
+  50% {
+    box-shadow: 0 0 0 6px hsl(var(--blue-primary) / 0.15);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 hsl(var(--blue-primary) / 0);
+  }
+}
+
+.te-option-card[data-hotkey-flash="true"] {
+  animation: te-hotkey-flash 0.4s ease-out;
 }
 
 /* Keyboard badge */
@@ -664,6 +689,30 @@
     padding 0.3s ease;
 }
 
+/* Smooth panel expand when sidebar collapses */
+.te-panel-expand {
+  transition: flex-basis 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Mobile touch targets — enforce 44px minimum */
+@media (pointer: coarse) {
+  .te-footer button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .te-option-card {
+    min-height: 44px;
+  }
+
+  .te-grid-btn {
+    min-width: 44px;
+    min-height: 44px;
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+}
+
 /* Legend items */
 .te-legend-item {
   display: flex;
@@ -689,4 +738,24 @@
 .te-grid-btn:focus-visible {
   outline: 2px solid hsl(var(--ring));
   outline-offset: 2px;
+}
+
+/* Drag handle — visible affordance on resize handle */
+.te-drag-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 2.5rem;
+  border-radius: 0.375rem;
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--muted));
+  color: hsl(var(--muted-foreground));
+  transition: background 0.15s ease, color 0.15s ease;
+  cursor: col-resize;
+}
+
+.te-drag-handle:hover {
+  background: hsl(var(--accent-cool) / 0.15);
+  color: hsl(var(--foreground));
 }

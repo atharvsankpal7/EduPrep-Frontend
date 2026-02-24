@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle,
+  GripVertical,
   LayoutGrid,
   PanelLeftClose,
   PanelLeftOpen,
@@ -130,16 +131,6 @@ export function TestEngineShell({
   const controlsDisabled =
     !started || submitted || controlsLocked || isSubmitting;
 
-  // Total progress across all sections
-  const totalProgress = useMemo(() => {
-    const totalQuestions = test.sections.reduce(
-      (sum, s) => sum + s.questions.length,
-      0
-    );
-    const totalAnswered = Object.keys(answers).length;
-    if (totalQuestions === 0) return 0;
-    return Math.round((totalAnswered / totalQuestions) * 100);
-  }, [answers, test.sections]);
 
   const questionCountText = useMemo(
     () =>
@@ -391,97 +382,109 @@ export function TestEngineShell({
 
       {/* ── Glass header ── */}
       <TEHeader>
-        <TEContainer className="flex items-center justify-between gap-4 py-3">
-          {/* Left: Test info */}
-          <div className="min-w-0 flex-1">
-            <h1 className="truncate text-sm font-semibold text-foreground md:text-base">
-              {test.testName}
-            </h1>
-            <p className="text-xs text-muted-foreground">
-              Section {currentSectionIndex + 1} of {test.sections.length}
-              {" · "}
-              {currentSectionName}
+        <TEContainer className="py-2.5 sm:py-3">
+          <div className="flex items-center gap-3">
+            <div className="min-w-0 flex-1">
+              <h1 className="truncate text-sm font-semibold text-foreground md:text-base">
+                {test.testName}
+              </h1>
+              <p className="hidden text-xs text-muted-foreground sm:block">
+                Section {currentSectionIndex + 1} of {test.sections.length}
+                {" · "}
+                {currentSectionName}
+                {" · "}
+                <span className="tabular-nums">Q {questionCountText}</span>
+              </p>
+            </div>
+
+            <SectionTimer
+              sectionKey={sectionKey}
+              initialSeconds={sectionDurationSeconds}
+              isRunning={!submitted && !isSubmitting}
+              onTick={onTimerTick}
+              onExpire={() => {
+                void handleTimerExpired().catch(handleAutoSubmitFailure);
+              }}
+            />
+          </div>
+
+          <div className="mt-1.5 flex items-center justify-between gap-2 sm:mt-2">
+            <p className="truncate text-[0.6875rem] text-muted-foreground sm:hidden">
+              Sec {currentSectionIndex + 1}/{test.sections.length}
               {" · "}
               <span className="tabular-nums">Q {questionCountText}</span>
             </p>
+
+            {/* Spacer for sm+ so buttons push right */}
+            <div className="hidden sm:block sm:flex-1" />
+
+            {/* Action buttons */}
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-8 min-w-[36px] gap-1 px-2 text-xs sm:gap-1.5 sm:px-3"
+                onClick={() => setIsOverviewOpen(true)}
+                aria-label="Open test overview"
+              >
+                <LayoutGrid className="size-3.5" />
+                <span className="hidden sm:inline">Overview</span>
+              </Button>
+
+              <TooltipProvider delayDuration={300}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="hidden lg:inline-flex size-8"
+                      onClick={() => setIsSidebarCollapsed((prev) => !prev)}
+                      aria-label={
+                        isSidebarCollapsed ? "Show sidebar" : "Hide sidebar"
+                      }
+                    >
+                      {isSidebarCollapsed ? (
+                        <PanelLeftOpen className="size-4" />
+                      ) : (
+                        <PanelLeftClose className="size-4" />
+                      )}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom">
+                    {isSidebarCollapsed ? "Show palette" : "Hide palette"}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+
+              <div className="h-4 w-px bg-border" />
+
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-8 gap-1 px-2 text-xs font-semibold border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground sm:gap-1.5 sm:px-3"
+                onClick={() => {
+                  if (isLastSection) {
+                    setIsSubmitDialogOpen(true);
+                  } else {
+                    setIsSectionLockDialogOpen(true);
+                  }
+                }}
+                disabled={controlsDisabled}
+              >
+                <Send className="size-3" />
+                <span className="hidden sm:inline">
+                  {isLastSection ? "Submit Test" : "Submit Section"}
+                </span>
+                <span className="sm:hidden">Submit</span>
+              </Button>
+            </div>
           </div>
-
-          {/* Center: Actions */}
-          <div className="flex items-center gap-3 sm:gap-4">
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="gap-1.5 text-xs"
-              onClick={() => setIsOverviewOpen(true)}
-              aria-label="Open test overview"
-            >
-              <LayoutGrid className="size-3.5" />
-              <span className="hidden md:inline">Overview</span>
-            </Button>
-
-            <Button
-              type="button"
-              variant={"destructive"}
-              size="sm"
-              className="h-8 gap-1.5 text-xs font-semibold"
-              onClick={() => {
-                if (isLastSection) {
-                  setIsSubmitDialogOpen(true);
-                } else {
-                  setIsSectionLockDialogOpen(true);
-                }
-              }}
-              disabled={controlsDisabled}
-            >
-              <Send className="size-3" />
-              <span className="hidden sm:inline">
-                {isLastSection ? "Submit Test" : "Submit Section"}
-              </span>
-              <span className="sm:hidden">Submit</span>
-            </Button>
-
-            <TooltipProvider delayDuration={300}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="hidden lg:inline-flex size-8"
-                    onClick={() => setIsSidebarCollapsed((prev) => !prev)}
-                    aria-label={
-                      isSidebarCollapsed ? "Show sidebar" : "Hide sidebar"
-                    }
-                  >
-                    {isSidebarCollapsed ? (
-                      <PanelLeftOpen className="size-4" />
-                    ) : (
-                      <PanelLeftClose className="size-4" />
-                    )}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="bottom">
-                  {isSidebarCollapsed ? "Show palette" : "Hide palette"}
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-
-          {/* Right: Timer */}
-          <SectionTimer
-            sectionKey={sectionKey}
-            initialSeconds={sectionDurationSeconds}
-            isRunning={!submitted && !isSubmitting}
-            onTick={onTimerTick}
-            onExpire={() => {
-              void handleTimerExpired().catch(handleAutoSubmitFailure);
-            }}
-          />
         </TEContainer>
 
-        {/* Progress bar */}
-        <TEProgressBar value={totalProgress} className="mt-3" />
+
       </TEHeader>
 
       {/* ── Content area ── */}
@@ -495,13 +498,18 @@ export function TestEngineShell({
             <ResizablePanel
               defaultSize={isSidebarCollapsed ? 100 : 72}
               minSize={55}
+              className="te-panel-expand"
             >
               {questionPanel}
             </ResizablePanel>
 
             {!isSidebarCollapsed && (
               <>
-                <ResizableHandle withHandle className="mx-2" />
+                <ResizableHandle className="mx-2 group">
+                  <div className="te-drag-handle opacity-60 group-hover:opacity-100">
+                    <GripVertical className="size-3.5" />
+                  </div>
+                </ResizableHandle>
                 <ResizablePanel
                   defaultSize={28}
                   minSize={20}
