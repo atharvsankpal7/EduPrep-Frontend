@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { RenderableContent } from "@/components/test-engine/renderable-content";
+import { TEOptionCard, TEKbd, TESeparator } from "@/components/test-engine/te-primitives";
 import { getRenderableContent } from "@/lib/test-engine/content";
 import type { EngineQuestion } from "@/types/global/interface/test.apiInterface";
 
@@ -66,26 +67,27 @@ function QuestionPanelComponent({
           </div>
 
           {/* Actions row: Clear + Mark for Review */}
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2">
             <Button
               type="button"
-              variant="ghost"
+              variant="outline"
               size="sm"
               disabled={disabled || selectedOption === undefined}
               onClick={onClearResponse}
-              className="h-7 gap-1 px-2 text-xs text-muted-foreground"
+              className="h-8 gap-1.5 px-3 text-xs text-muted-foreground border-dashed"
               aria-label="Clear response"
             >
-              <Eraser className="size-3" />
+              <Eraser className="size-3.5" />
               Clear
             </Button>
+            <TESeparator />
             <Button
               type="button"
               variant="ghost"
               size="sm"
               disabled={disabled}
               onClick={onToggleReview}
-              className="h-7 gap-1 px-2 text-xs"
+              className="h-8 gap-1.5 px-3 text-xs"
               aria-label={
                 isMarkedForReview
                   ? "Remove review mark"
@@ -93,9 +95,9 @@ function QuestionPanelComponent({
               }
             >
               {isMarkedForReview ? (
-                <BookmarkCheck className="size-3" />
+                <BookmarkCheck className="size-3.5" />
               ) : (
-                <Bookmark className="size-3" />
+                <Bookmark className="size-3.5" />
               )}
               {isMarkedForReview ? "Unmark" : "Mark Review"}
             </Button>
@@ -125,7 +127,7 @@ function QuestionPanelComponent({
           key={question.id}
           value={selectedValue}
           onValueChange={(value) => onSelectOption(Number(value))}
-          className="space-y-3"
+          className="space-y-4"
           aria-label={`Options for question ${questionNumber}`}
         >
           {question.options.map((option, optionIndex) => {
@@ -134,13 +136,10 @@ function QuestionPanelComponent({
             const label = OPTION_LABELS[optionIndex] ?? `${optionIndex + 1}`;
 
             return (
-              <div
+              <TEOptionCard
                 key={optionId}
-                role="button"
-                tabIndex={disabled ? -1 : 0}
-                className="te-option-card"
-                data-selected={isSelected}
-                data-disabled={disabled}
+                selected={isSelected}
+                disabled={disabled}
                 onClick={() => handleCardClick(optionIndex)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
@@ -151,9 +150,8 @@ function QuestionPanelComponent({
                 aria-label={`Option ${label}`}
               >
                 {/* Keyboard indicator */}
-                <span className="te-kbd mt-0.5" aria-hidden="true">
-                  {label}
-                </span>
+                <TEKbd>{label}</TEKbd>
+
 
                 {/* Hidden radio for a11y */}
                 <RadioGroupItem
@@ -192,7 +190,7 @@ function QuestionPanelComponent({
                     </svg>
                   </div>
                 )}
-              </div>
+              </TEOptionCard>
             );
           })}
         </RadioGroup>

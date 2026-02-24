@@ -11,6 +11,7 @@ import {
 import { shallow } from "zustand/shallow";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { TEHeader, TEContainer, TEProgressBar } from "@/components/test-engine/te-primitives";
 import {
   Tooltip,
   TooltipContent,
@@ -389,8 +390,8 @@ export function TestEngineShell({
       />
 
       {/* ── Glass header ── */}
-      <header className="te-header">
-        <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-3">
+      <TEHeader>
+        <TEContainer className="flex items-center justify-between gap-4 py-3">
           {/* Left: Test info */}
           <div className="min-w-0 flex-1">
             <h1 className="truncate text-sm font-semibold text-foreground md:text-base">
@@ -406,7 +407,7 @@ export function TestEngineShell({
           </div>
 
           {/* Center: Actions */}
-          <div className="flex justify-between gap-2">
+          <div className="flex items-center gap-3 sm:gap-4">
             <Button
               type="button"
               variant="ghost"
@@ -477,24 +478,14 @@ export function TestEngineShell({
               void handleTimerExpired().catch(handleAutoSubmitFailure);
             }}
           />
-        </div>
+        </TEContainer>
 
         {/* Progress bar */}
-        <div className="te-progress-track">
-          <div
-            className="te-progress-fill"
-            style={{ width: `${totalProgress}%` }}
-            role="progressbar"
-            aria-valuenow={totalProgress}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-label={`${totalProgress}% of questions answered`}
-          />
-        </div>
-      </header>
+        <TEProgressBar value={totalProgress} className="mt-3" />
+      </TEHeader>
 
       {/* ── Content area ── */}
-      <div className="mx-auto w-full max-w-7xl px-4 py-4 pb-28 md:py-6 md:pb-32">
+      <TEContainer className="py-4 pb-24 md:py-6 md:pb-28">
         {/* Desktop: resizable split pane */}
         <div className="hidden lg:block">
           <ResizablePanelGroup
@@ -528,7 +519,7 @@ export function TestEngineShell({
           {questionPanel}
           {questionGrid}
         </div>
-      </div>
+      </TEContainer>
 
       {/* ── Footer (navigation only) ── */}
       <TestFooter

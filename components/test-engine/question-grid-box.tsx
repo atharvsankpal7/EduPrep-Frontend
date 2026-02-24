@@ -2,6 +2,7 @@
 
 import { memo } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { TEGridButton } from "@/components/test-engine/te-primitives";
 import type { QuestionVisualState } from "@/hooks/use-test-engine";
 
 interface QuestionGridBoxProps {
@@ -56,14 +57,12 @@ function QuestionGridBoxComponent({
             const isCurrent = index === currentQuestionIndex;
 
             return (
-              <button
+              <TEGridButton
                 key={`qg-${index}`}
-                type="button"
                 disabled={disabled}
                 onClick={() => onSelectQuestion(index)}
-                className="te-grid-btn"
-                data-status={status}
-                data-current={isCurrent}
+                status={status}
+                current={isCurrent}
                 aria-label={`Question ${index + 1}, ${status.replaceAll(
                   "-",
                   " "
@@ -71,7 +70,7 @@ function QuestionGridBoxComponent({
                 aria-current={isCurrent ? "true" : undefined}
               >
                 {index + 1}
-              </button>
+              </TEGridButton>
             );
           })}
         </div>
@@ -82,14 +81,9 @@ function QuestionGridBoxComponent({
         <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
           {LEGEND.map((item) => (
             <div key={item.status} className="te-legend-item">
-              <span
-                className="te-legend-swatch te-grid-btn"
-                data-status={item.status}
-                style={{
-                  width: "0.875rem",
-                  height: "0.875rem",
-                  fontSize: "0px",
-                }}
+              <TEGridButton
+                status={item.status}
+                className="!w-3.5 !h-3.5 text-[0px]"
                 aria-hidden="true"
               />
               {item.label}

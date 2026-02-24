@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { TEFooter, TEContainer } from "@/components/test-engine/te-primitives";
 
 interface TestFooterProps {
   currentQuestionIndex: number;
@@ -35,33 +36,32 @@ export function TestFooter({
   onSubmit,
 }: TestFooterProps) {
   return (
-    <div className="te-footer" role="toolbar" aria-label="Test controls">
-      <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3">
-        {/* Left: Empty spacer or secondary actions could go here */}
-        <div className="flex-1" />
+    <TEFooter>
+      <TEContainer className="flex items-center justify-between gap-4 px-2 sm:px-4">
+        {/* Left: Previous button */}
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={disabled || isFirstQuestion}
+          onClick={onPrevious}
+          className="gap-1"
+          aria-label="Previous question"
+        >
+          <ChevronLeft className="size-4" />
+          <span className="hidden sm:inline">Previous</span>
+        </Button>
 
-        {/* Center/Right Group: Navigation */}
-        <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={disabled || isFirstQuestion}
-            onClick={onPrevious}
-            className="gap-1"
-            aria-label="Previous question"
-          >
-            <ChevronLeft className="size-4" />
-            <span className="hidden sm:inline">Previous</span>
-          </Button>
+        {/* Center: Question counter */}
+        <Badge
+          variant="outline"
+          className="tabular-nums text-[0.75rem] px-3 py-1.5 font-medium"
+        >
+          {currentQuestionIndex + 1} / {totalQuestions}
+        </Badge>
 
-          <Badge
-            variant="outline"
-            className="tabular-nums text-[0.6875rem] px-3 py-1"
-          >
-            {currentQuestionIndex + 1} / {totalQuestions}
-          </Badge>
-
+        {/* Right: Action buttons */}
+        <div className="flex items-center gap-2 sm:gap-3">
           {isLastQuestionInSection ? (
             isLastSection ? (
               <Button
@@ -74,7 +74,7 @@ export function TestFooter({
                 aria-label="Submit test"
               >
                 <Send className="size-3.5" />
-                Submit Test
+                <span className="hidden sm:inline">Submit Test</span>
               </Button>
             ) : (
               <Button
@@ -95,7 +95,7 @@ export function TestFooter({
               size="sm"
               disabled={disabled}
               onClick={onNext}
-              className="gap-1 bg-[hsl(var(--blue-primary))] font-semibold text-white hover:bg-[hsl(var(--blue-dark))]"
+              className="gap-1.5 bg-[hsl(var(--blue-primary))] font-semibold text-white hover:bg-[hsl(var(--blue-dark))]"
               aria-label="Save and next question"
             >
               Save & Next
@@ -103,9 +103,7 @@ export function TestFooter({
             </Button>
           )}
         </div>
-
-        <div className="flex-1" />
-      </div>
-    </div>
+      </TEContainer>
+    </TEFooter>
   );
 }
