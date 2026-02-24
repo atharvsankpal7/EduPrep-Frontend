@@ -1,42 +1,43 @@
 "use client";
 
 import { useMemo } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { TestResult } from "@/components/test/test-result";
-import InvalidResult from "@/components/test/result/invalid-result";
-import QuestionAnalysis from "@/components/test/result/question-analysis";
 import LoadingComponent from "@/components/loading";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { queryKeys } from "@/lib/api/query-keys";
 import { fetchTestResultById } from "@/lib/api/services/test.api";
-import { TestResultData } from "@/types/global/interface/test.apiInterface";
+import {
+  transformTestResult,
+  type RawTestResult,
+} from "@/lib/api/transformers/result.transformer";
 
-export default function TestResultPage({ params }: { params: { id: string } }) {
-  const router = useRouter();
+export default function TestResultPage({
+  params,
+}: {
+  params: { id: string[] | string };
+}) {
+  const resultId = Array.isArray(params.id) ? params.id[0] : params.id;
 
-  const { data: rawResult, error, isLoading } = useQuery({
-    queryKey: ["testResult", params.id],
-    queryFn: () => fetchTestResultById(params.id),
+  const { data, isLoading, error } = useQuery<RawTestResult>({
+    queryKey: queryKeys.tests.result(resultId || "pending"),
+    queryFn: () => fetchTestResultById(resultId),
+    enabled: Boolean(resultId),
   });
 
-  // Derive the processed result from raw data
-  const result = useMemo<TestResultData | null>(() => {
-    if (!rawResult) return null;
+  const result = useMemo(
+    () => (data ? transformTestResult(data) : null),
+    [data]
+  );
 
-    const sectionResults =
-      rawResult.sectionResults?.map((section: any) => ({
-        name: section.sectionName,
-        totalQuestions: section.totalQuestions,
-        correctAnswers: section.correctAnswers,
-        score: (section.correctAnswers / section.totalQuestions) * 100,
-        timeSpent: section.timeSpent,
-      })) || [];
-
-    return {
-      ...rawResult,
-      sectionResults,
-      questionAnalysis: rawResult.questionAnalysis || [],
-    };
-  }, [rawResult]);
+  if (!resultId) {
+    return (
+      <div className="container py-8 text-center text-destructive">
+        Invalid result id.
+      </div>
+    );
+  }
 
   if (isLoading) {
     return <LoadingComponent />;
@@ -45,40 +46,108 @@ export default function TestResultPage({ params }: { params: { id: string } }) {
   if (error) {
     return (
       <div className="container py-8 text-center text-destructive">
-        {error instanceof Error ? error.message : "Failed to load test result"}
+        {error instanceof Error ? error.message : "Failed to load result."}
       </div>
     );
   }
 
   if (!result) {
     return (
-      <div className="container py-8 text-center">No result data available</div>
+      <div className="container py-8 text-center text-muted-foreground">
+        No result data available.
+      </div>
     );
   }
 
   if (result.invalid) {
-    return <InvalidResult onClick={() => router.push("/test")} />;
+    return (
+      <div className="container py-8">
+        <div className="mx-auto max-w-3xl">
+          <Card className="border-destructive/40">
+            <CardHeader>
+              <CardTitle className="text-destructive">Result Invalid</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 text-sm">
+              <p>
+                This attempt was marked invalid due to integrity violations during
+                the test session.
+              </p>
+              <Button asChild>
+                <Link href="/test">Go to Test Selection</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
   }
 
+  const score = result.totalQuestions
+    ? (result.correctAnswers / result.totalQuestions) * 100
+    : 0;
+
   return (
-    <div className="container py-8 max-w-4xl mx-auto">
-      <div className="space-y-8">
-        <div className="flex flex-col items-center text-center">
-          <h1 className="text-4xl font-bold ">Test Results</h1>
-        </div>
+    <div className="container py-8">
+      <div className="mx-auto max-w-5xl space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Test Result</CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="rounded-md border border-border p-3">
+              <p className="text-xs text-muted-foreground">Correct Answers</p>
+              <p className="text-xl font-semibold tabular-nums">
+                {result.correctAnswers}/{result.totalQuestions}
+              </p>
+            </div>
+            <div className="rounded-md border border-border p-3">
+              <p className="text-xs text-muted-foreground">Score</p>
+              <p className="text-xl font-semibold tabular-nums">
+                {score.toFixed(2)}%
+              </p>
+            </div>
+            <div className="rounded-md border border-border p-3">
+              <p className="text-xs text-muted-foreground">Time Spent</p>
+              <p className="text-xl font-semibold tabular-nums">
+                {result.timeSpent}s
+              </p>
+            </div>
+            <div className="rounded-md border border-border p-3">
+              <p className="text-xs text-muted-foreground">Tab Switches</p>
+              <p className="text-xl font-semibold tabular-nums">
+                {result.tabSwitches}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
 
-        <div className="bg-card rounded-xl shadow-lg p-6">
-          <TestResult
-            totalQuestions={result.totalQuestions}
-            correctAnswers={result.correctAnswers}
-            score={(result.correctAnswers / result.totalQuestions) * 100}
-            timeSpent={result.timeSpent}
-            tabSwitches={result.tabSwitches || 0}
-            autoSubmitted={result.autoSubmitted || false}
-            sectionResults={result.sectionResults}
-          />
+        {result.sectionResults && result.sectionResults.length > 0 ? (
+          <Card>
+            <CardHeader>
+              <CardTitle>Section Performance</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {result.sectionResults.map((section) => (
+                <div
+                  key={section.name}
+                  className="grid gap-2 rounded-md border border-border p-3 sm:grid-cols-4"
+                >
+                  <p className="font-medium">{section.name}</p>
+                  <p className="text-sm tabular-nums">
+                    {section.correctAnswers}/{section.totalQuestions}
+                  </p>
+                  <p className="text-sm tabular-nums">{section.score.toFixed(2)}%</p>
+                  <p className="text-sm tabular-nums">{section.timeSpent}s</p>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        ) : null}
 
-          <QuestionAnalysis questionAnalysis={result.questionAnalysis || []} />
+        <div className="flex justify-end">
+          <Button asChild>
+            <Link href="/test">Take Another Test</Link>
+          </Button>
         </div>
       </div>
     </div>

@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/stores/auth-store";
 
-const PUBLIC_PATHS = ["/", "/sign-in", "/sign-up", "/about", "/landing-page-codex", "/landing-page-gemini", "/landing-page-glm", "/landingPage-codexatelier"];
+const PUBLIC_PATHS = ["/", "/sign-in", "/sign-up"];
 
 function isPublicPath(pathname: string): boolean {
     return PUBLIC_PATHS.some(

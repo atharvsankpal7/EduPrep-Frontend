@@ -1,7 +1,7 @@
 "use client";
 
-import { TestInfoDisplay } from "@/components/test/test-info-display";
-import { ErrorMessageDialog } from "@/components/test/error-message";
+import { TestInfoDisplay } from "@/components/test-engine/pre-test/test-info-display";
+import { ErrorMessageDialog } from "@/components/test-engine/pre-test/error-message-dialog";
 import { EducationLevel } from "@/types/global/interface/test.apiInterface";
 import LoadingComponent from "@/components/loading";
 import { useCreateAndNavigate } from "../use-create-and-navigate";
@@ -30,6 +30,8 @@ export default function CetTestPage() {
         duration={180}
         questionCount={100}
         onStart={startTest}
+        startButtonLabel={isPending ? "Creating Test..." : "Start Test"}
+        isStartDisabled={isPending}
         requirements={[
           "Enough time for the test",
           "Stable internet connection",

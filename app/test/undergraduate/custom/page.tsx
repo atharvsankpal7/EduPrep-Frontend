@@ -2,26 +2,22 @@
 
 import { useState } from "react";
 import { CustomizedTest } from "@/components/custom-practice/customized-test";
-import { TestInfoDisplay } from "@/components/test/test-info-display";
-import { TestConfigDialog } from "@/components/test/custom-practice/test-config-dialog";
-import { ErrorMessageDialog } from "@/components/test/error-message";
-import { useCreateTest } from "@/lib/api/hooks/useCreateTest";
+import { TestInfoDisplay } from "@/components/test-engine/pre-test/test-info-display";
+import { TestConfigDialog } from "@/components/test-engine/pre-test/test-config-dialog";
+import { ErrorMessageDialog } from "@/components/test-engine/pre-test/error-message-dialog";
 import { EducationLevel, TopicList } from "@/types/global/interface/test.apiInterface";
 import { undergraduateSubjects } from "@/lib/data/undergraduate-subjects";
-import { useRouter } from "next/navigation";
-import { useToast } from "@/components/ui/use-toast";
+import { useCreateAndNavigate } from "@/app/test/junior-college/use-create-and-navigate";
 
 export default function CustomTestPage() {
   const [showConfig, setShowConfig] = useState(false);
-  const [showError, setShowError] = useState(false);
   const [selectedTopics, setSelectedTopics] = useState<TopicList | null>(null);
   const [testConfig, setTestConfig] = useState<{
     duration: number;
     questionCount: number;
   } | null>(null);
-  const router = useRouter();
-  const { toast } = useToast();
-  const createTestMutation = useCreateTest();
+  const { createAndNavigate, isPending, hasError, clearError } =
+    useCreateAndNavigate();
 
   const handleTopicsSelected = (topics: TopicList) => {
     setSelectedTopics(topics);
@@ -39,47 +35,26 @@ export default function CustomTestPage() {
   const startTest = () => {
     if (!selectedTopics || !testConfig) return;
 
-    createTestMutation.mutate(
-      {
-        educationLevel: EducationLevel.Undergraduate,
-        topicList: selectedTopics,
-        numberOfQuestions: testConfig.questionCount,
-        time: testConfig.duration,
-      },
-      {
-        onSuccess: (response: any) => {
-          const testId = response?.data?.testDetails?.testId ?? response?.testId;
-          if (!testId) {
-            setShowError(true);
-            return;
-          }
-          router.push(`/test/${testId}`);
-        },
-        onError: () => {
-          setShowError(true);
-          toast({
-            title: "Error",
-            description: "Failed to create test. Please try again.",
-            variant: "destructive",
-          });
-        },
-      }
-    );
+    createAndNavigate({
+      educationLevel: EducationLevel.Undergraduate,
+      topicList: selectedTopics,
+      numberOfQuestions: testConfig.questionCount,
+      time: testConfig.duration,
+    });
   };
 
   if (testConfig && selectedTopics) {
     return (
       <>
-        <ErrorMessageDialog
-          open={showError}
-          onClose={() => setShowError(false)}
-        />
+        <ErrorMessageDialog open={hasError} onClose={clearError} />
         <TestInfoDisplay
           title="Custom Practice Test"
           description="Personalized test based on your selected topics"
           duration={testConfig.duration}
           questionCount={testConfig.questionCount}
           onStart={startTest}
+          startButtonLabel={isPending ? "Creating Test..." : "Start Test"}
+          isStartDisabled={isPending}
           requirements={[
             "Working webcam and microphone",
             "Stable internet connection",
@@ -87,6 +62,14 @@ export default function CustomTestPage() {
           ]}
         />
       </>
+    );
+  }
+
+  if (isPending) {
+    return (
+      <div className="container py-8 text-center text-muted-foreground">
+        Creating your test...
+      </div>
     );
   }
 

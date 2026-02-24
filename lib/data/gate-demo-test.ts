@@ -1,6 +1,10 @@
-import { Question } from "@/components/test/test-interface";
+export interface DemoQuestion {
+  question: string;
+  options: string[];
+  correctAnswer: number;
+}
 
-export const gateQuestions: Question[] = [
+export const gateQuestions: DemoQuestion[] = [
   { 
     question: "What is the time complexity of QuickSort in the worst case?",
     options: ["O(n log n)", "O(n²)", "O(n)", "O(log n)"],

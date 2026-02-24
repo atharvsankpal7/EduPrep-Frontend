@@ -1,6 +1,6 @@
-import { Question } from "@/components/test/test-interface";
+import type { DemoQuestion } from "@/lib/data/gate-demo-test";
 
-export const cetQuestions= [
+export const cetQuestions: DemoQuestion[] = [
   
   {
     question: "Which of these is not a noble gas?",
@@ -504,5 +504,3 @@ export const cetQuestions= [
     correctAnswer: 1
   }
 ];
-
-console.log(cetQuestions.length);

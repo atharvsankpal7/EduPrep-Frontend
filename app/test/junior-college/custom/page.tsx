@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { TestInfoDisplay } from "@/components/test/test-info-display";
-import { TestConfigDialog } from "@/components/test/custom-practice/test-config-dialog";
-import { ErrorMessageDialog } from "@/components/test/error-message";
+import { TestInfoDisplay } from "@/components/test-engine/pre-test/test-info-display";
+import { TestConfigDialog } from "@/components/test-engine/pre-test/test-config-dialog";
+import { ErrorMessageDialog } from "@/components/test-engine/pre-test/error-message-dialog";
 import { EducationLevel, TopicList } from "@/types/global/interface/test.apiInterface";
 import { CetTopicsSelector } from "@/components/custom-practice/cet-topics-selector";
 import { useCetTopics } from "@/lib/api/hooks/useCetTopics";
@@ -68,6 +68,8 @@ export default function CustomTestPage() {
           duration={testConfig.duration}
           questionCount={testConfig.questionCount}
           onStart={startTest}
+          startButtonLabel={isPending ? "Creating Test..." : "Start Test"}
+          isStartDisabled={isPending}
           requirements={[
             "Working webcam and microphone",
             "Stable internet connection",
