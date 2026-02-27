@@ -1,31 +1,35 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Clock, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDigitalDurationFromSeconds } from "@/lib/time";
 import { testUi } from "@/components/test/test-design-system";
 
 interface TimerProps {
-  timeLeft: number;
+  duration: number;
   totalTime: number;
-  setTimeLeft: React.Dispatch<React.SetStateAction<number>>;
   onTimeUp: () => void;
   variant?: "panel" | "inline";
 }
 
 export function Timer({
-  timeLeft,
+  duration,
   totalTime,
-  setTimeLeft,
   onTimeUp,
   variant = "panel",
 }: TimerProps) {
+  const [timeLeft, setTimeLeft] = useState(duration);
   const onTimeUpRef = useRef(onTimeUp);
 
   useEffect(() => {
     onTimeUpRef.current = onTimeUp;
   }, [onTimeUp]);
+
+  useEffect(() => {
+    // Reset timer when duration changes (e.g., next section)
+    setTimeLeft(duration);
+  }, [duration]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -40,7 +44,7 @@ export function Timer({
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [setTimeLeft]);
+  }, [duration]); // Re-run effect if duration changes (though setTimeLeft(duration) handles the value, we want to restart the interval logic cleanly)
 
   const isLowTime = timeLeft < 300;
   const timeProgress = totalTime > 0 ? (timeLeft / totalTime) * 100 : 0;
