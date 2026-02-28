@@ -8,7 +8,7 @@
     --blue-primary: 221.2 83.2% 53.3%;
     --blue-light: 214 84% 56%;
     --blue-dark: 224 76% 48%;
-    
+
     /* Secondary Gingers - Analogous */
     --ginger-primary: 24 95% 53%;
     --ginger-light: 30 95% 60%;
@@ -25,13 +25,13 @@
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    
+
     /* Semantic Colors */
     --primary: var(--blue-primary);
     --primary-foreground: 210 40% 98%;
     --secondary: var(--ginger-primary);
     --secondary-foreground: 222.2 47.4% 11.2%;
-    
+
     /* UI Elements */
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
@@ -43,6 +43,23 @@
     --input: 214.3 31.8% 91.4%;
     --ring: var(--blue-primary);
     --radius: 0.5rem;
+
+    /* Question Status Colors — WCAG AA compliant against --card */
+    --status-review-bg: 267 100% 96%;
+    --status-review-border: 265 76% 82%;
+    --status-review-text: 270 60% 30%;
+    --status-unanswered-bg: 357 100% 96%;
+    --status-unanswered-border: 357 85% 87%;
+    --status-unanswered-text: 356 62% 34%;
+    --status-answered-bg: 151 55% 94%;
+    --status-answered-border: 152 49% 77%;
+    --status-answered-text: 155 64% 22%;
+    --status-warning-bg: 44 100% 94%;
+    --status-warning-border: 40 94% 83%;
+    --status-warning-text: 35 88% 26%;
+    --status-danger-bg: 357 100% 95%;
+    --status-danger-border: 357 85% 84%;
+    --status-danger-text: 356 70% 32%;
 
     /* Chart Colors - Analogous Harmony */
     --chart-1: var(--blue-primary);
@@ -59,13 +76,13 @@
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
- 
+
   .dark {
     /* Dark Mode Adjustments */
     --blue-primary: 217.2 91.2% 59.8%;
     --blue-light: 213 90% 62%;
     --blue-dark: 220 85% 57%;
-    
+
     --ginger-primary: 24 95% 53%;
     --ginger-light: 30 90% 55%;
     --ginger-dark: 20 85% 50%;
@@ -79,12 +96,12 @@
     --card-foreground: 210 40% 98%;
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-    
+
     --primary: var(--blue-primary);
     --primary-foreground: 222.2 47.4% 11.2%;
     --secondary: var(--ginger-primary);
     --secondary-foreground: 210 40% 98%;
-    
+
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
     --accent: var(--accent-warm);
@@ -94,6 +111,23 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: var(--blue-light);
+
+    /* Question Status Colors — Dark — WCAG AA compliant against dark --card */
+    --status-review-bg: 268 48% 20%;
+    --status-review-border: 267 50% 34%;
+    --status-review-text: 270 90% 85%;
+    --status-unanswered-bg: 355 44% 20%;
+    --status-unanswered-border: 356 45% 33%;
+    --status-unanswered-text: 358 90% 85%;
+    --status-answered-bg: 155 40% 20%;
+    --status-answered-border: 155 35% 33%;
+    --status-answered-text: 152 72% 82%;
+    --status-warning-bg: 40 42% 20%;
+    --status-warning-border: 40 46% 35%;
+    --status-warning-text: 46 90% 82%;
+    --status-danger-bg: 356 44% 20%;
+    --status-danger-border: 356 50% 35%;
+    --status-danger-text: 358 90% 85%;
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -104,15 +138,16 @@
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
- 
+
 @layer base {
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
-  
+
   /* Hide navbar when in test mode */
   body.test-mode header {
     display: none;
@@ -157,9 +192,12 @@
 
 /* Enhanced Animations */
 @keyframes float {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0) rotate(0);
   }
+
   50% {
     transform: translateY(-10px) rotate(1deg);
   }
@@ -172,28 +210,22 @@
 /* Enhanced Card Styles */
 .card-highlight {
   @apply border-2 border-primary/10 hover:border-primary/30 transition-all duration-300;
-  background: linear-gradient(
-    135deg,
-    hsl(var(--background)),
-    hsl(var(--card))
-  );
+  background: linear-gradient(135deg,
+      hsl(var(--background)),
+      hsl(var(--card)));
 }
 
 .card-highlight:hover {
-  background: linear-gradient(
-    135deg,
-    hsl(var(--card)),
-    hsl(var(--background))
-  );
+  background: linear-gradient(135deg,
+      hsl(var(--card)),
+      hsl(var(--background)));
 }
 
 .card-highlight-secondary {
   @apply border-2 border-secondary/10 hover:border-secondary/30 transition-all duration-300;
-  background: linear-gradient(
-    135deg,
-    hsl(var(--background)),
-    hsl(var(--card))
-  );
+  background: linear-gradient(135deg,
+      hsl(var(--background)),
+      hsl(var(--card)));
 }
 
 /* Glass Effect */
@@ -237,11 +269,9 @@
 
 /* Section Backgrounds */
 .section-pattern {
-  background-image: radial-gradient(
-    circle at 1px 1px,
-    hsl(var(--muted-foreground) / 0.1) 1px,
-    transparent 0
-  );
+  background-image: radial-gradient(circle at 1px 1px,
+      hsl(var(--muted-foreground) / 0.1) 1px,
+      transparent 0);
   background-size: 20px 20px;
 }
 
@@ -261,15 +291,24 @@
   --font-landing-mono: 'IBM Plex Mono', monospace;
 }
 
-.landing-page-glm .font-display { font-family: var(--font-landing-display); }
-.landing-page-glm .font-body { font-family: var(--font-landing-body); }
-.landing-page-glm .font-mono { font-family: var(--font-landing-mono); }
+.landing-page-glm .font-display {
+  font-family: var(--font-landing-display);
+}
+
+.landing-page-glm .font-body {
+  font-family: var(--font-landing-body);
+}
+
+.landing-page-glm .font-mono {
+  font-family: var(--font-landing-mono);
+}
 
 @keyframes fadeInUp {
   from {
     opacity: 0;
     transform: translateY(30px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -277,8 +316,13 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes scaleIn {
@@ -286,6 +330,7 @@
     opacity: 0;
     transform: scale(0.9);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
@@ -307,18 +352,35 @@
   opacity: 0;
 }
 
-.landing-page-glm .delay-100 { animation-delay: 100ms; }
-.landing-page-glm .delay-200 { animation-delay: 200ms; }
-.landing-page-glm .delay-300 { animation-delay: 300ms; }
-.landing-page-glm .delay-400 { animation-delay: 400ms; }
-.landing-page-glm .delay-500 { animation-delay: 500ms; }
-.landing-page-glm .delay-600 { animation-delay: 600ms; }
+.landing-page-glm .delay-100 {
+  animation-delay: 100ms;
+}
+
+.landing-page-glm .delay-200 {
+  animation-delay: 200ms;
+}
+
+.landing-page-glm .delay-300 {
+  animation-delay: 300ms;
+}
+
+.landing-page-glm .delay-400 {
+  animation-delay: 400ms;
+}
+
+.landing-page-glm .delay-500 {
+  animation-delay: 500ms;
+}
+
+.landing-page-glm .delay-600 {
+  animation-delay: 600ms;
+}
 
 .landing-page-glm .scroll-reveal {
   opacity: 0;
   transform: translateY(40px);
   transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .landing-page-glm .scroll-reveal.visible {
@@ -326,64 +388,421 @@
   transform: translateY(0);
 }
 
-@layer base {
-  .test-interface-theme {
-    --test-bg: 204 33% 95%;
-    --test-surface: 0 0% 100%;
-    --test-surface-muted: 204 36% 98%;
-    --test-foreground: 210 32% 14%;
-    --test-muted-foreground: 214 17% 38%;
-    --test-border: 212 24% 86%;
-    --test-border-strong: 212 20% 78%;
-    --test-primary: 180 56% 31%;
-    --test-primary-foreground: 0 0% 100%;
-    --test-focus: 180 60% 37%;
-    --test-status-review-bg: 267 100% 96%;
-    --test-status-review-border: 265 76% 82%;
-    --test-status-review-text: 266 56% 35%;
-    --test-status-unanswered-bg: 357 100% 96%;
-    --test-status-unanswered-border: 357 85% 87%;
-    --test-status-unanswered-text: 356 56% 40%;
-    --test-status-answered-bg: 151 55% 94%;
-    --test-status-answered-border: 152 49% 77%;
-    --test-status-answered-text: 155 58% 28%;
-    --test-status-warning-bg: 44 100% 94%;
-    --test-status-warning-border: 40 94% 83%;
-    --test-status-warning-text: 31 92% 30%;
-    --test-status-danger-bg: 357 100% 95%;
-    --test-status-danger-border: 357 85% 84%;
-    --test-status-danger-text: 356 64% 36%;
-    --test-status-primary-soft-bg: 180 45% 90%;
-    --test-status-primary-soft-text: 180 56% 31%;
+/* ═══════════════════════════════════════════════════════════ */
+/*  TEST ENGINE — Premium Assessment Interface                */
+/* ═══════════════════════════════════════════════════════════ */
+
+/* Glass header bar */
+.te-header {
+  position: relative;
+  z-index: 40;
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  background: hsl(var(--background) / 0.72);
+  border-bottom: 1px solid hsl(var(--border) / 0.5);
+  box-shadow: 0 1px 3px hsl(var(--foreground) / 0.04);
+  transition: box-shadow 0.3s ease;
+}
+
+.te-header:hover {
+  box-shadow: 0 4px 12px hsl(var(--foreground) / 0.06);
+}
+
+/* Progress bar track */
+.te-progress-track {
+  position: relative;
+  height: 3px;
+  width: 100%;
+  background: hsl(var(--muted));
+  overflow: hidden;
+  border-radius: 999px;
+}
+
+.te-progress-fill {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg,
+      hsl(var(--blue-dark)),
+      hsl(var(--blue-primary)),
+      hsl(var(--blue-light)));
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Timer states */
+.te-timer {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.875rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  font-size: 0.875rem;
+  border: 1px solid hsl(var(--border));
+  color: hsl(var(--foreground));
+  background: hsl(var(--card));
+  transition: all 0.3s ease;
+}
+
+.te-timer[data-urgency="normal"] {
+  border-color: hsl(var(--border));
+  color: hsl(var(--foreground));
+}
+
+.te-timer[data-urgency="warning"] {
+  border-color: hsl(var(--ginger-primary) / 0.5);
+  color: hsl(var(--ginger-primary));
+  background: hsl(var(--ginger-primary) / 0.06);
+}
+
+.te-timer[data-urgency="critical"] {
+  border-color: hsl(var(--destructive) / 0.5);
+  color: hsl(var(--destructive));
+  background: hsl(var(--destructive) / 0.06);
+  animation: te-pulse-critical 1.5s ease-in-out infinite;
+}
+
+@keyframes te-pulse-critical {
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 hsl(var(--destructive) / 0.15);
   }
 
-  .dark .test-interface-theme {
-    --test-bg: 224 33% 8%;
-    --test-surface: 222 24% 12%;
-    --test-surface-muted: 222 22% 16%;
-    --test-foreground: 210 40% 96%;
-    --test-muted-foreground: 214 20% 72%;
-    --test-border: 220 16% 22%;
-    --test-border-strong: 220 18% 32%;
-    --test-primary: 183 73% 45%;
-    --test-primary-foreground: 210 40% 98%;
-    --test-focus: 183 73% 52%;
-    --test-status-review-bg: 268 48% 20%;
-    --test-status-review-border: 267 50% 34%;
-    --test-status-review-text: 268 100% 88%;
-    --test-status-unanswered-bg: 355 44% 20%;
-    --test-status-unanswered-border: 356 45% 33%;
-    --test-status-unanswered-text: 356 100% 88%;
-    --test-status-answered-bg: 155 40% 20%;
-    --test-status-answered-border: 155 35% 33%;
-    --test-status-answered-text: 152 72% 85%;
-    --test-status-warning-bg: 40 42% 20%;
-    --test-status-warning-border: 40 46% 35%;
-    --test-status-warning-text: 46 100% 86%;
-    --test-status-danger-bg: 356 44% 20%;
-    --test-status-danger-border: 356 50% 35%;
-    --test-status-danger-text: 356 100% 88%;
-    --test-status-primary-soft-bg: 183 36% 22%;
-    --test-status-primary-soft-text: 183 73% 74%;
+  50% {
+    box-shadow: 0 0 0 6px hsl(var(--destructive) / 0);
   }
+}
+
+/* Option card — premium clickable surface */
+.te-option-card {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  border-radius: 0.625rem;
+  border: 1.5px solid hsl(var(--border));
+  background: hsl(var(--card));
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.1s ease;
+  user-select: none;
+}
+
+.te-option-card:hover:not([data-disabled="true"]):not([data-selected="true"]) {
+  border-color: hsl(var(--blue-primary) / 0.35);
+  background: hsl(var(--blue-primary) / 0.04);
+}
+
+/* Physical button-press feel */
+.te-option-card:active:not([data-disabled="true"]) {
+  transform: scale(0.98);
+}
+
+.te-option-card[data-selected="true"] {
+  border-color: hsl(var(--blue-primary) / 0.6);
+  background: linear-gradient(135deg,
+      hsl(var(--blue-dark) / 0.08),
+      hsl(var(--blue-primary) / 0.12));
+  box-shadow:
+    0 0 0 1px hsl(var(--blue-primary) / 0.15),
+    0 4px 16px hsl(var(--blue-primary) / 0.1);
+}
+
+.te-option-card[data-disabled="true"] {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+/* Hotkey selection ripple flash */
+@keyframes te-hotkey-flash {
+  0% {
+    box-shadow: 0 0 0 0 hsl(var(--blue-primary) / 0.4);
+  }
+
+  50% {
+    box-shadow: 0 0 0 6px hsl(var(--blue-primary) / 0.15);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 hsl(var(--blue-primary) / 0);
+  }
+}
+
+.te-option-card[data-hotkey-flash="true"] {
+  animation: te-hotkey-flash 0.4s ease-out;
+}
+
+/* Result review — correct option */
+.te-option-card[data-result="correct"] {
+  border-color: hsl(var(--status-answered-border));
+  background: hsl(var(--status-answered-bg));
+}
+
+.te-option-card[data-result="correct"] .te-kbd {
+  background: hsl(var(--status-answered-text));
+  border-color: hsl(var(--status-answered-text));
+  color: white;
+}
+
+/* Result review — incorrect (user's wrong pick) */
+.te-option-card[data-result="incorrect"] {
+  border-color: hsl(var(--status-unanswered-border));
+  background: hsl(var(--status-unanswered-bg));
+}
+
+.te-option-card[data-result="incorrect"] .te-kbd {
+  background: hsl(var(--status-unanswered-text));
+  border-color: hsl(var(--status-unanswered-text));
+  color: white;
+}
+
+/* Result review — neutral (not selected, not correct) */
+.te-option-card[data-result="neutral"] {
+  opacity: 0.65;
+  cursor: default;
+}
+
+/* Result grid button states */
+.te-grid-btn[data-status="correct"] {
+  border-color: hsl(var(--status-answered-border));
+  background: hsl(var(--status-answered-bg));
+  color: hsl(var(--status-answered-text));
+}
+
+.te-grid-btn[data-status="incorrect"] {
+  border-color: hsl(var(--status-unanswered-border));
+  background: hsl(var(--status-unanswered-bg));
+  color: hsl(var(--status-unanswered-text));
+}
+
+.te-grid-btn[data-status="skipped"] {
+  border-style: dashed;
+}
+
+/* Keyboard badge */
+.te-kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  padding: 0 0.25rem;
+  border-radius: 0.25rem;
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--muted));
+  font-size: 0.6875rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: hsl(var(--muted-foreground));
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.te-option-card[data-selected="true"] .te-kbd {
+  background: hsl(var(--blue-primary));
+  border-color: hsl(var(--blue-primary));
+  color: hsl(var(--primary-foreground));
+}
+
+/* Question grid shapes */
+.te-grid-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  border: 1.5px solid hsl(var(--border));
+  background: hsl(var(--card));
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.te-grid-btn:hover:not(:disabled) {
+  filter: brightness(0.95);
+}
+
+/* Visited-unanswered gets a dashed border to stand out */
+.te-grid-btn[data-status="visited-unanswered"] {
+  border-style: dashed;
+}
+
+/* Marked for review — rounded top, square bottom */
+.te-grid-btn[data-status="marked-for-review"] {
+  border-radius: 1.5rem 1.5rem 0 0;
+}
+
+/* Status colors */
+.te-grid-btn[data-status="answered"] {
+  border-color: hsl(var(--status-answered-border));
+  background: hsl(var(--status-answered-bg));
+  color: hsl(var(--status-answered-text));
+}
+
+.te-grid-btn[data-status="marked-for-review"] {
+  border-color: hsl(var(--status-review-border));
+  background: hsl(var(--status-review-bg));
+  color: hsl(var(--status-review-text));
+}
+
+.te-grid-btn[data-status="visited-unanswered"] {
+  border-color: hsl(var(--status-unanswered-border));
+  background: hsl(var(--status-unanswered-bg));
+  color: hsl(var(--status-unanswered-text));
+}
+
+/* Current highlight ring */
+.te-grid-btn[data-current="true"] {
+  box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--ring));
+}
+
+/* Footer bar */
+.te-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  background: hsl(var(--background) / 0.88);
+  border-top: 1px solid hsl(var(--border) / 0.5);
+  padding: 0.75rem 1rem;
+  padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+}
+
+/* Proctoring alert state — red vignette */
+.te-proctor-alert {
+  position: fixed;
+  inset: 0;
+  z-index: 35;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.te-proctor-alert[data-active="true"] {
+  opacity: 1;
+  animation: te-vignette-pulse 2s ease-in-out 3;
+}
+
+@keyframes te-vignette-pulse {
+
+  0%,
+  100% {
+    box-shadow: inset 0 0 120px 40px hsl(var(--destructive) / 0.06);
+  }
+
+  50% {
+    box-shadow: inset 0 0 120px 40px hsl(var(--destructive) / 0.15);
+  }
+}
+
+/* Skeleton shimmers */
+.te-skeleton {
+  background: linear-gradient(90deg,
+      hsl(var(--muted)) 25%,
+      hsl(var(--muted-foreground) / 0.06) 50%,
+      hsl(var(--muted)) 75%);
+  background-size: 200% 100%;
+  animation: te-shimmer 1.5s infinite;
+  border-radius: 0.375rem;
+}
+
+@keyframes te-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Collapsible sidebar transition */
+.te-sidebar-toggle {
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.2s ease,
+    padding 0.3s ease;
+}
+
+/* Smooth panel expand when sidebar collapses */
+.te-panel-expand {
+  transition: flex-basis 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Mobile touch targets — enforce 44px minimum */
+@media (pointer: coarse) {
+  .te-footer button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .te-option-card {
+    min-height: 44px;
+  }
+
+  .te-grid-btn {
+    min-width: 44px;
+    min-height: 44px;
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+}
+
+/* Legend items */
+.te-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.6875rem;
+  color: hsl(var(--muted-foreground));
+  font-weight: 500;
+}
+
+.te-legend-swatch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  border-width: 1.5px;
+  flex-shrink: 0;
+}
+
+/* Ensure focus visible states for a11y */
+.te-option-card:focus-visible,
+.te-grid-btn:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+/* Drag handle — visible affordance on resize handle */
+.te-drag-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 2.5rem;
+  border-radius: 0.375rem;
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--muted));
+  color: hsl(var(--muted-foreground));
+  transition: background 0.15s ease, color 0.15s ease;
+  cursor: col-resize;
+}
+
+.te-drag-handle:hover {
+  background: hsl(var(--accent-cool) / 0.15);
+  color: hsl(var(--foreground));
 }

@@ -9,13 +9,11 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Building2, ArrowLeft } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useCreateTest } from "@/lib/api/hooks/useCreateTest";
 import { EducationLevel } from "@/types/global/interface/test.apiInterface";
 import { useState } from "react";
-import { ErrorMessageDialog } from "@/components/test/error-message";
-import { useToast } from "@/components/ui/use-toast";
-import { TestInfoDisplay } from "@/components/test/test-info-display";
+import { ErrorMessageDialog } from "@/components/test-engine/pre-test/error-message-dialog";
+import { TestInfoDisplay } from "@/components/test-engine/pre-test/test-info-display";
+import { useCreateAndNavigate } from "@/app/test/junior-college/use-create-and-navigate";
 
 const companies = [
   {
@@ -64,46 +62,21 @@ const item = {
 };
 
 export default function CompanyTestPage() {
-  const router = useRouter();
-  const [showError, setShowError] = useState(false);
-  const { toast } = useToast();
   const [selectedCompany, setSelectedCompany] = useState<typeof companies[0] | null>(null);
-  const createTestMutation = useCreateTest();
+  const { createAndNavigate, isPending, hasError, clearError } =
+    useCreateAndNavigate();
 
   const handleStartTest = (companyId: string) => {
-    createTestMutation.mutate(
-      {
-        educationLevel: EducationLevel.Undergraduate,
-        company: companyId,
-      },
-      {
-        onSuccess: (response: any) => {
-          const testId = response?.testId;
-          if (!testId) {
-            setShowError(true);
-            return;
-          }
-          router.push(`/test/${testId}`);
-        },
-        onError: () => {
-          setShowError(true);
-          toast({
-            title: "Error",
-            description: "Failed to create test. Please try again.",
-            variant: "destructive",
-          });
-        },
-      }
-    );
+    createAndNavigate({
+      educationLevel: EducationLevel.Undergraduate,
+      company: companyId,
+    });
   };
 
   if (selectedCompany) {
     return (
       <>
-        <ErrorMessageDialog
-          open={showError}
-          onClose={() => setShowError(false)}
-        />
+        <ErrorMessageDialog open={hasError} onClose={clearError} />
         <div className="container pt-8 pb-0">
           <div className="max-w-4xl mx-auto">
             <Button
@@ -121,6 +94,9 @@ export default function CompanyTestPage() {
           duration={selectedCompany.duration}
           questionCount={selectedCompany.questionCount}
           onStart={() => handleStartTest(selectedCompany.id)}
+          startButtonLabel={isPending ? "Starting Test..." : "Start Test"}
+          isStartDisabled={isPending}
+          isStartLoading={isPending}
           requirements={[
             "Stable internet connection",
             "Latest browser version",
@@ -134,10 +110,7 @@ export default function CompanyTestPage() {
 
   return (
     <div className="container py-8">
-      <ErrorMessageDialog
-        open={showError}
-        onClose={() => setShowError(false)}
-      />
+      <ErrorMessageDialog open={hasError} onClose={clearError} />
 
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">

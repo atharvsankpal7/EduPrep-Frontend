@@ -1,13 +1,21 @@
 "use client";
 
-import { TestSettings } from "@/components/test/teacher/test-settings";
-import { undergraduateSubjects } from "@/lib/data/undergraduate-subjects";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function TeacherDashboardPage() {
-  // Flatten all topics from undergraduate subjects
-  
-
   return (
-    <div>teacher</div>
+    <div className="container py-8">
+      <div className="mx-auto max-w-3xl">
+        <Card>
+          <CardHeader>
+            <CardTitle>Teacher Test Console</CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm text-muted-foreground">
+            Teacher-side test settings are currently being migrated to the new
+            test engine architecture.
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 }

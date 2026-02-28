@@ -1,0 +1,117 @@
+📋 The AI Agent Prompt
+  Role & Objective You are an expert React/Next.js engineer specializing in high-performance, lightweight web applications. Your task is to
+  build a highly optimized, fully functional Test Engine interface.
+1. Pre-Test Initialization (Setup)
+  Test Generation: The engine intercepts the user's request (e.g., a CET test or a custom topic test), creates the test instance via the
+  backend, and routes the user to a unique, dedicated test session URL.
+  Data Hydration: It pulls down the entire test structure: sections, duration limits per section, questions (including text or image content),
+  options, and rules.
+  Consent Wall (Functional): Before any timer begins or questions are shown, a mandatory "Important Test Rules" modal is presented. The student
+  cannot view the test without explicitly acknowledging and clicking "I Understand, Start Test".
+  2. Proctored Execution Environment (Non-Functional & Security)
+  The moment the user clicks "Start", the engine enforces a strict set of integrity rules:
+
+  Forced Fullscreen: The browser is immediately pushed into fullscreen mode to block out OS distractions and other application windows.
+  Clipboard Lockdown: The engine aggressively blocks all copy, cut, and paste commands. If a user tries to copy a question to search it online,
+  the action is blocked, and an error toast notification warns them.
+  Context Menu Blocking: Right-clicking is disabled to prevent accessing developer tools or saving the webpage locally.
+  Tab-Switch Monitoring & Auto-Submit (Strike System):
+  The engine constantly monitors if the browser tab loses focus or visibility.
+  Strikes 1 & 2: If the user minimizes the browser or switches tabs, a blocking warning modal halts the test, logging the violation. The second
+  warning explicitly states it is the final warning.
+  Strike 3: Upon a third tab switch, the engine instantly terminates the test, locks all controls, and forces an automatic submission tagged
+  with the violation metadata.
+  3. Core Test Interface & State (Functional)
+  During the test, the engine orchestrates several moving parts on the screen:
+
+  Question Panel: Displays the active question. If the question contains an image URL, it automatically renders the image responsively. It
+  renders multiple-choice options that users can select.
+  Action Footer: A sticky bottom bar providing simple traversal: "Previous", "Next", and "Next Section"/"Submit", tracking exactly where the
+  user is (e.g., Question 4 of 30).
+  Dynamic Visual Map: A persistent side panel gives a bird's-eye view of all questions in the current section. The engine color-codes each
+  question block in real-time based on the user's actions:
+  White/Gray: Not visited yet.
+  Red/Orange: Visited, but not answered.
+  Green: Visited and answered.
+  Purple/Blue: "Marked for Review" (a feature allowing students to flag unsure questions to revisit later).
+  4. Pacing & Time Management
+  Real-time Countdown: A persistent digital timer runs per section or globally.
+  Low-Time Alerts (Non-Functional): When the time drops below 5 minutes (300 seconds), the engine visually transitions the timer and surrounding
+  UI into a "Warning" state (typically red/amber) with an alert icon.
+  Strict Time Enforcement: The engine does not rely on the user to click submit. The exact second the timer hits zero, the engine rips control
+  away and instantly processes a submission or section jump.
+  5. Section Progression Logic (Functional)
+  One-Way Traversal: If the test is split into sections (e.g., Physics, then Chemistry), the engine ensures one-way progression.
+  Section Locks: When a user clicks "Next Section", a warning dialog appears requiring confirmation, clarifying that they cannot return to the
+  prior section and any unanswered questions will be permanently skipped.
+  Time Carry-over/Reset: Upon entering a new section, the engine resets the active question to #1, re-evaluates the timer based on the new
+  section's allocated duration, and updates the UI state.
+  6. Submission & Hand-Off
+  Manual Trigger: If on the final section and final question, the engine swaps the "Next" button for "Submit Test". To prevent accidental
+  misclicks, it spawns a confirmation dialog.
+  Metadata Compilation: During submission (whether manual, time-out, or forced via tab-switching), the engine silently bundles:
+  The exact sequence of selected answers.
+  The precise total time spent active on the test.
+  Proctoring metadata (e.g., was it auto-submitted? How many tab switches occurred?).
+  Backend Resolution: This bundle is securely transmitted. Once the server grades the test, the engine receives the specific Result ID and
+  gracefully transitions the interface away from the test boundary over to the detailed Result Analysis page.
+  Below is the exact functional and non-functional requirements of the engine you need to build.🎨 UI & Styling Constraints (CRITICAL)
+  Pure Shadcn/ui: You MUST use base shadcn/ui components for all interactive elements. Do NOT invent custom UI elements if a shadcn component
+  exists.
+  Zero Custom CSS: Do NOT write any .css files, custom CSS variables, or <style> tags. Everything must be styled using standard Tailwind CSS
+  utility classes.
+  Theming: Rely entirely on the default shadcn Tailwind CSS variables (e.g., bg-background, text-primary, bg-destructive, text-muted-
+  foreground).
+  🧩 Specific Component Mapping
+  Use the following shadcn/ui components for specific features:
+
+  Modals/Warnings (Consent, Tab-Switch, Submit Confirmation): Use AlertDialog to force user interaction (prevent overlay click-outs).
+  Section Navigation & Time-Up Toasts: Use useToast / Toaster.
+  Question Options: Use RadioGroup and RadioGroupItem with connected Label components for accessibility.
+
+  Minimal Re-renders: The countdown timer updates every second. CRITICAL: Do NOT put the timer state in the global parent component, as it will
+  re-render the heavy question content every second. Isolate the timer in its own minimal <Timer /> component, or utilize React.memo
+  effectively.
+  State Location: Separate the "UI State" (modals open/closed) from the "Engine State" (current answers, time left, tab switches). Use a custom
+  hook (e.g.,
+
+
+
+› Section Navigation & Time-Up Toasts: Use useToast / Toaster.
+  Question Options: Use RadioGroup and RadioGroupItem with connected Label components for accessibility.
+  Navigation Buttons (Previous, Next, Submit): Use
+
+  Button
+   with appropriate variants (outline, default, destructive).
+  Question Grid (Visual Map): Use a Tailwind flex/grid layout comprised of small
+
+  Button
+   components variant outline, using inline Tailwind conditional classes to color-code (e.g., bg-primary/10 for visited, bg-muted for not
+  visited).
+   Performance & State Management Rules
+  The application must be as lightweight as possible to run smoothly on low-end devices.
+
+  Minimal Re-renders: The countdown timer updates every second. CRITICAL: Do NOT put the timer state in the global parent component, as it will
+  re-render the heavy question content every second. Isolate the timer in its own minimal <Timer /> component, or utilize React.memo
+  effectively.
+  State Location: Separate the "UI State" (modals open/closed) from the "Engine State" (current answers, time left, tab switches). Use a custom
+  hook (e.g.,
+
+  useTestEngine
+  ) to encapsulate the complex logic.
+  Data Fetching: Assume the consumer will pass the raw test data into this interface component as props. Do not clutter the UI components with
+  API logic.
+  🛠 Code Quality & Architecture
+  Separation of Concerns: Break the UI down into small, single-responsibility components: <QuestionPanel />, <TestFooter />,
+  <ProctoringManager />, <QuestionGridBox />.
+  TypeScript: Strictly type all props, state, and function signatures. Create clear interfaces for the Test Data, Questions, and Submission
+  Payload. No use of
+
+  any
+  .
+  Callbacks: Wrap all functions passed down to children in useCallback to maintain referential equality. Wrap derived data (like transforming
+  the question list) in useMemo.
+  🛑 Ambiguity Resolution Rule
+  Before you write any code, read these instructions carefully. If any part of the component architecture, prop structure, proctoring edge-
+  cases, or Shadcn implementation is ambiguous, STOP AND ASK ME QUESTIONS FIRST. Do not make assumptions about data structures or routing
+  mechanisms without confirming. before starting ask me your doubts then we will start

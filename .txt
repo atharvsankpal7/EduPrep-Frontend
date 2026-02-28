@@ -1,0 +1,203 @@
+I want you to perform a senior-level architectural audit of my Next.js frontend application.
+
+Context:
+
+Next.js frontend (App Router or Pages Router — infer from code).
+
+Consumes a separate backend API.
+
+Uses TanStack Query for server-state management.
+
+This is intended to scale as a production SaaS.
+
+Do not give surface-level feedback.
+Evaluate this as if you are reviewing a codebase before approving it for long-term scale.
+
+1️⃣ Executive Score (Out of 100)
+
+Break it down across:
+
+System architecture quality
+
+Data-flow design correctness
+
+TanStack Query mastery
+
+Component boundaries & separation of concerns
+
+Scalability readiness
+
+Performance hygiene
+
+Long-term maintainability
+
+If something is fundamentally flawed, say so clearly.
+
+2️⃣ Architectural Integrity Review
+
+Evaluate whether:
+
+UI layer is truly separated from data layer.
+
+Business logic is abstracted or leaking into components.
+
+Server state and client state are cleanly separated.
+
+The app follows a predictable data flow model.
+
+Routing/layout structure will scale with feature growth.
+
+There is implicit coupling between unrelated modules.
+
+Identify:
+
+Architectural smells
+
+Anti-patterns
+
+Fragile abstractions
+
+Hidden technical debt
+
+Areas where scale will break this design
+
+If necessary, recommend a structural reorganization of the project.
+
+3️⃣ TanStack Query – Deep Correctness Audit
+
+Treat this as a professional audit of server-state management.
+
+Analyze:
+
+Query key design (namespacing, parameter structure, consistency)
+
+Cache invalidation strategy correctness
+
+Over-invalidation vs under-invalidation
+
+Accidental cache fragmentation
+
+Redundant data transformations
+
+Query waterfalls
+
+Proper use of select
+
+Proper usage of enabled
+
+Appropriate staleTime / gcTime
+
+Mutation side-effect handling
+
+Optimistic updates safety
+
+Error boundary strategy
+
+Retry strategy sanity
+
+Whether TanStack is being misused as global state
+
+If the mental model behind TanStack usage is incorrect, explicitly rewrite the correct mental model.
+
+4️⃣ Performance Pathology Detection
+
+Identify:
+
+Unnecessary renders
+
+Referential instability
+
+Prop drilling where composition would be better
+
+Missing memoization in expensive areas
+
+Excessive client components
+
+Avoidable hydration cost
+
+Layout thrashing
+
+List rendering inefficiencies
+
+Over-fetching patterns
+
+Data waterfalls caused by component nesting
+
+Explain why each issue occurs, not just what it is.
+
+5️⃣ Code Quality & Structural Cohesion
+
+Evaluate:
+
+Folder structure logic
+
+Feature-based vs layer-based organization
+
+Reusable hooks quality
+
+Duplication patterns
+
+Naming clarity
+
+Component responsibility boundaries
+
+File size discipline
+
+Testability
+
+Predictability of behavior
+
+Identify where cohesion is weak and coupling is high.
+
+6️⃣ Mental Model Diagnosis
+
+Infer the developer’s mental model from the code.
+
+For example:
+
+Are they treating TanStack like Redux?
+
+Are they duplicating server state into local state?
+
+Are they colocating logic incorrectly?
+
+Are they over-centralizing or over-fragmenting?
+
+Are they thinking in components instead of flows?
+
+Clearly describe:
+
+The current implicit mental model
+
+Why it will cause scaling issues
+
+The corrected model they should adopt
+
+7️⃣ If You Were the Tech Lead…
+
+If this codebase landed on your desk and you had 4 weeks:
+
+What would you refactor immediately?
+
+What would you redesign?
+
+What would you leave alone?
+
+What architectural direction would you set?
+
+What engineering standards would you introduce?
+
+8️⃣ Brutal Honesty Constraint
+
+Do not soften critique.
+Assume this system must support:
+
+10x feature growth
+
+10x traffic growth
+
+Multiple engineers working in parallel
+
+Focus only on leverage — changes that materially improve clarity, scale, and long-term maintainability.
+
+Avoid superficial feedback.

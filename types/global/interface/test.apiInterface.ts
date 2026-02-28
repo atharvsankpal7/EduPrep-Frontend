@@ -97,8 +97,7 @@ export interface TestPageProps {
 
 export interface TestResponse {
   test: {
-    id?: string;
-    _id?: string;
+    id: string;
     testName: string;
     totalDuration: number;
     totalQuestions: number;
@@ -107,14 +106,15 @@ export interface TestResponse {
       sectionDuration: number;
       totalQuestions: number;
       questions: {
-        id?: string;
-        _id?: string;
+        id: string;
         questionText: string;
+        imageUrl?: string;
         options: string[];
         answer: number;
         explanation: string;
       }[];
     }[];
+    proctoringEnabled?: boolean;
   };
 }
 
@@ -127,6 +127,40 @@ export interface TestSection {
     correctAnswer: number;
     id: string;
   }[];
+}
+
+export interface EngineQuestion {
+  id: string;
+  questionText: string;
+  imageUrl?: string;
+  options: string[];
+}
+
+export interface EngineSection {
+  id: string;
+  sectionName: string;
+  sectionDuration: number;
+  questions: EngineQuestion[];
+}
+
+export interface EngineTest {
+  id: string;
+  testName: string;
+  totalDuration: number;
+  totalQuestions: number;
+  proctoringEnabled: boolean;
+  sections: EngineSection[];
+}
+
+export type AutoSubmitReason =
+  | "manual"
+  | "time_up"
+  | "tab_switch"
+  | "fullscreen_exit";
+
+export interface RenderableContent {
+  kind: "text" | "image";
+  value: string;
 }
 
 export interface SubmitTestPayload {

@@ -5,7 +5,10 @@ take the information about the compnay-specific test from the backend
 also add a button under each of the company to see syllabus for that company 
 
 
-✅ JWT Auth<!-- add persistent storage for the user to store authentication 
--->
+make sure that we have working result page
 
-admin dashboard
+fix the navigation for the test [id]
+
+
+
+show time spent on each question

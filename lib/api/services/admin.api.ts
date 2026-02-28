@@ -1,7 +1,7 @@
 import api from "@/lib/api/axios";
 
 export interface Student {
-  _id: string;
+  id: string;
   email: string;
   fullName: string;
   role: string;

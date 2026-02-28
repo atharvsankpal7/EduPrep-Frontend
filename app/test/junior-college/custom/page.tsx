@@ -2,33 +2,29 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { TestInfoDisplay } from "@/components/test/test-info-display";
-import { TestConfigDialog } from "@/components/test/custom-practice/test-config-dialog";
-import { ErrorMessageDialog } from "@/components/test/error-message";
-import { useCreateTest } from "@/lib/api/hooks/useCreateTest";
+import { TestInfoDisplay } from "@/components/test-engine/pre-test/test-info-display";
+import { TestConfigDialog } from "@/components/test-engine/pre-test/test-config-dialog";
+import { ErrorMessageDialog } from "@/components/test-engine/pre-test/error-message-dialog";
 import { EducationLevel, TopicList } from "@/types/global/interface/test.apiInterface";
 import { CetTopicsSelector } from "@/components/custom-practice/cet-topics-selector";
 import { useCetTopics } from "@/lib/api/hooks/useCetTopics";
-import { useToast } from "@/components/ui/use-toast";
 import LoadingComponent from "@/components/loading";
+import { useCreateAndNavigate } from "../use-create-and-navigate";
 
 export default function CustomTestPage() {
   const [showConfig, setShowConfig] = useState(false);
-  const [showError, setShowError] = useState(false);
   const [selectedTopics, setSelectedTopics] = useState<TopicList | null>(null);
   const [testConfig, setTestConfig] = useState<{
     duration: number;
     questionCount: number;
   } | null>(null);
   const router = useRouter();
-  const { toast } = useToast();
 
-  // TanStack Query for fetching CET topics
   const { data: cetTopicsData, isLoading: loading } = useCetTopics();
   const cetTopics = cetTopicsData?.topicsBySubject ?? [];
 
-  // TanStack mutation for creating tests
-  const createTestMutation = useCreateTest();
+  const { createAndNavigate, isPending, hasError, clearError } =
+    useCreateAndNavigate();
 
   const handleTopicsSelected = (topics: TopicList) => {
     setSelectedTopics(topics);
@@ -46,32 +42,12 @@ export default function CustomTestPage() {
   const startTest = async () => {
     if (!selectedTopics || !testConfig) return;
 
-    createTestMutation.mutate(
-      {
-        educationLevel: EducationLevel.JuniorCollege,
-        topicList: selectedTopics,
-        numberOfQuestions: testConfig.questionCount,
-        time: testConfig.duration,
-      },
-      {
-        onSuccess: (response: any) => {
-          const testId = response?.data?.testDetails?.testId;
-          if (!testId) {
-            setShowError(true);
-            return;
-          }
-          router.push(`/test/${testId}`);
-        },
-        onError: () => {
-          setShowError(true);
-          toast({
-            title: "Error",
-            description: "Failed to create test. Please try again.",
-            variant: "destructive",
-          });
-        },
-      }
-    );
+    createAndNavigate({
+      educationLevel: EducationLevel.JuniorCollege,
+      topicList: selectedTopics,
+      numberOfQuestions: testConfig.questionCount,
+      time: testConfig.duration,
+    });
   };
 
   const handleBack = () => {
@@ -85,13 +61,16 @@ export default function CustomTestPage() {
   if (testConfig && selectedTopics) {
     return (
       <>
-        <ErrorMessageDialog open={showError} onClose={() => setShowError(false)} />
+        <ErrorMessageDialog open={hasError} onClose={clearError} />
         <TestInfoDisplay
           title="Custom CET Practice Test"
           description="Personalized test based on your selected topics"
           duration={testConfig.duration}
           questionCount={testConfig.questionCount}
           onStart={startTest}
+          startButtonLabel={isPending ? "Starting Test..." : "Start Test"}
+          isStartDisabled={isPending}
+          isStartLoading={isPending}
           requirements={[
             "Working webcam and microphone",
             "Stable internet connection",

@@ -1,86 +1,110 @@
 "use client";
 
-import { useMemo } from "react";
-import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
-import { TestResult } from "@/components/test/test-result";
-import InvalidResult from "@/components/test/result/invalid-result";
-import QuestionAnalysis from "@/components/test/result/question-analysis";
+import Link from "next/link";
+import { AlertTriangle, ArrowLeft } from "lucide-react";
 import LoadingComponent from "@/components/loading";
-import { fetchTestResultById } from "@/lib/api/services/test.api";
-import { TestResultData } from "@/types/global/interface/test.apiInterface";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useTestResult } from "@/lib/api/hooks/useTestResult";
+import { ResultReviewShell } from "@/components/test-engine/result-review-shell";
 
-export default function TestResultPage({ params }: { params: { id: string } }) {
-  const router = useRouter();
+export default function TestResultPage({
+  params,
+}: {
+  params: { id: string[] | string };
+}) {
+  const resultId = Array.isArray(params.id) ? params.id[0] : params.id;
+  const { data: result, isLoading, error } = useTestResult(resultId ?? "");
 
-  const { data: rawResult, error, isLoading } = useQuery({
-    queryKey: ["testResult", params.id],
-    queryFn: () => fetchTestResultById(params.id),
-  });
+  // ─── Missing ID ──────────────────────────────────────────
+  if (!resultId) {
+    return (
+      <div className="mx-auto max-w-xl px-4 py-12 text-center">
+        <Card className="border-destructive/40">
+          <CardContent className="flex flex-col items-center gap-4 p-8">
+            <AlertTriangle className="size-8 text-destructive" />
+            <p className="text-sm text-muted-foreground">
+              Invalid result URL — no result ID found.
+            </p>
+            <Button asChild variant="outline">
+              <Link href="/test">Back to Tests</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
-  // Derive the processed result from raw data
-  const result = useMemo<TestResultData | null>(() => {
-    if (!rawResult) return null;
-
-    const sectionResults =
-      rawResult.sectionResults?.map((section: any) => ({
-        name: section.sectionName,
-        totalQuestions: section.totalQuestions,
-        correctAnswers: section.correctAnswers,
-        score: (section.correctAnswers / section.totalQuestions) * 100,
-        timeSpent: section.timeSpent,
-      })) || [];
-
-    return {
-      ...rawResult,
-      sectionResults,
-      questionAnalysis: rawResult.questionAnalysis || [],
-    };
-  }, [rawResult]);
-
+  // ─── Loading ─────────────────────────────────────────────
   if (isLoading) {
     return <LoadingComponent />;
   }
 
+  // ─── Error ───────────────────────────────────────────────
   if (error) {
     return (
-      <div className="container py-8 text-center text-destructive">
-        {error instanceof Error ? error.message : "Failed to load test result"}
+      <div className="mx-auto max-w-xl px-4 py-12 text-center">
+        <Card className="border-destructive/40">
+          <CardContent className="flex flex-col items-center gap-4 p-8">
+            <AlertTriangle className="size-8 text-destructive" />
+            <p className="text-sm text-muted-foreground">
+              {error instanceof Error ? error.message : "Failed to load result."}
+            </p>
+            <Button asChild variant="outline">
+              <Link href="/test">Back to Tests</Link>
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
+  // ─── No data ─────────────────────────────────────────────
   if (!result) {
     return (
-      <div className="container py-8 text-center">No result data available</div>
+      <div className="mx-auto max-w-xl px-4 py-12 text-center">
+        <Card>
+          <CardContent className="p-8 text-muted-foreground">
+            No result data available.
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
+  // ─── Invalid attempt ─────────────────────────────────────
   if (result.invalid) {
-    return <InvalidResult onClick={() => router.push("/test")} />;
+    return (
+      <div className="mx-auto max-w-xl px-4 py-12">
+        <Card className="border-destructive/40">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="size-5" />
+              Result Invalidated
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4 text-sm text-muted-foreground">
+            <p>
+              This attempt was marked invalid due to integrity violations during
+              the test session.
+            </p>
+            {result.tabSwitches > 0 && (
+              <p className="text-xs">
+                Tab switches recorded: <strong>{result.tabSwitches}</strong>
+              </p>
+            )}
+            <Button asChild>
+              <Link href="/test">
+                <ArrowLeft className="mr-1.5 size-4" />
+                Go to Test Selection
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
-  return (
-    <div className="container py-8 max-w-4xl mx-auto">
-      <div className="space-y-8">
-        <div className="flex flex-col items-center text-center">
-          <h1 className="text-4xl font-bold ">Test Results</h1>
-        </div>
-
-        <div className="bg-card rounded-xl shadow-lg p-6">
-          <TestResult
-            totalQuestions={result.totalQuestions}
-            correctAnswers={result.correctAnswers}
-            score={(result.correctAnswers / result.totalQuestions) * 100}
-            timeSpent={result.timeSpent}
-            tabSwitches={result.tabSwitches || 0}
-            autoSubmitted={result.autoSubmitted || false}
-            sectionResults={result.sectionResults}
-          />
-
-          <QuestionAnalysis questionAnalysis={result.questionAnalysis || []} />
-        </div>
-      </div>
-    </div>
-  );
+  // ─── Review shell (reuses test engine layout) ────────────
+  return <ResultReviewShell result={result} />;
 }

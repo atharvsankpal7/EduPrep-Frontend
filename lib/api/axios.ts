@@ -2,6 +2,7 @@ import axios from "axios";
 import { BACKEND_URL } from "../constant";
 import { useAuthStore } from "../stores/auth-store";
 import { toast } from "@/components/ui/use-toast";
+import { isAuthPublicPath } from "@/lib/routing/public-paths";
 
 const api = axios.create({
   baseURL: BACKEND_URL,
@@ -15,16 +16,14 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     const status = error.response?.status;
+    const currentPath =
+      typeof window !== "undefined" ? window.location.pathname : "";
 
-    const isAuthPage =
-      typeof window !== "undefined" &&
-      (window.location.pathname.startsWith("/sign-in") ||
-        window.location.pathname.startsWith("/sign-up"));
+    const isAuthPage = isAuthPublicPath(currentPath);
 
     if (status === 401 && !isAuthPage) {
       useAuthStore.getState().logout();
       if (typeof window !== "undefined") {
-        const currentPath = window.location.pathname;
         toast({
           title: "Session Expired",
           description: "Please sign in again to continue.",

@@ -1,0 +1,123 @@
+"use client";
+
+import { memo, useState } from "react";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { TEGridButton } from "@/components/test-engine/te-primitives";
+import type { QuestionVisualState } from "@/hooks/use-test-engine";
+
+interface QuestionGridBoxProps {
+  totalQuestions: number;
+  currentQuestionIndex: number;
+  questionStatuses: QuestionVisualState[];
+  disabled?: boolean;
+  onSelectQuestion: (questionIndex: number) => void;
+}
+
+const LEGEND: {
+  label: string;
+  status: QuestionVisualState;
+}[] = [
+    { label: "Not Visited", status: "not-visited" },
+    { label: "Unanswered", status: "visited-unanswered" },
+    { label: "Answered", status: "answered" },
+    { label: "Review", status: "marked-for-review" },
+  ];
+
+function QuestionGridBoxComponent({
+  totalQuestions,
+  currentQuestionIndex,
+  questionStatuses,
+  disabled = false,
+  onSelectQuestion,
+}: QuestionGridBoxProps) {
+  const [isLegendOpen, setIsLegendOpen] = useState(false);
+
+  return (
+    <aside
+      className="flex flex-col rounded-xl border border-border bg-card"
+      aria-label="Question navigation palette"
+    >
+      {/* Header */}
+      <div className="border-b border-border px-4 py-3">
+        <h3 className="text-sm font-semibold text-foreground">
+          Question Palette
+        </h3>
+        <p className="mt-0.5 text-[0.6875rem] text-muted-foreground">
+          Jump to any question in this section
+        </p>
+      </div>
+
+      {/* Grid */}
+      <ScrollArea className="flex-1 px-4 py-3">
+        <div
+          className="grid grid-cols-5 gap-2.5"
+          role="group"
+          aria-label="Question grid"
+        >
+          {Array.from({ length: totalQuestions }).map((_, index) => {
+            const status = questionStatuses[index] ?? "not-visited";
+            const isCurrent = index === currentQuestionIndex;
+
+            return (
+              <TEGridButton
+                key={`qg-${index}`}
+                disabled={disabled}
+                onClick={() => onSelectQuestion(index)}
+                status={status}
+                current={isCurrent}
+                aria-label={`Question ${index + 1}, ${status.replaceAll(
+                  "-",
+                  " "
+                )}${isCurrent ? ", current" : ""}`}
+                aria-current={isCurrent ? "true" : undefined}
+              >
+                {index + 1}
+              </TEGridButton>
+            );
+          })}
+        </div>
+      </ScrollArea>
+
+      {/* Legend */}
+      <div className="border-t border-border">
+        <button
+          type="button"
+          className="flex w-full items-center justify-between px-4 py-2.5 text-[0.6875rem] font-medium text-muted-foreground lg:hidden"
+          onClick={() => setIsLegendOpen((prev) => !prev)}
+          aria-expanded={isLegendOpen}
+          aria-controls="te-legend-content"
+        >
+          Legend
+          {isLegendOpen ? (
+            <ChevronUp className="size-3.5" />
+          ) : (
+            <ChevronDown className="size-3.5" />
+          )}
+        </button>
+
+        {/* Legend content */}
+        <div
+          id="te-legend-content"
+          className={`px-4 overflow-hidden transition-all duration-200 ease-out ${isLegendOpen ? "max-h-40 py-2" : "max-h-0 py-0 lg:max-h-40 lg:py-3"
+            }`}
+        >
+          <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
+            {LEGEND.map((item) => (
+              <div key={item.status} className="te-legend-item">
+                <TEGridButton
+                  status={item.status}
+                  className="!w-3.5 !h-3.5 text-[0px]"
+                  aria-hidden="true"
+                />
+                {item.label}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </aside>
+  );
+}
+
+export const QuestionGridBox = memo(QuestionGridBoxComponent);
