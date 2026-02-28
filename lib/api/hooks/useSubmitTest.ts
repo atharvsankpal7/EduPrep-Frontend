@@ -12,26 +12,19 @@ interface SubmitTestInput {
     payload: SubmitTestPayload;
 }
 
-const extractResultId = (response: SubmitTestResponse): string | null => {
-    if (!response || typeof response !== "object") {
-        return null;
-    }
-
-    const data = response as {
-        data?: {
-            testResult?: {
-                id: string;
-            };
-        };
+interface SubmitResponseData {
+    data: {
+        testResult?: { id: string };
+        resultData?: Record<string, unknown>;
     };
+}
 
-    const resultId = data.data?.testResult?.id;
-
-    if (!resultId || typeof resultId !== "string") {
-        return null;
-    }
-
-    return resultId;
+const extractSubmitData = (response: SubmitTestResponse) => {
+    const data = (response as SubmitResponseData)?.data;
+    return {
+        resultId: data?.testResult?.id ?? null,
+        resultData: data?.resultData ?? null,
+    };
 };
 
 export const useSubmitTest = () => {
@@ -45,16 +38,19 @@ export const useSubmitTest = () => {
                 exact: true,
             });
 
-            const resultId = extractResultId(response);
+            const { resultId, resultData } = extractSubmitData(response);
 
             if (!resultId) {
                 return;
             }
 
-            queryClient.invalidateQueries({
-                queryKey: queryKeys.tests.result(resultId),
-                exact: true,
-            });
+            // Seed result cache so the result page skips a fetch
+            if (resultData) {
+                queryClient.setQueryData(
+                    queryKeys.tests.result(resultId),
+                    resultData,
+                );
+            }
         },
     });
 };

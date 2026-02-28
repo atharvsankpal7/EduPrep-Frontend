@@ -5,6 +5,7 @@ import {
   AlertTriangle,
   GripVertical,
   LayoutGrid,
+  Loader2,
   PanelLeftClose,
   PanelLeftOpen,
   Send,
@@ -474,11 +475,21 @@ export function TestEngineShell({
                 }}
                 disabled={controlsDisabled}
               >
-                <Send className="size-3" />
+                {isSubmitting ? (
+                  <Loader2 className="size-3 animate-spin" />
+                ) : (
+                  <Send className="size-3" />
+                )}
                 <span className="hidden sm:inline">
-                  {isLastSection ? "Submit Test" : "Submit Section"}
+                  {isSubmitting
+                    ? "Submitting…"
+                    : isLastSection
+                      ? "Submit Test"
+                      : "Submit Section"}
                 </span>
-                <span className="sm:hidden">Submit</span>
+                <span className="sm:hidden">
+                  {isSubmitting ? "Submitting…" : "Submit"}
+                </span>
               </Button>
             </div>
           </div>
