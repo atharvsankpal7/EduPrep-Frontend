@@ -247,7 +247,7 @@ export default function StudentsPage() {
                     {students.length > 0 ? (
                       students.map((student) => (
                         <TableRow
-                          key={student._id}
+                          key={student.id}
                           className="hover:bg-muted/50 transition-colors"
                         >
                           <TableCell className="font-medium">

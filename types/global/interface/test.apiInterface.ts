@@ -97,8 +97,7 @@ export interface TestPageProps {
 
 export interface TestResponse {
   test: {
-    id?: string;
-    _id?: string;
+    id: string;
     testName: string;
     totalDuration: number;
     totalQuestions: number;
@@ -107,8 +106,7 @@ export interface TestResponse {
       sectionDuration: number;
       totalQuestions: number;
       questions: {
-        id?: string;
-        _id?: string;
+        id: string;
         questionText: string;
         imageUrl?: string;
         options: string[];

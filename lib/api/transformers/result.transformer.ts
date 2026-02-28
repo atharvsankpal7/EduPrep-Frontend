@@ -19,8 +19,7 @@ interface RawSectionResult {
 }
 
 export interface RawTestResult {
-  id?: string;
-  _id?: string;
+  id: string;
   totalQuestions: number;
   correctAnswers: number;
   timeSpent: number;
@@ -42,7 +41,7 @@ export const transformTestResult = (raw: RawTestResult): TestResultData => {
     })) ?? [];
 
   return {
-    id: raw.id ?? raw._id ?? "",
+    id: raw.id,
     totalQuestions: raw.totalQuestions,
     correctAnswers: raw.correctAnswers,
     timeSpent: raw.timeSpent,

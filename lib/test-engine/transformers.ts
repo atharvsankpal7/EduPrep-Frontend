@@ -4,15 +4,9 @@ import type {
   TestResponse,
 } from "@/types/global/interface/test.apiInterface";
 
-const resolveId = (entity: { id?: string; _id?: string }, fallback: string) =>
-  entity.id ?? entity._id ?? fallback;
-
-export const normalizeEngineTest = (
-  response: TestResponse,
-  fallbackId: string
-): EngineTest => {
+export const normalizeEngineTest = (response: TestResponse): EngineTest => {
   const rawTest = response.test;
-  const testId = resolveId(rawTest, fallbackId);
+  const testId = rawTest.id;
 
   return {
     id: testId,
@@ -24,11 +18,8 @@ export const normalizeEngineTest = (
       id: `${testId}-section-${sectionIndex + 1}`,
       sectionName: section.sectionName,
       sectionDuration: section.sectionDuration,
-      questions: section.questions.map((question, questionIndex) => ({
-        id: resolveId(
-          question,
-          `${testId}-q-${sectionIndex + 1}-${questionIndex + 1}`
-        ),
+      questions: section.questions.map((question) => ({
+        id: question.id,
         questionText: question.questionText,
         imageUrl: question.imageUrl,
         options: question.options,

@@ -20,13 +20,12 @@ const extractResultId = (response: SubmitTestResponse): string | null => {
     const data = response as {
         data?: {
             testResult?: {
-                id?: string;
-                _id?: string;
+                id: string;
             };
         };
     };
 
-    const resultId = data.data?.testResult?.id ?? data.data?.testResult?._id;
+    const resultId = data.data?.testResult?.id;
 
     if (!resultId || typeof resultId !== "string") {
         return null;

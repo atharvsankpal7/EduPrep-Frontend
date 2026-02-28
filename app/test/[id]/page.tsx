@@ -21,8 +21,7 @@ interface TestSessionPageProps {
 interface SubmitResponseShape {
   data?: {
     testResult?: {
-      id?: string;
-      _id?: string;
+      id: string;
     };
   };
 }
@@ -44,8 +43,8 @@ export default function TestSessionPage({ params }: TestSessionPageProps) {
   });
 
   const normalizedTest = useMemo(
-    () => (data ? normalizeEngineTest(data, testId) : null),
-    [data, testId]
+    () => (data ? normalizeEngineTest(data) : null),
+    [data]
   );
 
   const handleSubmit = useCallback(
@@ -55,8 +54,7 @@ export default function TestSessionPage({ params }: TestSessionPageProps) {
         payload,
       })) as SubmitResponseShape;
 
-      const resultId =
-        response.data?.testResult?.id ?? response.data?.testResult?._id;
+      const resultId = response.data?.testResult?.id;
 
       if (!resultId) {
         throw new Error("Submission succeeded but result id was missing.");

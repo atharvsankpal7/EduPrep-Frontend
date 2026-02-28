@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo } from "react";
 import { shallow } from "zustand/shallow";
 import { buildSubmissionPayload } from "@/lib/test-engine/transformers";
+import { submitWithRecovery } from "@/lib/test-engine/submit";
 import { useTestEngineStore } from "@/lib/stores/test-engine-store";
 import type {
   AutoSubmitReason,
@@ -43,8 +44,8 @@ interface UseTestEngineReturn {
   currentSectionName: string;
   currentSectionQuestions: EngineTest["sections"][number]["questions"];
   currentQuestion:
-    | EngineTest["sections"][number]["questions"][number]
-    | undefined;
+  | EngineTest["sections"][number]["questions"][number]
+  | undefined;
   selectedOption: number | undefined;
   isCurrentMarkedForReview: boolean;
   questionStatuses: QuestionVisualState[];
@@ -117,6 +118,7 @@ export const useTestEngine = ({
   const incrementActiveSeconds = useTestEngineStore(
     (state) => state.incrementActiveSeconds
   );
+  const setControlsLocked = useTestEngineStore((state) => state.setControlsLocked);
   const registerViolation = useTestEngineStore((state) => state.registerViolation);
   const setSubmitted = useTestEngineStore((state) => state.setSubmitted);
 
@@ -262,13 +264,7 @@ export const useTestEngine = ({
   ]);
 
   const submitTest = useCallback(
-    async ({ isAutoSubmitted }: SubmitTestOptions) => {
-      if (submitted) {
-        return;
-      }
-
-      setSubmitted();
-
+    async ({ isAutoSubmitted, reason }: SubmitTestOptions) => {
       const latestState = useTestEngineStore.getState();
       const payload = buildSubmissionPayload({
         test,
@@ -278,9 +274,16 @@ export const useTestEngine = ({
         tabSwitches: latestState.tabSwitches,
       });
 
-      await onSubmit(payload);
+      await submitWithRecovery({
+        submitted,
+        controlsLocked,
+        payload,
+        onSubmit,
+        setControlsLocked,
+        setSubmitted,
+      });
     },
-    [onSubmit, setSubmitted, submitted, test]
+    [controlsLocked, onSubmit, setControlsLocked, setSubmitted, submitted]
   );
 
   const onSectionTimeout = useCallback(async () => {
@@ -327,7 +330,7 @@ export const useTestEngine = ({
         void submitTest({
           isAutoSubmitted: true,
           reason,
-        });
+        }).catch(() => undefined);
       }
 
       return {

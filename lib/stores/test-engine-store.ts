@@ -30,6 +30,7 @@ interface TestEngineStoreState {
   markVisited: (questionId: string) => void;
   toggleMarkedForReview: (questionId: string) => void;
   incrementActiveSeconds: () => void;
+  setControlsLocked: (locked: boolean) => void;
   registerViolation: (
     timestamp: number,
     cooldownMs: number,
@@ -157,6 +158,12 @@ export const useTestEngineStore = create<TestEngineStoreState>((set, get) => ({
       return {
         totalActiveSeconds: state.totalActiveSeconds + 1,
       };
+    });
+  },
+
+  setControlsLocked: (locked) => {
+    set({
+      controlsLocked: locked,
     });
   },
 
