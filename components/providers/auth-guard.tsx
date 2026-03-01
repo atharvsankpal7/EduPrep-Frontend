@@ -15,7 +15,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     if (isAppPublicPath(pathname)) return;
 
     if (!isAuthenticated) {
-      router.push(`/sign-in?callbackUrl=${encodeURIComponent(pathname)}`);
+      router.push(`/sign-up?callbackUrl=${encodeURIComponent(pathname)}`);
       return;
     }
 

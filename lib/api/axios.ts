@@ -29,7 +29,7 @@ api.interceptors.response.use(
           description: "Please sign in again to continue.",
           variant: "destructive",
         });
-        window.location.href = `/sign-in?callbackUrl=${encodeURIComponent(currentPath)}`;
+        window.location.href = `/sign-up?callbackUrl=${encodeURIComponent(currentPath)}`;
       }
     }
 

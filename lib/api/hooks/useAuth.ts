@@ -37,7 +37,7 @@ export const useLogout = () => {
     mutationFn: logoutApi,
     onSuccess: () => {
       logout();
-      router.push("/sign-in");
+      router.push("/sign-up");
     },
     onError: () => {
       // Even if the API call fails, clear the local state
