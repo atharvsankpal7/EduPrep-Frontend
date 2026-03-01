@@ -95,6 +95,10 @@ export default function TestSessionPage({ params }: TestSessionPageProps) {
     );
   }
 
+  if (submitTestMutation.isSuccess) {
+    return <LoadingComponent />;
+  }
+
   return (
     <TestEngineShell
       test={normalizedTest}

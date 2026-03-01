@@ -315,7 +315,7 @@ export function TestEngineShell({
   });
 
   // ─── Pre-start state ─────────────────────────────────────
-  if (!started) {
+  if (!started && !submitted && !isSubmitting) {
     return (
       <>
         <ConsentRulesDialog open={isConsentOpen} onStart={handleStartTest} />
