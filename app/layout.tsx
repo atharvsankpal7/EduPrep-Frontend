@@ -13,11 +13,67 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "ADCET - Online Test Platform",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL || "https://www.eduprep.app"
+  ),
+  title: {
+    template: "%s | EduPrep",
+    default: "EduPrep | Advanced Online Test Platform for Competitive Exams",
+  },
   description:
-    "Enhance your test preparation with our advanced mock test platform",
+    "Master your exams with EduPrep. Access proctored mock tests, detailed analytics, and comprehensive test preparation materials.",
+  keywords: [
+    "online test platform",
+    "mock tests",
+    "exam preparation",
+    "competitive exams",
+    "test analytics",
+  ],
+  authors: [{ name: "EduPrep Team" }],
+  creator: "EduPrep",
+  publisher: "EduPrep",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "/",
+    siteName: "EduPrep",
+    title: "EduPrep | Advanced Online Test Platform",
+    description: "Master your exams with EduPrep mock tests and analytics.",
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "EduPrep Platform Dashboard Preview",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "EduPrep | Advanced Online Test Platform",
+    description: "Master your exams with EduPrep mock tests and analytics.",
+    images: ["/twitter-image.jpg"],
+    creator: "@eduprep",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
   icons: {
     icon: "/favicon.ico",
+    apple: "/favicon.ico",
   },
 };
 
