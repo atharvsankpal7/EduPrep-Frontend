@@ -1,10 +1,14 @@
 "use client";
 
-import { useState } from "react";
 import { motion } from "framer-motion";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { GraduationCap, Building2, Settings } from "lucide-react";
-import Link from "next/link";
+import { GraduationCap, Building2, Settings, Lock } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const examTypes = [
   {
@@ -13,6 +17,7 @@ const examTypes = [
     description: "Practice tests specifically designed for GATE examination",
     icon: GraduationCap,
     href: "/test/undergraduate/gate",
+    disabled: true,
   },
   {
     id: "company",
@@ -20,6 +25,7 @@ const examTypes = [
     description: "Tests tailored to specific company recruitment patterns",
     icon: Building2,
     href: "/test/undergraduate/company",
+    disabled: true,
   },
   {
     id: "custom",
@@ -27,6 +33,7 @@ const examTypes = [
     description: "Create your own test by selecting specific topics",
     icon: Settings,
     href: "/test/undergraduate/custom",
+    disabled: true,
   },
 ];
 
@@ -56,32 +63,68 @@ export default function UndergraduatePage() {
           </p>
         </div>
 
-        <motion.div
-          variants={container}
-          initial="hidden"
-          animate="show"
-          className="grid gap-6 md:grid-cols-3"
-        >
-          {examTypes.map((type) => (
-            <Link href={type.href} key={type.id}>
-              <motion.div variants={item}>
-                <Card className="cursor-pointer hover:shadow-lg transition-all duration-300 card-highlight glass-effect">
-                  <CardHeader>
-                    <div className="flex items-center gap-4">
-                      <div className={`p-2 rounded-lg ${type.id === 'gate' ? 'bg-gradient-blue' : type.id === 'company' ? 'bg-gradient-ginger' : 'bg-gradient-cool'}`}>
-                        <type.icon className="w-6 h-6 text-white" />
-                      </div>
-                      <div>
-                        <CardTitle>{type.title}</CardTitle>
-                        <CardDescription>{type.description}</CardDescription>
-                      </div>
+        <TooltipProvider>
+          <motion.div
+            variants={container}
+            initial="hidden"
+            animate="show"
+            className="grid gap-6 md:grid-cols-3"
+          >
+            {examTypes.map((type) => (
+              <Tooltip key={type.id}>
+                <TooltipTrigger asChild>
+                  <motion.div variants={item}>
+                    <Card
+                      className={`transition-all duration-300 card-highlight glass-effect ${type.disabled
+                          ? "opacity-50 grayscale cursor-not-allowed"
+                          : "cursor-pointer hover:shadow-lg"
+                        }`}
+                    >
+                      <CardHeader>
+                        <div className="flex items-center gap-4">
+                          <div
+                            className={`p-2 rounded-lg ${type.disabled
+                                ? "bg-muted"
+                                : type.id === "gate"
+                                  ? "bg-gradient-blue"
+                                  : type.id === "company"
+                                    ? "bg-gradient-ginger"
+                                    : "bg-gradient-cool"
+                              }`}
+                          >
+                            <type.icon
+                              className={`w-6 h-6 ${type.disabled ? "text-muted-foreground" : "text-white"
+                                }`}
+                            />
+                          </div>
+                          <div className="flex-1">
+                            <CardTitle
+                              className={type.disabled ? "text-muted-foreground" : ""}
+                            >
+                              {type.title}
+                            </CardTitle>
+                            <CardDescription>{type.description}</CardDescription>
+                          </div>
+                          {type.disabled && (
+                            <Lock className="w-5 h-5 text-muted-foreground" />
+                          )}
+                        </div>
+                      </CardHeader>
+                    </Card>
+                  </motion.div>
+                </TooltipTrigger>
+                {type.disabled && (
+                  <TooltipContent side="bottom" className="text-sm font-medium">
+                    <div className="flex items-center gap-2">
+                      <Lock className="w-4 h-4" />
+                      Commercial License Required
                     </div>
-                  </CardHeader>
-                </Card>
-              </motion.div>
-            </Link>
-          ))}
-        </motion.div>
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            ))}
+          </motion.div>
+        </TooltipProvider>
       </div>
     </div>
   );
