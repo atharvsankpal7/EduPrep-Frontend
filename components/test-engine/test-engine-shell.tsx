@@ -233,6 +233,20 @@ export function TestEngineShell({
     }));
   }, [toast]);
 
+  const handleAutoSubmitFailure = useCallback(
+    (error: unknown) => {
+      toast({
+        title: "Submission Failed",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Unable to submit your test at the moment.",
+        variant: "destructive",
+      });
+    },
+    [toast]
+  );
+
   const handleTimerExpired = useCallback(async () => {
     const outcome = await onSectionTimeout();
     if (outcome === "advanced") {
@@ -252,6 +266,10 @@ export function TestEngineShell({
       });
     }
   }, [onSectionTimeout, toast]);
+
+  const onTimerExpire = useCallback(() => {
+    void handleTimerExpired().catch(handleAutoSubmitFailure);
+  }, [handleTimerExpired, handleAutoSubmitFailure]);
 
   const handleSectionAdvance = useCallback(() => {
     const moved = moveToNextSection();
@@ -288,20 +306,6 @@ export function TestEngineShell({
       });
     }
   }, [submitTest, toast]);
-
-  const handleAutoSubmitFailure = useCallback(
-    (error: unknown) => {
-      toast({
-        title: "Submission Failed",
-        description:
-          error instanceof Error
-            ? error.message
-            : "Unable to submit your test at the moment.",
-        variant: "destructive",
-      });
-    },
-    [toast]
-  );
 
   // Keyboard shortcuts
   useTestHotkeys({
@@ -403,9 +407,7 @@ export function TestEngineShell({
               initialSeconds={sectionDurationSeconds}
               isRunning={!submitted && !isSubmitting}
               onTick={onTimerTick}
-              onExpire={() => {
-                void handleTimerExpired().catch(handleAutoSubmitFailure);
-              }}
+              onExpire={onTimerExpire}
             />
           </div>
 
