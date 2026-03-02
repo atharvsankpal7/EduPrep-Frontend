@@ -68,7 +68,7 @@ const item = {
 
 export function Features() {
   return (
-    <section className="py-20 bg-muted/50 section-pattern">
+    <section className="py-20 bg-muted/50 section-pattern" index={"features"}>
       <div className="container px-4 mx-auto">
         <motion.div
           initial="hidden"

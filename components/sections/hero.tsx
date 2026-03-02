@@ -44,8 +44,8 @@ export function HeroSection() {
               className="bg-gradient-blue hover-glow hover-glow-cool text-lg px-8 py-6 w-full sm:w-auto font-semibold"
               asChild
             >
-              <Link href="/programs">
-                Start Learning <ArrowRight className="w-5 h-5 ml-2" />
+              <Link href="/test">
+                Start Test <ArrowRight className="w-5 h-5 ml-2" />
               </Link>
             </Button>
             <Button
@@ -54,7 +54,7 @@ export function HeroSection() {
               className="hover-glow hover-glow-warm text-lg px-8 py-6 w-full sm:w-auto glass-effect border-secondary/20 font-medium"
               asChild
             >
-              <Link href="/about">
+              <Link href="#features">
                 Explore Features <Sparkles className="w-4 h-4 ml-2 text-ginger-primary" />
               </Link>
             </Button>
