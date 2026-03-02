@@ -1,0 +1,3 @@
+## 2026-03-02 - Memoization in High-Frequency Update Components
+**Learning:** In applications with high-frequency updating components (like `SectionTimer` ticking every second), passing inline arrow functions from parent components (e.g., `<SectionTimer onExpire={() => { ... }} />`) causes the child to re-render on every tick, even if wrapped in `React.memo`. This is because the inline function's reference changes on every parent render, breaking memoization.
+**Action:** Always extract inline functions passed to memoized components into referentially stable callbacks using `useCallback`, ensuring that both `React.memo` and the stable callback work together to prevent unnecessary renders.
