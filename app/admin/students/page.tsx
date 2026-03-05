@@ -56,7 +56,14 @@ export default function StudentsPage() {
 
   useEffect(() => {
     fetchStudents();
-  }, [pagination.page, pagination.limit, cityFilter, startDate, endDate, searchQuery]);
+  }, [
+    pagination.page,
+    pagination.limit,
+    cityFilter,
+    startDate,
+    endDate,
+    searchQuery,
+  ]);
 
   const fetchStudents = async () => {
     setLoading(true);
@@ -78,8 +85,8 @@ export default function StudentsPage() {
           new Set(
             data.students
               .map((student: Student) => student.city?.toLowerCase())
-              .filter(Boolean)
-          )
+              .filter(Boolean),
+          ),
         ) as string[];
         setCities(uniqueCities);
       }
@@ -182,7 +189,10 @@ export default function StudentsPage() {
 
             <div className="w-full md:w-[120px] space-y-2">
               <label className="text-sm font-medium">Items per page</label>
-              <Select value={pagination.limit.toString()} onValueChange={handleLimitChange}>
+              <Select
+                value={pagination.limit.toString()}
+                onValueChange={handleLimitChange}
+              >
                 <SelectTrigger className="transition-all hover:border-primary">
                   <SelectValue placeholder="10" />
                 </SelectTrigger>
@@ -195,7 +205,7 @@ export default function StudentsPage() {
               </Select>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex w-full gap-2 md:w-auto">
               <Button
                 onClick={handleReset}
                 variant="outline"
@@ -230,8 +240,8 @@ export default function StudentsPage() {
             </div>
           ) : (
             <>
-              <div className="rounded-md border">
-                <Table>
+              <div className="rounded-md border overflow-x-auto">
+                <Table className="min-w-[720px]">
                   <TableHeader>
                     <TableRow className="bg-muted/50">
                       <TableHead className="font-semibold">Name</TableHead>
@@ -253,7 +263,9 @@ export default function StudentsPage() {
                           <TableCell className="font-medium">
                             {student.fullName}
                           </TableCell>
-                          <TableCell>{student.email}</TableCell>
+                          <TableCell className="break-all">
+                            {student.email}
+                          </TableCell>
                           <TableCell>{student.city || "N/A"}</TableCell>
                           <TableCell>
                             {student.contactNumber || "N/A"}

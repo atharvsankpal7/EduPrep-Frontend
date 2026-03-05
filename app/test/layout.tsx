@@ -4,7 +4,11 @@ import { useMemo } from "react";
 import { usePathname } from "next/navigation";
 import { NavBar } from "@/components/navbar";
 
-export default function TestLayout({ children }: { children: React.ReactNode }) {
+export default function TestLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const pathname = usePathname();
 
   const shouldHideNav = useMemo(() => {
@@ -17,12 +21,16 @@ export default function TestLayout({ children }: { children: React.ReactNode }) 
       return false;
     }
 
-    const staticRoutes = new Set(["undergraduate", "junior-college", "teacher"]);
+    const staticRoutes = new Set([
+      "undergraduate",
+      "junior-college",
+      "teacher",
+    ]);
     return !staticRoutes.has(pathSegments[1]);
   }, [pathname]);
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center">
+    <div className="min-h-screen bg-background flex w-full flex-col">
       {shouldHideNav ? null : <NavBar />}
       {children}
     </div>

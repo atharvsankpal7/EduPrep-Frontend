@@ -16,7 +16,7 @@ export function HeroSection() {
           className="relative z-10 max-w-5xl mx-auto text-center"
         >
           <div className="flex items-center justify-center mb-8">
-            <div className="flex items-center space-x-2 px-4 py-2 rounded-full bg-secondary/10 border border-secondary/20 animate-float glass-effect">
+            <div className="flex flex-wrap items-center justify-center gap-2 px-4 py-2 rounded-full bg-secondary/10 border border-secondary/20 animate-float glass-effect">
               <span className="p-1.5 rounded-full bg-gradient-blue">
                 <GraduationCap className="w-5 h-5 text-white" />
               </span>
@@ -26,16 +26,21 @@ export function HeroSection() {
             </div>
           </div>
 
-          <h1 className="mb-8 text-5xl font-bold tracking-tight md:text-7xl">
+          <h1 className="mb-8 text-4xl font-bold tracking-tight sm:text-5xl md:text-7xl">
             Master Your Exams with
             <br className="hidden md:block" />
-            <span className="text-gradient-blue"> Structured Learning</span>{" "}
+            <span className="text-gradient-blue">
+              {" "}
+              Structured Learning
+            </span>{" "}
             <span className="text-muted-foreground">&</span>{" "}
             <span className="text-gradient-ginger">Smart Practice</span>
           </h1>
 
-          <p className="max-w-2xl mx-auto mb-10 text-xl text-muted-foreground leading-relaxed">
-            EduPrep brings together structured content, smart practice tools, and performance insights in one place—making exam preparation focused, measurable, and less overwhelming.
+          <p className="max-w-2xl mx-auto mb-10 text-base leading-relaxed text-muted-foreground sm:text-xl">
+            EduPrep brings together structured content, smart practice tools,
+            and performance insights in one place—making exam preparation
+            focused, measurable, and less overwhelming.
           </p>
 
           <div className="flex flex-col items-center space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4 sm:justify-center">
@@ -55,7 +60,8 @@ export function HeroSection() {
               asChild
             >
               <Link href="#features">
-                Explore Features <Sparkles className="w-4 h-4 ml-2 text-ginger-primary" />
+                Explore Features{" "}
+                <Sparkles className="w-4 h-4 ml-2 text-ginger-primary" />
               </Link>
             </Button>
           </div>
