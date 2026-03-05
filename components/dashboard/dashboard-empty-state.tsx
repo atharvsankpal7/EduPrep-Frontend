@@ -10,47 +10,40 @@ interface DashboardEmptyStateProps {
     onClearFilters: () => void;
 }
 
-export function DashboardEmptyState({
-    hasFilters,
-    onClearFilters,
-}: DashboardEmptyStateProps) {
+export function DashboardEmptyState({ hasFilters, onClearFilters }: DashboardEmptyStateProps) {
     return (
         <motion.div
-            initial={{ opacity: 0, scale: 0.96 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.35 }}
-            className="flex flex-col items-center justify-center py-16 px-6"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.25 }}
+            className="flex flex-col items-center justify-center rounded-lg border bg-card px-6 py-14"
         >
-            <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mb-5">
-                <ClipboardList className="h-8 w-8 text-muted-foreground" />
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full border bg-muted/40">
+                <ClipboardList className="h-5 w-5 text-muted-foreground" />
             </div>
 
             {hasFilters ? (
                 <>
-                    <h3 className="text-lg font-semibold text-foreground mb-1.5">
-                        No tests match your filters
+                    <h3 className="mb-1 text-base font-semibold text-foreground">
+                        No matching tests found
                     </h3>
-                    <p className="text-sm text-muted-foreground text-center max-w-md mb-6">
-                        Try adjusting your search query or filter criteria to find the tests
-                        you&apos;re looking for.
+                    <p className="mb-5 max-w-md text-center text-sm text-muted-foreground">
+                        Adjust your filters or search terms to view more results.
                     </p>
                     <Button variant="outline" onClick={onClearFilters} size="sm">
-                        Clear Filters
+                        Clear filters
                     </Button>
                 </>
             ) : (
                 <>
-                    <h3 className="text-lg font-semibold text-foreground mb-1.5">
-                        No tests attempted yet
-                    </h3>
-                    <p className="text-sm text-muted-foreground text-center max-w-md mb-6">
-                        Start your exam preparation journey by taking your first mock test.
-                        Your performance history will appear here.
+                    <h3 className="mb-1 text-base font-semibold text-foreground">No tests yet</h3>
+                    <p className="mb-5 max-w-md text-center text-sm text-muted-foreground">
+                        Start a test to see your performance history on this dashboard.
                     </p>
-                    <Button asChild className="bg-gradient-blue hover-glow">
+                    <Button asChild size="sm">
                         <Link href="/test">
-                            Take Your First Test
-                            <ArrowRight className="h-4 w-4 ml-1.5" />
+                            Start a test
+                            <ArrowRight className="ml-1.5 h-4 w-4" />
                         </Link>
                     </Button>
                 </>

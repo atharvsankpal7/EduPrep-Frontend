@@ -2,30 +2,16 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import {
-    HelpCircle,
-    Calendar,
-    ArrowRight,
-    Target,
-    BookOpen,
-    Zap,
-    Timer,
-} from "lucide-react";
+import { HelpCircle, Calendar, ArrowRight, Target, BookOpen, Timer } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import type {
     TestHistoryEntry,
     TestType,
     TestStatus,
 } from "@/types/global/interface/test-history.interface";
-
-// ─── Helpers ──────────────────────────────────────────────────────────────
 
 function formatDuration(seconds: number): string {
     const h = Math.floor(seconds / 3600);
@@ -54,58 +40,37 @@ function formatTime(isoString: string): string {
     });
 }
 
-const testTypeConfig: Record<
-    TestType,
-    { label: string; icon: React.ElementType; colorClass: string; bgClass: string }
-> = {
+const testTypeConfig: Record<TestType, { label: string; icon: React.ElementType }> = {
     custom: {
-        label: "Custom Test",
+        label: "Custom",
         icon: Target,
-        colorClass: "text-[hsl(var(--ginger-primary))]",
-        bgClass: "bg-[hsl(var(--ginger-primary)/0.1)]",
     },
     cet: {
-        label: "CET Test",
+        label: "CET",
         icon: BookOpen,
-        colorClass: "text-[hsl(var(--accent-cool))]",
-        bgClass: "bg-[hsl(var(--accent-cool)/0.1)]",
     },
 };
 
-const statusConfig: Record<
-    TestStatus,
-    { label: string; colorClass: string; bgClass: string }
-> = {
+const statusConfig: Record<TestStatus, { label: string; tone: string }> = {
     completed: {
         label: "Completed",
-        colorClass: "text-[hsl(var(--status-answered-text))]",
-        bgClass: "bg-[hsl(var(--status-answered-bg))] border-[hsl(var(--status-answered-border))]",
+        tone: "border-green-200 bg-green-50 text-green-700 dark:border-green-900 dark:bg-green-950/40 dark:text-green-300",
     },
     submitted: {
         label: "Submitted",
-        colorClass: "text-[hsl(var(--blue-primary))]",
-        bgClass: "bg-[hsl(var(--blue-primary)/0.08)] border-[hsl(var(--blue-primary)/0.2)]",
+        tone: "border-border bg-muted text-foreground",
     },
     auto_submitted: {
-        label: "Auto-Submitted",
-        colorClass: "text-[hsl(var(--status-warning-text))]",
-        bgClass: "bg-[hsl(var(--status-warning-bg))] border-[hsl(var(--status-warning-border))]",
+        label: "Auto-submitted",
+        tone: "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-300",
     },
 };
 
-function getScoreColor(score: number): string {
-    if (score >= 80) return "text-[hsl(var(--status-answered-text))]";
-    if (score >= 50) return "text-[hsl(var(--accent-warm))]";
-    return "text-[hsl(var(--status-unanswered-text))]";
+function getScoreTone(score: number): string {
+    if (score >= 80) return "text-green-700 dark:text-green-300";
+    if (score >= 50) return "text-amber-700 dark:text-amber-300";
+    return "text-red-700 dark:text-red-300";
 }
-
-function getScoreBgColor(score: number): string {
-    if (score >= 80) return "bg-[hsl(var(--status-answered-bg))]";
-    if (score >= 50) return "bg-[hsl(var(--status-warning-bg))]";
-    return "bg-[hsl(var(--status-unanswered-bg))]";
-}
-
-// ─── Component ────────────────────────────────────────────────────────────
 
 interface TestHistoryCardProps {
     entry: TestHistoryEntry;
@@ -113,14 +78,13 @@ interface TestHistoryCardProps {
 }
 
 const cardVariants = {
-    hidden: { opacity: 0, y: 16 },
+    hidden: { opacity: 0, y: 10 },
     visible: (i: number) => ({
         opacity: 1,
         y: 0,
         transition: {
-            delay: i * 0.05,
-            duration: 0.35,
-            ease: [0.25, 0.46, 0.45, 0.94],
+            delay: i * 0.04,
+            duration: 0.25,
         },
     }),
 };
@@ -131,143 +95,84 @@ export function TestHistoryCard({ entry, index }: TestHistoryCardProps) {
     const TypeIcon = typeConfig.icon;
 
     const scorePercentage = Math.round(Number(entry.score));
-    const scoreColor = getScoreColor(scorePercentage);
-    const scoreBg = getScoreBgColor(scorePercentage);
+    const scoreTone = getScoreTone(scorePercentage);
 
     return (
-        <motion.div
-            variants={cardVariants}
-            initial="hidden"
-            animate="visible"
-            custom={index}
-        >
-            <Card
-                className="group relative overflow-hidden border bg-card transition-all duration-300
-                   hover:shadow-lg hover:border-primary/20 hover:-translate-y-0.5"
-                id={`test-history-card-${entry.id}`}
-            >
-                {/* Top accent bar */}
-                <div
-                    className={`absolute top-0 left-0 right-0 h-[2px] opacity-60 transition-opacity duration-300 group-hover:opacity-100 ${scorePercentage >= 80
-                        ? "bg-gradient-to-r from-[hsl(var(--status-answered-text))] to-[hsl(var(--status-answered-border))]"
-                        : scorePercentage >= 50
-                            ? "bg-gradient-warm"
-                            : "bg-gradient-to-r from-[hsl(var(--status-unanswered-text))] to-[hsl(var(--status-unanswered-border))]"
-                        }`}
-                />
+        <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={index}>
+            <Card className="border bg-card p-4" id={`test-history-card-${entry.id}`}>
+                <div className="mb-3 flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                        <h3 className="truncate text-sm font-semibold text-foreground">{entry.testName}</h3>
+                        <div className="mt-1 inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <TypeIcon className="h-3.5 w-3.5" />
+                            {typeConfig.label}
+                        </div>
+                    </div>
 
-                <div className="p-5">
-                    {/* ─── Header Row: Test Type + Status ─────────────────── */}
-                    <div className="flex items-start justify-between gap-3 mb-3.5">
-                        <div className="flex items-center gap-2.5 min-w-0">
-                            <div
-                                className={`flex-shrink-0 rounded-lg p-2 ${typeConfig.bgClass}`}
+                    <Badge className={`border px-2 py-0.5 text-[10px] font-medium ${stConfig.tone}`}>
+                        {stConfig.label}
+                    </Badge>
+                </div>
+
+                <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <span className="inline-flex items-center gap-1.5">
+                                <Calendar className="h-3.5 w-3.5" />
+                                {formatDate(entry.attemptedAt)}
+                            </span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            {formatDate(entry.attemptedAt)} at {formatTime(entry.attemptedAt)}
+                        </TooltipContent>
+                    </Tooltip>
+
+                    <span className="inline-flex items-center gap-1.5">
+                        <HelpCircle className="h-3.5 w-3.5" />
+                        {entry.totalQuestions} Qs
+                    </span>
+
+                    <span className="inline-flex items-center gap-1.5">
+                        <Timer className="h-3.5 w-3.5" />
+                        {formatDuration(entry.timeTaken)}
+                    </span>
+                </div>
+
+                {entry.testType === "custom" && entry.topics.length > 0 && (
+                    <div className="mb-3 flex flex-wrap gap-1.5">
+                        {entry.topics.slice(0, 4).map((topic) => (
+                            <span
+                                key={topic}
+                                className="inline-flex items-center rounded-md border bg-muted/30 px-2 py-0.5 text-[11px] text-muted-foreground"
                             >
-                                <TypeIcon className={`h-4 w-4 ${typeConfig.colorClass}`} />
-                            </div>
-                            <div className="min-w-0">
-                                <h3 className="text-sm font-semibold text-foreground truncate leading-tight">
-                                    {entry.testName}
-                                </h3>
-                                <span
-                                    className={`text-xs font-medium ${typeConfig.colorClass}`}
-                                >
-                                    {typeConfig.label}
-                                </span>
-                            </div>
-                        </div>
+                                {topic}
+                            </span>
+                        ))}
+                        {entry.topics.length > 4 && (
+                            <span className="inline-flex items-center rounded-md border bg-muted/30 px-2 py-0.5 text-[11px] text-muted-foreground">
+                                +{entry.topics.length - 4}
+                            </span>
+                        )}
+                    </div>
+                )}
 
-                        <Badge
-                            className={`text-[10px] font-semibold px-2 py-0.5 border ${stConfig.bgClass} ${stConfig.colorClass} shrink-0`}
-                        >
-                            {stConfig.label}
-                        </Badge>
+                <div className="flex items-center justify-between border-t pt-3">
+                    <div>
+                        <p className="text-xs text-muted-foreground">Score</p>
+                        <p className={`text-sm font-semibold ${scoreTone}`}>
+                            {scorePercentage}%
+                            <span className="ml-1 text-muted-foreground">
+                                ({entry.correctAnswers}/{entry.totalQuestions})
+                            </span>
+                        </p>
                     </div>
 
-                    {/* ─── Meta Row: Date, Questions, Time ────────────────── */}
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-muted-foreground mb-3.5">
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <span className="inline-flex items-center gap-1.5">
-                                    <Calendar className="h-3.5 w-3.5" />
-                                    {formatDate(entry.attemptedAt)}
-                                </span>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                {formatDate(entry.attemptedAt)} at {formatTime(entry.attemptedAt)}
-                            </TooltipContent>
-                        </Tooltip>
-
-                        <span className="inline-flex items-center gap-1.5">
-                            <HelpCircle className="h-3.5 w-3.5" />
-                            {entry.totalQuestions} Qs
-                        </span>
-
-                        <span className="inline-flex items-center gap-1.5">
-                            <Timer className="h-3.5 w-3.5" />
-                            {formatDuration(entry.timeTaken)}
-                        </span>
-                    </div>
-
-                    {/* ─── Topics (only for custom tests) ──────────────────── */}
-                    {entry.testType === "custom" && entry.topics.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5 mb-3.5">
-                            {entry.topics.slice(0, 4).map((topic) => (
-                                <span
-                                    key={topic}
-                                    className="inline-flex items-center gap-1 rounded-md bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground"
-                                >
-                                    <Zap className="h-2.5 w-2.5" />
-                                    {topic}
-                                </span>
-                            ))}
-                            {entry.topics.length > 4 && (
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <span className="inline-flex items-center rounded-md bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground cursor-default">
-                                            +{entry.topics.length - 4} more
-                                        </span>
-                                    </TooltipTrigger>
-                                    <TooltipContent className="max-w-[240px]">
-                                        <p className="text-xs">{entry.topics.slice(4).join(", ")}</p>
-                                    </TooltipContent>
-                                </Tooltip>
-                            )}
-                        </div>
-                    )}
-
-                    {/* ─── Score + CTA Row ──────────────────────────────────── */}
-                    <div className="flex items-center justify-between pt-3 border-t border-border/60">
-                        <div className="flex items-center gap-3">
-                            {/* Score circle */}
-                            <div
-                                className={`flex items-center justify-center w-11 h-11 rounded-full ${scoreBg}`}
-                            >
-                                <span className={`text-sm font-bold ${scoreColor}`}>
-                                    {scorePercentage}%
-                                </span>
-                            </div>
-                            <div>
-                                <p className="text-xs text-muted-foreground">Score</p>
-                                <p className="text-sm font-semibold text-foreground">
-                                    {entry.correctAnswers}/{entry.totalQuestions}
-                                </p>
-                            </div>
-                        </div>
-
-                        <Button
-                            asChild
-                            variant="outline"
-                            size="sm"
-                            className="group/btn transition-all duration-200 hover:bg-primary hover:text-primary-foreground hover:border-primary"
-                            id={`view-result-${entry.id}`}
-                        >
-                            <Link href={`/result/${entry.resultId}`}>
-                                View Result
-                                <ArrowRight className="h-3.5 w-3.5 ml-1 transition-transform group-hover/btn:translate-x-0.5" />
-                            </Link>
-                        </Button>
-                    </div>
+                    <Button asChild variant="ghost" size="sm" className="h-8 px-2 text-xs" id={`view-result-${entry.id}`}>
+                        <Link href={`/result/${entry.resultId}`}>
+                            View result
+                            <ArrowRight className="ml-1 h-3.5 w-3.5" />
+                        </Link>
+                    </Button>
                 </div>
             </Card>
         </motion.div>
