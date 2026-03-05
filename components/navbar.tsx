@@ -177,16 +177,7 @@ export function NavBar() {
               );
             })}
 
-            {isAuthenticated ? (
-              <Button
-                variant="ghost"
-                className="h-auto min-w-[72px] flex-col gap-1 px-2 py-1 text-xs text-muted-foreground"
-                onClick={handleLogout}
-              >
-                <Users className="h-4 w-4" />
-                <span className="leading-none">Log Out</span>
-              </Button>
-            ) : (
+            {!isAuthenticated && (
               <Link
                 href="/sign-in"
                 className="flex min-w-[72px] flex-col items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
