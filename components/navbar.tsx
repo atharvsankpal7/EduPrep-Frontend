@@ -13,6 +13,7 @@ import { useLogout } from "@/lib/api/hooks/useAuth";
 
 const studentRoutes = [
   { href: "/", label: "Home" },
+  { href: "/dashboard", label: "Dashboard" },
   { href: "/test", label: "Mock Tests" },
 ];
 

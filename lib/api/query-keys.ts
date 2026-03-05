@@ -34,6 +34,10 @@ export const testKeys = {
 
     /** Test result by result ID (the "view result" flow). */
     result: (resultId: string) => ["tests", "result", resultId] as const,
+
+    /** Student test history with optional filters. */
+    history: (filters: object = {}) =>
+        ["tests", "history", filters] as const,
 } as const;
 
 // ────────────────────────────────────────────────────────────────────────────
