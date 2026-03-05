@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { AlertTriangle, Clock3 } from "lucide-react";
 
 interface SectionTimerProps {
@@ -37,7 +37,7 @@ const getUrgency = (seconds: number): "normal" | "warning" | "critical" => {
   return "normal";
 };
 
-export function SectionTimer({
+export const SectionTimer = React.memo(function SectionTimer({
   sectionKey,
   initialSeconds,
   isRunning,
@@ -118,4 +118,4 @@ export function SectionTimer({
       )}
     </div>
   );
-}
+});
