@@ -47,7 +47,7 @@ export function DashboardEmptyState({
                         Start your exam preparation journey by taking your first mock test.
                         Your performance history will appear here.
                     </p>
-                    <Button asChild className="bg-gradient-blue hover-glow">
+                    <Button asChild>
                         <Link href="/test">
                             Take Your First Test
                             <ArrowRight className="h-4 w-4 ml-1.5" />

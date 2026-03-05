@@ -61,14 +61,14 @@ const testTypeConfig: Record<
     custom: {
         label: "Custom Test",
         icon: Target,
-        colorClass: "text-[hsl(var(--ginger-primary))]",
-        bgClass: "bg-[hsl(var(--ginger-primary)/0.1)]",
+        colorClass: "text-foreground",
+        bgClass: "bg-muted",
     },
     cet: {
         label: "CET Test",
         icon: BookOpen,
-        colorClass: "text-[hsl(var(--accent-cool))]",
-        bgClass: "bg-[hsl(var(--accent-cool)/0.1)]",
+        colorClass: "text-foreground",
+        bgClass: "bg-muted",
     },
 };
 
@@ -78,31 +78,27 @@ const statusConfig: Record<
 > = {
     completed: {
         label: "Completed",
-        colorClass: "text-[hsl(var(--status-answered-text))]",
-        bgClass: "bg-[hsl(var(--status-answered-bg))] border-[hsl(var(--status-answered-border))]",
+        colorClass: "text-foreground",
+        bgClass: "bg-muted border-border",
     },
     submitted: {
         label: "Submitted",
-        colorClass: "text-[hsl(var(--blue-primary))]",
-        bgClass: "bg-[hsl(var(--blue-primary)/0.08)] border-[hsl(var(--blue-primary)/0.2)]",
+        colorClass: "text-foreground",
+        bgClass: "bg-muted border-border",
     },
     auto_submitted: {
         label: "Auto-Submitted",
-        colorClass: "text-[hsl(var(--status-warning-text))]",
-        bgClass: "bg-[hsl(var(--status-warning-bg))] border-[hsl(var(--status-warning-border))]",
+        colorClass: "text-foreground",
+        bgClass: "bg-muted border-border",
     },
 };
 
 function getScoreColor(score: number): string {
-    if (score >= 80) return "text-[hsl(var(--status-answered-text))]";
-    if (score >= 50) return "text-[hsl(var(--accent-warm))]";
-    return "text-[hsl(var(--status-unanswered-text))]";
+    return "text-foreground";
 }
 
 function getScoreBgColor(score: number): string {
-    if (score >= 80) return "bg-[hsl(var(--status-answered-bg))]";
-    if (score >= 50) return "bg-[hsl(var(--status-warning-bg))]";
-    return "bg-[hsl(var(--status-unanswered-bg))]";
+    return "bg-muted";
 }
 
 // ─── Component ────────────────────────────────────────────────────────────
@@ -143,19 +139,9 @@ export function TestHistoryCard({ entry, index }: TestHistoryCardProps) {
         >
             <Card
                 className="group relative overflow-hidden border bg-card transition-all duration-300
-                   hover:shadow-lg hover:border-primary/20 hover:-translate-y-0.5"
+                   hover:shadow-sm hover:border-border hover:-translate-y-0.5"
                 id={`test-history-card-${entry.id}`}
             >
-                {/* Top accent bar */}
-                <div
-                    className={`absolute top-0 left-0 right-0 h-[2px] opacity-60 transition-opacity duration-300 group-hover:opacity-100 ${scorePercentage >= 80
-                        ? "bg-gradient-to-r from-[hsl(var(--status-answered-text))] to-[hsl(var(--status-answered-border))]"
-                        : scorePercentage >= 50
-                            ? "bg-gradient-warm"
-                            : "bg-gradient-to-r from-[hsl(var(--status-unanswered-text))] to-[hsl(var(--status-unanswered-border))]"
-                        }`}
-                />
-
                 <div className="p-5">
                     {/* ─── Header Row: Test Type + Status ─────────────────── */}
                     <div className="flex items-start justify-between gap-3 mb-3.5">

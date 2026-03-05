@@ -89,8 +89,8 @@ export default function DashboardPage() {
                     className="mb-6"
                 >
                     <div className="flex items-center gap-3 mb-1.5">
-                        <div className="p-2 rounded-lg bg-gradient-blue">
-                            <LayoutDashboard className="h-5 w-5 text-white" />
+                        <div className="p-2 rounded-lg bg-muted">
+                            <LayoutDashboard className="h-5 w-5 text-muted-foreground" />
                         </div>
                         <div>
                             <h1 className="text-2xl font-bold text-foreground leading-tight">
