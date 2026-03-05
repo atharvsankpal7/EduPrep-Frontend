@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent } from "@/components/ui/card";
@@ -40,7 +40,6 @@ interface TestInterfaceProps {
 export function TestInterface({ testId, onTestEnd }: TestInterfaceProps) {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<Record<number, number>>({});
-  const [timeLeft, setTimeLeft] = useState(3600); // 60 minutes in seconds
   const { toast } = useToast();
 
   const progress = (currentQuestion / mockQuestions.length) * 100;
@@ -64,7 +63,7 @@ export function TestInterface({ testId, onTestEnd }: TestInterfaceProps) {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = useCallback(() => {
     const score = Object.entries(answers).reduce((acc, [questionIndex, answer]) => {
       return acc + (mockQuestions[parseInt(questionIndex)].correctAnswer === answer ? 1 : 0);
     }, 0);
@@ -74,7 +73,7 @@ export function TestInterface({ testId, onTestEnd }: TestInterfaceProps) {
       description: `You scored ${score} out of ${mockQuestions.length} questions.`,
     });
     onTestEnd();
-  };
+  }, [answers, toast, onTestEnd]);
 
   return (
     <div className="container py-8">
@@ -86,7 +85,7 @@ export function TestInterface({ testId, onTestEnd }: TestInterfaceProps) {
               Question {currentQuestion + 1} of {mockQuestions.length}
             </p>
           </div>
-          <Timer timeLeft={timeLeft} setTimeLeft={setTimeLeft} onTimeUp={handleSubmit} />
+          <Timer initialTime={3600} onTimeUp={handleSubmit} />
         </div>
 
         <Progress value={progress} className="mb-6" />
