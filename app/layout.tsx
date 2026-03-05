@@ -1,4 +1,3 @@
-
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { ThemeProvider } from "@/components/providers/theme-provider";
@@ -14,7 +13,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL || "https://www.eduprep.app"
+    process.env.NEXT_PUBLIC_APP_URL || "https://www.eduprep.app",
   ),
   title: {
     template: "%s | EduPrep",
@@ -95,7 +94,9 @@ export default function RootLayout({
             <StoreHydrationGate>
               <AuthGuard>
                 <div className="flex flex-col min-h-screen ">
-                  <main className="flex-1 bg-background ">{children}</main>
+                  <main className="flex-1 bg-background pb-20 md:pb-0">
+                    {children}
+                  </main>
                   <Footer />
                 </div>
               </AuthGuard>
@@ -107,4 +108,3 @@ export default function RootLayout({
     </html>
   );
 }
-
