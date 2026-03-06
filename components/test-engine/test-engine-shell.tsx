@@ -307,6 +307,14 @@ export function TestEngineShell({
     }
   }, [submitTest, toast]);
 
+  const handleNextSection = useCallback(() => {
+    setIsSectionLockDialogOpen(true);
+  }, []);
+
+  const handleOpenSubmitDialog = useCallback(() => {
+    setIsSubmitDialogOpen(true);
+  }, []);
+
   // Keyboard shortcuts
   useTestHotkeys({
     enabled: started && !submitted && !controlsLocked && !isSubmitting,
@@ -552,8 +560,8 @@ export function TestEngineShell({
         disabled={controlsDisabled}
         onPrevious={goPreviousQuestion}
         onNext={goNextQuestion}
-        onNextSection={() => setIsSectionLockDialogOpen(true)}
-        onSubmit={() => setIsSubmitDialogOpen(true)}
+        onNextSection={handleNextSection}
+        onSubmit={handleOpenSubmitDialog}
       />
 
       {/* ── Overview drawer ── */}
