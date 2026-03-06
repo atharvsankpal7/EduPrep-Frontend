@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -23,7 +24,7 @@ interface TestFooterProps {
   onSubmit: () => void;
 }
 
-export function TestFooter({
+export const TestFooter = React.memo(function TestFooter({
   currentQuestionIndex,
   totalQuestions,
   isFirstQuestion,
@@ -99,4 +100,4 @@ export function TestFooter({
       </TEContainer>
     </TEFooter>
   );
-}
+});
